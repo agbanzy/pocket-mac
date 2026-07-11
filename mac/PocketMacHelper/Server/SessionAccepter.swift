@@ -2,37 +2,71 @@ import Foundation
 import CryptoKit
 import PocketMacKit
 
-/// Accepts one inbound connection: runs the Noise responder handshake (authorizing the peer), then
-/// spins up a long-lived receive loop that turns decrypted frames into real input and actions.
+/// Runs the Noise responder handshake over an inbound connection (LAN or relay — any ``Transport``),
+/// authorizes the peer, then drives a receive loop that turns decrypted frames into real input and
+/// actions. Two entry points: `accept` (fire-and-forget, for the many concurrent LAN connections)
+/// and `serve` (awaits the session's end, so the relay-reachability loop knows when to re-dial).
 actor SessionAccepter {
     private let handshake = NoisePatternHandshake()
 
-    /// Performs the handshake and, on success, launches the session's receive loop as a detached
-    /// task. Returns the authenticated peer id, or nil if the handshake/authorization failed.
+    /// LAN: establish and launch the session's receive loop detached; returns the peer id (or nil).
     func accept(
-        transport: NWConnectionTransport,
+        transport: any Transport,
         privateKeyData: Data,
         prologue: Data,
         authorize: @escaping @Sendable (PeerID, Data) -> Bool,
         translator: CGEventTranslator,
         actions: ActionExecutor
     ) async -> PeerID? {
-        do {
-            try await transport.start()
-            let privateKey = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: privateKeyData)
-            let keys = try await handshake.performResponder(
-                over: transport, localStatic: privateKey, prologue: prologue, authorize: authorize)
-
-            let session = SecureSession(transport: transport, channel: AEADChannel(keys: keys))
-            let runner = SessionRunner(session: session, translator: translator, actions: actions)
-            Task.detached {
-                await session.run(onFrame: { frame in await runner.handle(frame) })
-            }
-            return keys.peerID
-        } catch {
+        guard let established = try? await establish(
+            transport: transport, privateKeyData: privateKeyData, prologue: prologue,
+            authorize: authorize, translator: translator, actions: actions) else {
             transport.close()
             return nil
         }
+        Task.detached { await established.run() }
+        return established.peerID
+    }
+
+    /// Relay: establish and run the session **inline**, returning only when it ends — so the caller
+    /// can re-establish the rendezvous.
+    func serve(
+        transport: any Transport,
+        privateKeyData: Data,
+        prologue: Data,
+        authorize: @escaping @Sendable (PeerID, Data) -> Bool,
+        translator: CGEventTranslator,
+        actions: ActionExecutor
+    ) async {
+        guard let established = try? await establish(
+            transport: transport, privateKeyData: privateKeyData, prologue: prologue,
+            authorize: authorize, translator: translator, actions: actions) else {
+            transport.close()
+            return
+        }
+        await established.run()
+    }
+
+    private struct Established {
+        let peerID: PeerID
+        let run: @Sendable () async -> Void
+    }
+
+    private func establish(
+        transport: any Transport,
+        privateKeyData: Data,
+        prologue: Data,
+        authorize: @escaping @Sendable (PeerID, Data) -> Bool,
+        translator: CGEventTranslator,
+        actions: ActionExecutor
+    ) async throws -> Established {
+        try await transport.start()
+        let privateKey = try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: privateKeyData)
+        let keys = try await handshake.performResponder(
+            over: transport, localStatic: privateKey, prologue: prologue, authorize: authorize)
+        let session = SecureSession(transport: transport, channel: AEADChannel(keys: keys))
+        let runner = SessionRunner(session: session, translator: translator, actions: actions)
+        return Established(peerID: keys.peerID, run: { await session.run(onFrame: { await runner.handle($0) }) })
     }
 }
 

@@ -118,32 +118,8 @@ if let idx = arguments.firstIndex(of: "--relay-selftest"), idx + 1 < arguments.c
     catch { log("FAIL — \(error)"); exit(1) }
 }
 
-do {
-    let payload = try readPairingURL(arguments: arguments)
-    log("Pairing target: \(payload.deviceName) [\(payload.macPeerID.fingerprint)] SAS \(payload.sas)")
-
-    log("Discovering helper over Bonjour…")
-    guard let service = await discover(timeout: .seconds(6)) else {
-        throw ProbeError("No _pocketmac._tcp helper found on the LAN (is the helper running + advertising?)")
-    }
-    log("Found “\(service.name)” — connecting…")
-
-    let transport = NWConnectionTransport(connection: service.makeConnection())
-    try await transport.start()
-
-    let identity = InMemoryIdentityStore()
-    let privateKey = try identity.privateKey()
-    let macPublicKey = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: payload.macPublicKey)
-
-    log("Running Noise IK handshake (initiator)…")
-    let keys = try await NoisePatternHandshake().performInitiator(
-        over: transport, localStatic: privateKey,
-        remoteStatic: macPublicKey, prologue: payload.pairingPrologue)
-    log("Secure session established with \(keys.peerID.fingerprint)")
-
-    let session = SecureSession(transport: transport, channel: AEADChannel(keys: keys))
-
-    // Drive the trackpad: center the cursor, then push it clearly to the right.
+/// Drives the trackpad over an established session and reports whether the real cursor moved.
+func driveAndReport(_ session: SecureSession, over path: String) async throws -> Never {
     CGWarpMouseCursorPosition(CGPoint(x: 500, y: 400))
     try await Task.sleep(for: .milliseconds(100))
     let before = NSEvent.mouseLocation
@@ -162,23 +138,48 @@ do {
     let movedX = after.x - before.x
     log("Cursor Δx = \(Int(movedX)) (expected ≈ +\(steps * Int(dxPerStep)))")
 
-    // Fire a couple of frames for manual observation, then a benign action.
     try await session.send(.input(.unicodeText("Pocket Mac probe ✅ ")))
     try await session.send(.action(ActionFrame(tileID: UUID(), action: .mediaKey(.playPause))))
-
     await session.close()
 
     if movedX > 100 {
-        log("PASS — the helper moved the real cursor over an encrypted session.")
-        exit(0)
+        log("PASS — \(path): the helper moved the real cursor over an encrypted session."); exit(0)
+    }
+    let message = "Cursor did not move (Δx=\(Int(movedX))). The \(path) session worked end-to-end, but the helper likely lacks the Accessibility grant, so CGEventPost is a no-op."
+    if shouldAssert { log("FAIL — \(message)"); exit(1) }
+    log("WARN — \(message)"); exit(0)
+}
+
+do {
+    let payload = try readPairingURL(arguments: arguments)
+    log("Target: \(payload.deviceName) [\(payload.macPeerID.fingerprint)] SAS \(payload.sas)")
+    let macPublicKey = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: payload.macPublicKey)
+    let privateKey = try InMemoryIdentityStore().privateKey()
+    let handshake = NoisePatternHandshake()
+
+    if let idx = arguments.firstIndex(of: "--via-relay"), idx + 1 < arguments.count {
+        guard let relayURL = URL(string: arguments[idx + 1]) else { throw ProbeError("invalid relay URL") }
+        log("Connecting to the Mac THROUGH the relay at \(relayURL)…")
+        let transport = RelayTransport(relayURL: relayURL, rendezvousToken: payload.rendezvousToken)
+        try await transport.start()
+        // The relay path uses an empty prologue: Noise static-key auth carries it; SAS is a
+        // LAN-pairing defense confirmed out-of-band via the QR.
+        let keys = try await handshake.performInitiator(
+            over: transport, localStatic: privateKey, remoteStatic: macPublicKey, prologue: Data())
+        log("Secure session established OVER THE RELAY with \(keys.peerID.fingerprint)")
+        try await driveAndReport(SecureSession(transport: transport, channel: AEADChannel(keys: keys)), over: "relay")
     } else {
-        let message = "Cursor did not move as expected (Δx=\(Int(movedX))). The session worked, but the helper likely lacks the Accessibility grant, so CGEventPost is a no-op. Grant it in System Settings → Privacy & Security → Accessibility."
-        if shouldAssert {
-            throw ProbeError(message)
-        } else {
-            log("WARN — \(message)")
-            exit(0)
+        log("Discovering helper over Bonjour…")
+        guard let service = await discover(timeout: .seconds(6)) else {
+            throw ProbeError("No _pocketmac._tcp helper found on the LAN (is the helper running + advertising?)")
         }
+        log("Found “\(service.name)” — connecting…")
+        let transport = NWConnectionTransport(connection: service.makeConnection())
+        try await transport.start()
+        let keys = try await handshake.performInitiator(
+            over: transport, localStatic: privateKey, remoteStatic: macPublicKey, prologue: payload.pairingPrologue)
+        log("Secure session established over LAN with \(keys.peerID.fingerprint)")
+        try await driveAndReport(SecureSession(transport: transport, channel: AEADChannel(keys: keys)), over: "LAN")
     }
 } catch {
     log("FAIL — \(error)")

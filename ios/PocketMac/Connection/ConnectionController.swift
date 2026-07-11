@@ -25,6 +25,10 @@ final class ConnectionController: InputSink {
     /// Live round-trip latency in ms (from control ping/pong), or nil until the first sample.
     private(set) var latencyMS: Int?
 
+    /// The relay endpoint (`wss://…/ws`) for the away-from-home path. Nil until configured/deployed;
+    /// the `.relay` path reports "No relay configured" while unset.
+    var relayURL: URL?
+
     private let identity: IdentityService
 
     private var session: SecureSession?
@@ -46,30 +50,38 @@ final class ConnectionController: InputSink {
     func connect(path: PathSelector, payload: PairingPayload) async {
         disconnect()
 
-        let service: DiscoveredService
+        // Build the transport + handshake prologue for the chosen path. Everything below this is
+        // identical for LAN and relay — that's the "keyed to identity, not path" invariant.
+        let transport: any Transport
+        let prologue: Data
         switch path {
-        case .lan(let s):
-            service = s
-        case .relay:
-            state = .offline("Relay path not available yet")
-            return
+        case .lan(let service):
+            transport = NWConnectionTransport(connection: service.makeConnection())
+            // LAN pairing binds the SAS into the prologue, so a wrong PIN fails the handshake.
+            prologue = payload.pairingPrologue
+        case .relay(let rendezvousToken):
+            guard let relayURL else {
+                state = .offline("No relay configured")
+                return
+            }
+            transport = RelayTransport(relayURL: relayURL, rendezvousToken: rendezvousToken)
+            // Relay path: Noise static-key authentication carries it; SAS is a LAN-pairing defense.
+            prologue = Data()
         }
 
         state = .connecting
         do {
-            let transport = NWConnectionTransport(connection: service.makeConnection())
             try await transport.start()
 
             let localStatic = try identity.privateKey()
             let remoteStatic = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: payload.macPublicKey)
 
             // The app is the Noise initiator; it already knows the Mac's static key from pairing.
-            // The pairing SAS is bound into the prologue, so a wrong PIN fails the handshake.
             let keys = try await NoisePatternHandshake().performInitiator(
                 over: transport,
                 localStatic: localStatic,
                 remoteStatic: remoteStatic,
-                prologue: payload.pairingPrologue
+                prologue: prologue
             )
 
             let session = SecureSession(transport: transport, channel: AEADChannel(keys: keys))

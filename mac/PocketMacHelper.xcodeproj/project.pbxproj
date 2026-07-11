@@ -10,6 +10,7 @@
 		0398F66BD9A7E42EE1002F48 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42E07D09C4D19C7641024A7 /* MenuBarContentView.swift */; };
 		0ECEDF0D2A35B2B36C14AF7D /* ListenerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00402E8659A0D0B74F78467 /* ListenerService.swift */; };
 		164605038C8125627A929A27 /* PocketMacHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406E10C12645C876707C6302 /* PocketMacHelperApp.swift */; };
+		32ABCE42C60C3C71982F0C26 /* RelayReachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62AC749EBD45E727D8E1DC57 /* RelayReachability.swift */; };
 		3BFA822DE0139DA4CA70B44E /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B9B9FFBEF98E9329142170 /* QRCodeView.swift */; };
 		3CEAFEF461CF35165FADE39C /* MediaKeySender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FAC1CF7696B7ED9248DE6C9 /* MediaKeySender.swift */; };
 		46F42185B8AD0C3C0FEC638A /* HelperModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 594B34EEB5427FFA35C1647A /* HelperModel.swift */; };
@@ -30,6 +31,7 @@
 		406E10C12645C876707C6302 /* PocketMacHelperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PocketMacHelperApp.swift; sourceTree = "<group>"; };
 		594B34EEB5427FFA35C1647A /* HelperModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperModel.swift; sourceTree = "<group>"; };
 		5A91A981FD1C08C4D3516405 /* AccessibilityAuthorizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityAuthorizer.swift; sourceTree = "<group>"; };
+		62AC749EBD45E727D8E1DC57 /* RelayReachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayReachability.swift; sourceTree = "<group>"; };
 		6B4F3BDCC6E004820C64E980 /* CGEventTranslator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGEventTranslator.swift; sourceTree = "<group>"; };
 		6E232B57AD4BDC9B9A142329 /* LoginItemManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemManager.swift; sourceTree = "<group>"; };
 		77765320C1E80EA636A371BC /* PocketMacHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PocketMacHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -107,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				A00402E8659A0D0B74F78467 /* ListenerService.swift */,
+				62AC749EBD45E727D8E1DC57 /* RelayReachability.swift */,
 				2C4FA1707C55107E167DF665 /* SessionAccepter.swift */,
 			);
 			path = Server;
@@ -254,6 +257,7 @@
 				0398F66BD9A7E42EE1002F48 /* MenuBarContentView.swift in Sources */,
 				164605038C8125627A929A27 /* PocketMacHelperApp.swift in Sources */,
 				3BFA822DE0139DA4CA70B44E /* QRCodeView.swift in Sources */,
+				32ABCE42C60C3C71982F0C26 /* RelayReachability.swift in Sources */,
 				AA7B5A02DE059511DFA69D6E /* SessionAccepter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

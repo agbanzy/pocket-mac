@@ -10,12 +10,17 @@ public struct PeerRecord: Codable, Sendable, Equatable {
     public var displayName: String
     public var pairedAt: Date
     public var isRevoked: Bool
+    /// The relay rendezvous token agreed at pairing, so either side can meet the other on the relay
+    /// away from the LAN. Optional: LAN-only pairings (and records from before the relay path) omit it.
+    public var rendezvousToken: Data?
 
-    public init(peerID: PeerID, publicKey: Data, displayName: String, pairedAt: Date = Date(), isRevoked: Bool = false) {
+    public init(peerID: PeerID, publicKey: Data, displayName: String, pairedAt: Date = Date(),
+                isRevoked: Bool = false, rendezvousToken: Data? = nil) {
         self.peerID = peerID
         self.publicKey = publicKey
         self.displayName = displayName
         self.pairedAt = pairedAt
         self.isRevoked = isRevoked
+        self.rendezvousToken = rendezvousToken
     }
 }

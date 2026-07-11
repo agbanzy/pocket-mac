@@ -19,6 +19,11 @@ xcodebuild -project "$ROOT/mac/PocketMacHelper.xcodeproj" -scheme PocketMacHelpe
   CODE_SIGNING_ALLOWED=NO build >/dev/null
 
 echo "› Signing with: $IDENTITY"
+# Sign inside-out: nested Mach-O (the Debug build's app dylib) first, then the bundle. Signing only
+# the top level would leave the nested dylib on a different Team ID and dyld would refuse to load it.
+while IFS= read -r nested; do
+  codesign --force --sign "$IDENTITY" --options runtime "$nested"
+done < <(find "$APP/Contents" -type f \( -name "*.dylib" -o -name "*.framework" \))
 codesign --force --sign "$IDENTITY" --options runtime \
   --entitlements "$ROOT/mac/PocketMacHelper/Resources/PocketMacHelper.entitlements" \
   "$APP"
