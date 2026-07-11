@@ -65,10 +65,58 @@ func discover(timeout: Duration) async -> DiscoveredService? {
     }
 }
 
+/// Proves the remote path's transport interop: two `RelayTransport` peers rendezvous through a real
+/// (locally-run) Go relay by a shared token, run the Noise handshake, and exchange encrypted frames
+/// both ways — all through the relay, which sees only opaque ciphertext.
+func runRelaySelftest(relayURL: URL) async throws {
+    let token = PairingCode.makeRendezvousToken()
+    let responderPrivate = try InMemoryIdentityStore().privateKey()
+    let initiatorPrivate = try InMemoryIdentityStore().privateKey()
+    let prologue = Data("relay-selftest".utf8)
+
+    let responderTransport = RelayTransport(relayURL: relayURL, rendezvousToken: token)
+    let initiatorTransport = RelayTransport(relayURL: relayURL, rendezvousToken: token)
+    try await responderTransport.start()
+    try await initiatorTransport.start()
+    log("Both peers HELLO'd the relay with token \(token.hexEncodedString.prefix(8))… — running handshake")
+
+    let handshake = NoisePatternHandshake()
+    async let responderKeys = handshake.performResponder(
+        over: responderTransport, localStatic: responderPrivate, prologue: prologue,
+        authorize: { _, _ in true })
+    let initiatorKeys = try await handshake.performInitiator(
+        over: initiatorTransport, localStatic: initiatorPrivate,
+        remoteStatic: responderPrivate.publicKey, prologue: prologue)
+    let rKeys = try await responderKeys
+
+    let initiatorSession = SecureSession(transport: initiatorTransport, channel: AEADChannel(keys: initiatorKeys))
+    let responderSession = SecureSession(transport: responderTransport, channel: AEADChannel(keys: rKeys))
+
+    try await initiatorSession.send(.input(.mouseMove(dx: 42, dy: -7)))
+    let received = try await responderSession.receiveFrame()
+    guard received == .input(.mouseMove(dx: 42, dy: -7)) else { throw ProbeError("frame mismatch over relay: \(received)") }
+
+    try await responderSession.send(.control(.ack(seq: 99)))
+    let ack = try await initiatorSession.receiveFrame()
+    guard ack == .control(.ack(seq: 99)) else { throw ProbeError("ack mismatch over relay: \(ack)") }
+
+    await initiatorSession.close()
+    await responderSession.close()
+    log("PASS — RelayTransport ↔ relay ↔ RelayTransport: Noise handshake + encrypted frames both directions.")
+}
+
 // MARK: - Run
 
 let arguments = CommandLine.arguments
 let shouldAssert = arguments.contains("--assert")
+
+if let idx = arguments.firstIndex(of: "--relay-selftest"), idx + 1 < arguments.count {
+    guard let url = URL(string: arguments[idx + 1]) else {
+        log("FAIL — invalid relay URL"); exit(1)
+    }
+    do { try await runRelaySelftest(relayURL: url); exit(0) }
+    catch { log("FAIL — \(error)"); exit(1) }
+}
 
 do {
     let payload = try readPairingURL(arguments: arguments)

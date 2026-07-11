@@ -27,3 +27,6 @@ secrets.local.*
 # Proof artifacts
 proof-*.mov
 proof-*.png
+
+# Build proof screenshots
+ios-*.png
