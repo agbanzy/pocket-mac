@@ -14,22 +14,32 @@ relay. **No screen streaming**: a fast, secure control channel, not a remote des
 | `probe/PocketMacProbe/` | Pure-Swift CLI E2E harness: discover → pair → drive → assert. |
 | `docs/`, `specs/` | Architecture, security model, ADRs, and BDD acceptance scenarios. |
 
-## Prove it (Milestone 0 — LAN)
+## Prove it
 ```bash
-./scripts/prove-m0.sh
+./scripts/prove-m0.sh        # LAN: kit tests + relay tests + helper + probe over Bonjour
+./scripts/relay-roundtrip.sh # RelayTransport <-> Go relay <-> RelayTransport (Swift/Go interop)
+./scripts/prove-remote.sh    # REMOTE: probe -> relay -> real helper (no LAN, no cloud)
 ```
-Runs the kit unit tests, the relay integration tests, builds + stably-signs the helper, launches it,
-and runs the probe against it over a real Bonjour socket. The one manual step is granting the helper
+Each builds what it needs and runs a live proof. The one manual step is granting the helper
 **Accessibility** (System Settings → Privacy & Security → Accessibility) — until then the probe
-reports `WARN`: the encrypted session works, but `CGEventPost` is a no-op without the grant.
+reports `WARN`: the encrypted session establishes and delivers frames, but `CGEventPost` is a no-op
+without the grant. Grant it, then `./probe/.build/debug/PocketMacProbe --assert` moves the cursor.
 
-## Status
-- **PocketMacKit** — complete, `swift test` green (37 tests).
-- **Mac helper** + **probe** — build clean; live LAN proof works end-to-end (discover → Noise IK
-  handshake → encrypted session → frame delivery); cursor movement pending the Accessibility grant.
-- **Go relay**, **iOS app** — see `relay/README.md` and `ios/`.
-- **v1.0 remote path** (relay deploy, `RelayTransport`, path switching, APNs wake) — phased in
-  `~/.claude/plans/…`; the crypto session is already path-agnostic so the relay drops in cleanly.
+## Status — all four components built and verified
+- **PocketMacKit** — complete, `swift test` green (37 tests): codec, Noise IK, AEAD, replay/tamper,
+  MITM + wrong-PIN rejection.
+- **Mac helper** — builds + stably signs; advertises on LAN and holds an outbound **relay responder**
+  when `--relay` is set. Live proof: real helper reached over **both** LAN and relay.
+- **Go relay** — `go test` green under `-race`; zero-knowledge enforced by a `go list -deps` test.
+- **iOS app** — builds for the iOS 26.5 Simulator, launches, pairs via deep link; LAN + `.relay`
+  connection arms wired.
+- **Both transport paths proven** end-to-end against the real helper (`prove-remote.sh`,
+  `relay-roundtrip.sh`). Cursor movement pends the Accessibility grant.
+
+## Remaining for v1.0 (phased in the plan)
+Deploy the relay to a droplet (`RelayTransport`/reachability are ready — it's a URL flip); seamless
+LAN↔relay path switching (`NWPathMonitor`); APNs push-to-wake + the opt-in keep-awake toggle; a
+hardening pass (red-sec, `TLSChannel` contingency, sliding-window replay).
 
 ## Distribution note
 The Mac helper synthesizes global input and is an Accessibility client, which the App Sandbox
