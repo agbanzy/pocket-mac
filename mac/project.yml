@@ -1,0 +1,40 @@
+name: PocketMacHelper
+options:
+  bundleIdPrefix: com.innoedge.pocketmac
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+packages:
+  PocketMacKit:
+    path: ../shared/PocketMacKit
+targets:
+  PocketMacHelper:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: PocketMacHelper
+    dependencies:
+      - package: PocketMacKit
+    info:
+      path: PocketMacHelper/Resources/Info.plist
+      properties:
+        LSUIElement: true
+        CFBundleDisplayName: Pocket Mac Helper
+        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "1"
+        NSHumanReadableCopyright: "© 2026 Innoedge Technologies"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.innoedge.pocketmac.helper
+        PRODUCT_NAME: PocketMacHelper
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        CODE_SIGN_ENTITLEMENTS: PocketMacHelper/Resources/PocketMacHelper.entitlements
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_APP_SANDBOX: NO
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 7T7BJT2AU7
+        GENERATE_INFOPLIST_FILE: NO

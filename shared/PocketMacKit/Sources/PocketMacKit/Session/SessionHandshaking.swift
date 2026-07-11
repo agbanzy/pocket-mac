@@ -14,11 +14,13 @@ public protocol SessionHandshaking: Sendable {
     ) async throws -> SessionKeys
 
     /// The Mac side: learns the phone's static from message 1 and authorizes it before replying.
+    /// `authorize` receives the peer's id AND its raw public key, so a pairing flow can persist the
+    /// new peer at the moment it is authenticated.
     func performResponder(
         over transport: any Transport,
         localStatic: Curve25519.KeyAgreement.PrivateKey,
         prologue: Data,
-        authorize: @Sendable (PeerID) -> Bool
+        authorize: @Sendable (PeerID, _ publicKey: Data) -> Bool
     ) async throws -> SessionKeys
 }
 
@@ -43,7 +45,7 @@ public struct NoisePatternHandshake: SessionHandshaking {
         over transport: any Transport,
         localStatic: Curve25519.KeyAgreement.PrivateKey,
         prologue: Data,
-        authorize: @Sendable (PeerID) -> Bool
+        authorize: @Sendable (PeerID, _ publicKey: Data) -> Bool
     ) async throws -> SessionKeys {
         var handshake = NoiseHandshakeIK(role: .responder, localStatic: localStatic,
                                          remoteStatic: nil, prologue: prologue)
@@ -51,7 +53,9 @@ public struct NoisePatternHandshake: SessionHandshaking {
 
         // Accept-only-paired: authorize the learned initiator identity BEFORE replying. An
         // unauthorized peer gets no message 2 and never establishes a session.
-        guard let peerID = handshake.remotePeerID, authorize(peerID) else {
+        guard let peerID = handshake.remotePeerID,
+              let publicKey = handshake.remoteStaticPublicKey,
+              authorize(peerID, publicKey) else {
             throw CryptoError.handshakeFailed(reason: "peer not authorized")
         }
         try await transport.send(try handshake.writeMessage2())

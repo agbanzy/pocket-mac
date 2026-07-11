@@ -1,0 +1,475 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0398F66BD9A7E42EE1002F48 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D42E07D09C4D19C7641024A7 /* MenuBarContentView.swift */; };
+		0ECEDF0D2A35B2B36C14AF7D /* ListenerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00402E8659A0D0B74F78467 /* ListenerService.swift */; };
+		164605038C8125627A929A27 /* PocketMacHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406E10C12645C876707C6302 /* PocketMacHelperApp.swift */; };
+		3BFA822DE0139DA4CA70B44E /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B9B9FFBEF98E9329142170 /* QRCodeView.swift */; };
+		3CEAFEF461CF35165FADE39C /* MediaKeySender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FAC1CF7696B7ED9248DE6C9 /* MediaKeySender.swift */; };
+		46F42185B8AD0C3C0FEC638A /* HelperModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 594B34EEB5427FFA35C1647A /* HelperModel.swift */; };
+		5D11909EF737EA7C17277011 /* CGEventTranslator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4F3BDCC6E004820C64E980 /* CGEventTranslator.swift */; };
+		62FA845AAA7F3B8A5CA55F8D /* MacPeerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5774EAD892247301FDD1E3C /* MacPeerStore.swift */; };
+		631006AD2EAD807B043DD8EC /* PocketMacKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6C3327AD3F666CD2FE7AC414 /* PocketMacKit */; };
+		73C574D310CA0E4F24CB9C6D /* LoginItemManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E232B57AD4BDC9B9A142329 /* LoginItemManager.swift */; };
+		AA7B5A02DE059511DFA69D6E /* SessionAccepter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4FA1707C55107E167DF665 /* SessionAccepter.swift */; };
+		FEBB34A2DC9671205F4B9B36 /* AccessibilityAuthorizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A91A981FD1C08C4D3516405 /* AccessibilityAuthorizer.swift */; };
+		FED2BF3FF179B4E27401A8C9 /* ActionExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE319641B884B5B56C8CF1E /* ActionExecutor.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0FAC1CF7696B7ED9248DE6C9 /* MediaKeySender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaKeySender.swift; sourceTree = "<group>"; };
+		2C4FA1707C55107E167DF665 /* SessionAccepter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionAccepter.swift; sourceTree = "<group>"; };
+		2CE319641B884B5B56C8CF1E /* ActionExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionExecutor.swift; sourceTree = "<group>"; };
+		33F36863DFFDD805F49285C9 /* PocketMacHelper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PocketMacHelper.entitlements; sourceTree = "<group>"; };
+		406E10C12645C876707C6302 /* PocketMacHelperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PocketMacHelperApp.swift; sourceTree = "<group>"; };
+		594B34EEB5427FFA35C1647A /* HelperModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperModel.swift; sourceTree = "<group>"; };
+		5A91A981FD1C08C4D3516405 /* AccessibilityAuthorizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityAuthorizer.swift; sourceTree = "<group>"; };
+		6B4F3BDCC6E004820C64E980 /* CGEventTranslator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGEventTranslator.swift; sourceTree = "<group>"; };
+		6E232B57AD4BDC9B9A142329 /* LoginItemManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemManager.swift; sourceTree = "<group>"; };
+		77765320C1E80EA636A371BC /* PocketMacHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PocketMacHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00402E8659A0D0B74F78467 /* ListenerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerService.swift; sourceTree = "<group>"; };
+		A5774EAD892247301FDD1E3C /* MacPeerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacPeerStore.swift; sourceTree = "<group>"; };
+		B9C2ECE3A1D3A7A11CF2F387 /* PocketMacKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PocketMacKit; path = ../shared/PocketMacKit; sourceTree = SOURCE_ROOT; };
+		C33BEC4A2D219EC4A5849F4D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		D42E07D09C4D19C7641024A7 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
+		D9B9B9FFBEF98E9329142170 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		956BF874CC42DE0CEB020824 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				631006AD2EAD807B043DD8EC /* PocketMacKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		03230ACBA4C45D5F8ACB17B6 /* Peers */ = {
+			isa = PBXGroup;
+			children = (
+				A5774EAD892247301FDD1E3C /* MacPeerStore.swift */,
+			);
+			path = Peers;
+			sourceTree = "<group>";
+		};
+		0890C0E9472F58EDFF242A37 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				B9C2ECE3A1D3A7A11CF2F387 /* PocketMacKit */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		2229A6887BC8BE65C94B39B8 /* Input */ = {
+			isa = PBXGroup;
+			children = (
+				6B4F3BDCC6E004820C64E980 /* CGEventTranslator.swift */,
+				0FAC1CF7696B7ED9248DE6C9 /* MediaKeySender.swift */,
+			);
+			path = Input;
+			sourceTree = "<group>";
+		};
+		27CD8951157725F65EFB1535 /* PocketMacHelper */ = {
+			isa = PBXGroup;
+			children = (
+				4708EB9B878EB8673572C59E /* Actions */,
+				FE3178A2FBEE9A691D753F3A /* App */,
+				2229A6887BC8BE65C94B39B8 /* Input */,
+				A03C5955EC0E48E0263D97E9 /* LoginItem */,
+				294AF6CC2BEC7F8E56BF4A21 /* MenuBar */,
+				FBE1FFB72165397075738A0E /* Pairing */,
+				03230ACBA4C45D5F8ACB17B6 /* Peers */,
+				66432843BD0A6024004F878E /* Permissions */,
+				3A23B51B2C8C424315847FCA /* Resources */,
+				2E22029F488D15A49865C6A4 /* Server */,
+			);
+			path = PocketMacHelper;
+			sourceTree = "<group>";
+		};
+		294AF6CC2BEC7F8E56BF4A21 /* MenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				D42E07D09C4D19C7641024A7 /* MenuBarContentView.swift */,
+			);
+			path = MenuBar;
+			sourceTree = "<group>";
+		};
+		2E22029F488D15A49865C6A4 /* Server */ = {
+			isa = PBXGroup;
+			children = (
+				A00402E8659A0D0B74F78467 /* ListenerService.swift */,
+				2C4FA1707C55107E167DF665 /* SessionAccepter.swift */,
+			);
+			path = Server;
+			sourceTree = "<group>";
+		};
+		3A23B51B2C8C424315847FCA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				C33BEC4A2D219EC4A5849F4D /* Info.plist */,
+				33F36863DFFDD805F49285C9 /* PocketMacHelper.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		4708EB9B878EB8673572C59E /* Actions */ = {
+			isa = PBXGroup;
+			children = (
+				2CE319641B884B5B56C8CF1E /* ActionExecutor.swift */,
+			);
+			path = Actions;
+			sourceTree = "<group>";
+		};
+		5F4D9B67320CD7E0CDFC07CF = {
+			isa = PBXGroup;
+			children = (
+				0890C0E9472F58EDFF242A37 /* Packages */,
+				27CD8951157725F65EFB1535 /* PocketMacHelper */,
+				87850699CA23008E197A571C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		66432843BD0A6024004F878E /* Permissions */ = {
+			isa = PBXGroup;
+			children = (
+				5A91A981FD1C08C4D3516405 /* AccessibilityAuthorizer.swift */,
+			);
+			path = Permissions;
+			sourceTree = "<group>";
+		};
+		87850699CA23008E197A571C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				77765320C1E80EA636A371BC /* PocketMacHelper.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A03C5955EC0E48E0263D97E9 /* LoginItem */ = {
+			isa = PBXGroup;
+			children = (
+				6E232B57AD4BDC9B9A142329 /* LoginItemManager.swift */,
+			);
+			path = LoginItem;
+			sourceTree = "<group>";
+		};
+		FBE1FFB72165397075738A0E /* Pairing */ = {
+			isa = PBXGroup;
+			children = (
+				D9B9B9FFBEF98E9329142170 /* QRCodeView.swift */,
+			);
+			path = Pairing;
+			sourceTree = "<group>";
+		};
+		FE3178A2FBEE9A691D753F3A /* App */ = {
+			isa = PBXGroup;
+			children = (
+				594B34EEB5427FFA35C1647A /* HelperModel.swift */,
+				406E10C12645C876707C6302 /* PocketMacHelperApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A8A49B164696C35337BD261F /* PocketMacHelper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F26D8024E2BA6BC7E0606B14 /* Build configuration list for PBXNativeTarget "PocketMacHelper" */;
+			buildPhases = (
+				CCA9F2D0C14CB499868D8487 /* Sources */,
+				956BF874CC42DE0CEB020824 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PocketMacHelper;
+			packageProductDependencies = (
+				6C3327AD3F666CD2FE7AC414 /* PocketMacKit */,
+			);
+			productName = PocketMacHelper;
+			productReference = 77765320C1E80EA636A371BC /* PocketMacHelper.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8BB95B4754A03AC998D1E5FC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					A8A49B164696C35337BD261F = {
+						DevelopmentTeam = 7T7BJT2AU7;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 77E6B91188E6C18A15526C00 /* Build configuration list for PBXProject "PocketMacHelper" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 5F4D9B67320CD7E0CDFC07CF;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				28FE91D8E11F8869C862D8CB /* XCLocalSwiftPackageReference "../shared/PocketMacKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 87850699CA23008E197A571C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A8A49B164696C35337BD261F /* PocketMacHelper */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CCA9F2D0C14CB499868D8487 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FEBB34A2DC9671205F4B9B36 /* AccessibilityAuthorizer.swift in Sources */,
+				FED2BF3FF179B4E27401A8C9 /* ActionExecutor.swift in Sources */,
+				5D11909EF737EA7C17277011 /* CGEventTranslator.swift in Sources */,
+				46F42185B8AD0C3C0FEC638A /* HelperModel.swift in Sources */,
+				0ECEDF0D2A35B2B36C14AF7D /* ListenerService.swift in Sources */,
+				73C574D310CA0E4F24CB9C6D /* LoginItemManager.swift in Sources */,
+				62FA845AAA7F3B8A5CA55F8D /* MacPeerStore.swift in Sources */,
+				3CEAFEF461CF35165FADE39C /* MediaKeySender.swift in Sources */,
+				0398F66BD9A7E42EE1002F48 /* MenuBarContentView.swift in Sources */,
+				164605038C8125627A929A27 /* PocketMacHelperApp.swift in Sources */,
+				3BFA822DE0139DA4CA70B44E /* QRCodeView.swift in Sources */,
+				AA7B5A02DE059511DFA69D6E /* SessionAccepter.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		4A95559F2AAD97EB5EE42166 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		5403A306A22F58F2D0E224FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PocketMacHelper/Resources/PocketMacHelper.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7T7BJT2AU7;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PocketMacHelper/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.innoedge.pocketmac.helper;
+				PRODUCT_NAME = PocketMacHelper;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		78EBEAF48E104550D91D0E92 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PocketMacHelper/Resources/PocketMacHelper.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7T7BJT2AU7;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PocketMacHelper/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.innoedge.pocketmac.helper;
+				PRODUCT_NAME = PocketMacHelper;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		CC6CC51C62389A0F4DB896BF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		77E6B91188E6C18A15526C00 /* Build configuration list for PBXProject "PocketMacHelper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A95559F2AAD97EB5EE42166 /* Debug */,
+				CC6CC51C62389A0F4DB896BF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F26D8024E2BA6BC7E0606B14 /* Build configuration list for PBXNativeTarget "PocketMacHelper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5403A306A22F58F2D0E224FE /* Debug */,
+				78EBEAF48E104550D91D0E92 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		28FE91D8E11F8869C862D8CB /* XCLocalSwiftPackageReference "../shared/PocketMacKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../shared/PocketMacKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6C3327AD3F666CD2FE7AC414 /* PocketMacKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PocketMacKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 8BB95B4754A03AC998D1E5FC /* Project object */;
+}

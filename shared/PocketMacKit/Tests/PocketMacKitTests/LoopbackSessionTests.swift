@@ -76,7 +76,7 @@ struct LoopbackSessionTests {
 
         async let macKeys = handshake.performResponder(
             over: macT, localStatic: macStatic, prologue: prologue,
-            authorize: { peers.isAuthorized($0) })
+            authorize: { peerID, _ in peers.isAuthorized(peerID) })
         let phoneKeys = try await handshake.performInitiator(
             over: phoneT, localStatic: phoneStatic, remoteStatic: macStatic.publicKey, prologue: prologue)
         let mk = try await macKeys
@@ -108,7 +108,7 @@ struct LoopbackSessionTests {
 
         let macTask = Task { try await handshake.performResponder(
             over: macT, localStatic: macStatic, prologue: Data(),
-            authorize: { peers.isAuthorized($0) }) }
+            authorize: { peerID, _ in peers.isAuthorized(peerID) }) }
 
         // Drive only message 1 from the initiator so the responder can reach its authorize check.
         var initiator = NoiseHandshakeIK(role: .initiator, localStatic: phoneStatic,
@@ -131,7 +131,7 @@ struct LoopbackSessionTests {
         let handshake = NoisePatternHandshake()
         let macTask = Task { try await handshake.performResponder(
             over: macT, localStatic: macStatic, prologue: Data(),
-            authorize: { peers.isAuthorized($0) }) }
+            authorize: { peerID, _ in peers.isAuthorized(peerID) }) }
         var initiator = NoiseHandshakeIK(role: .initiator, localStatic: phoneStatic,
                                          remoteStatic: macStatic.publicKey, prologue: Data())
         try await phoneT.send(try initiator.writeMessage1())

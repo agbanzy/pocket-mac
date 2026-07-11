@@ -56,6 +56,11 @@ struct NoiseHandshakeIK {
         rs.map { PeerID(publicKey: $0.rawRepresentation) }
     }
 
+    /// The raw 32-byte remote static public key, once known — used to persist a new pairing.
+    var remoteStaticPublicKey: Data? {
+        rs?.rawRepresentation
+    }
+
     // MARK: Message 1 — initiator → responder (e, es, s, ss)
 
     mutating func writeMessage1(payload: Data = Data()) throws -> Data {

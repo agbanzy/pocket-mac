@@ -1,0 +1,43 @@
+name: PocketMac
+options:
+  bundleIdPrefix: com.innoedge
+  deploymentTarget:
+    iOS: "26.5"
+  createIntermediateGroups: true
+  groupSortPosition: top
+  generateEmptyDirectories: false
+
+packages:
+  PocketMacKit:
+    path: ../shared/PocketMacKit
+
+targets:
+  PocketMacApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "26.5"
+    sources:
+      - path: PocketMac
+    dependencies:
+      - package: PocketMacKit
+        product: PocketMacKit
+    settings:
+      base:
+        PRODUCT_NAME: PocketMac
+        PRODUCT_BUNDLE_IDENTIFIER: com.innoedge.pocketmac
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: PocketMac/Resources/Info.plist
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        TARGETED_DEVICE_FAMILY: "1"
+        IPHONEOS_DEPLOYMENT_TARGET: "26.5"
+        ENABLE_PREVIEWS: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        # Simulator builds need no signing; these keep provisioning out of the loop.
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGN_IDENTITY: ""
