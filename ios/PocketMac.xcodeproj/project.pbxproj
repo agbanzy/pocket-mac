@@ -1,0 +1,517 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		01C497B4E8FCB21BF14DD39A /* HapticsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB072B97E6357838EE10A1F1 /* HapticsEngine.swift */; };
+		1F41CBBD8C020D6E8C2149FD /* DeckStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E978B74A2FF0C3417BD4074C /* DeckStore.swift */; };
+		2513C4BC8DF5F3DAA67AB89F /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B836ECC767145940FF2C3A5 /* AppModel.swift */; };
+		2BDD6FE8040E623219326BEE /* PairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FA340237D612A920068E70 /* PairingView.swift */; };
+		4CDAC2743406CA7BEA584FC9 /* DiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F980FA9EB2DB69E6B81A41F /* DiscoveryView.swift */; };
+		542A0C067612DC06E50C4523 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BD77BF02746744738C2A56 /* RootView.swift */; };
+		7FE9C2D47D46AB394EB2D79C /* TrackpadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D77DDEAFFAF80151742F320 /* TrackpadView.swift */; };
+		89AC945D6789437BC50243C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A96A0DEA25E646502214759 /* Assets.xcassets */; };
+		9173CF42392CB0E907C5741C /* TileDeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9990E9C32D4200FF6487FDB1 /* TileDeckView.swift */; };
+		A8C756F9C4130DE6B9156D1A /* ConnectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D87C3B2DAE59397DC624539 /* ConnectionState.swift */; };
+		AFD9884C69663356C05F445F /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E3ADD8FB0975161B28BB6A7 /* QRScannerView.swift */; };
+		AFE5D5CFB3CB431F24A9084E /* PocketMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9635B689A95B7FD18E9CE39C /* PocketMacApp.swift */; };
+		B37511E288B9F39E5A07880E /* RemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 891F863E670005C64955CB98 /* RemoteView.swift */; };
+		B5E66C47FE4E978517EE3F18 /* DiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7930D5D54304F1A77C3EEE4C /* DiscoveryService.swift */; };
+		B999C5F2FE17E82EA10ED498 /* PocketMacKit in Frameworks */ = {isa = PBXBuildFile; productRef = E0A9A6E4C386F355C5911668 /* PocketMacKit */; };
+		BC1B271E2C709BC971731586 /* PathSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48B282E057FA9D2920FBBE /* PathSelector.swift */; };
+		D58805C3338BF0722C083F36 /* KeyboardBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D516F26C33E4A451CFCF1961 /* KeyboardBarView.swift */; };
+		E758E3FF1665E065C8CA34B3 /* IdentityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A75652219ECD2B22246C9E3 /* IdentityService.swift */; };
+		E7F0D8066C4721EADD28578B /* ConnectionChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76A668B6F886B281AA354327 /* ConnectionChip.swift */; };
+		EBD2D6F6AB66B30CF4657C78 /* ConnectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6369A285FBD6A7AF30BE26 /* ConnectionController.swift */; };
+		ECD786265C6896D31BFC3191 /* TileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15038AA3068151AF20DFA86 /* TileModel.swift */; };
+		EE5C4B292AFB868E0A4CBF33 /* TrackpadSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1AB17C4FD40DADBB8434FE6 /* TrackpadSurface.swift */; };
+		F4D866C8A6BA55B65FD9131D /* PeerVault.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9265D080B404F393707B776 /* PeerVault.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0E6369A285FBD6A7AF30BE26 /* ConnectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionController.swift; sourceTree = "<group>"; };
+		2D77DDEAFFAF80151742F320 /* TrackpadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackpadView.swift; sourceTree = "<group>"; };
+		30BD77BF02746744738C2A56 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		40FA340237D612A920068E70 /* PairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingView.swift; sourceTree = "<group>"; };
+		4A75652219ECD2B22246C9E3 /* IdentityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityService.swift; sourceTree = "<group>"; };
+		4B836ECC767145940FF2C3A5 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		4E3ADD8FB0975161B28BB6A7 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
+		56693A542CF8CBCB8423E4FE /* PocketMacKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PocketMacKit; path = ../shared/PocketMacKit; sourceTree = SOURCE_ROOT; };
+		5A96A0DEA25E646502214759 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5D87C3B2DAE59397DC624539 /* ConnectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionState.swift; sourceTree = "<group>"; };
+		76A668B6F886B281AA354327 /* ConnectionChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionChip.swift; sourceTree = "<group>"; };
+		7930D5D54304F1A77C3EEE4C /* DiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryService.swift; sourceTree = "<group>"; };
+		80EA1B2F695F7BD8E3E1484F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		891F863E670005C64955CB98 /* RemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteView.swift; sourceTree = "<group>"; };
+		8F980FA9EB2DB69E6B81A41F /* DiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryView.swift; sourceTree = "<group>"; };
+		9635B689A95B7FD18E9CE39C /* PocketMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PocketMacApp.swift; sourceTree = "<group>"; };
+		9990E9C32D4200FF6487FDB1 /* TileDeckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileDeckView.swift; sourceTree = "<group>"; };
+		B8BBECE0B127B85F5C9FB9B2 /* PocketMacApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PocketMacApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB072B97E6357838EE10A1F1 /* HapticsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsEngine.swift; sourceTree = "<group>"; };
+		C15038AA3068151AF20DFA86 /* TileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileModel.swift; sourceTree = "<group>"; };
+		C1AB17C4FD40DADBB8434FE6 /* TrackpadSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackpadSurface.swift; sourceTree = "<group>"; };
+		D516F26C33E4A451CFCF1961 /* KeyboardBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardBarView.swift; sourceTree = "<group>"; };
+		D9265D080B404F393707B776 /* PeerVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerVault.swift; sourceTree = "<group>"; };
+		DD48B282E057FA9D2920FBBE /* PathSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PathSelector.swift; sourceTree = "<group>"; };
+		E978B74A2FF0C3417BD4074C /* DeckStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckStore.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B661A49F94473D196FE5ED02 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B999C5F2FE17E82EA10ED498 /* PocketMacKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0883E43D28D9AC92300F742E = {
+			isa = PBXGroup;
+			children = (
+				47F5071C2C5E6A59EC4224E0 /* Packages */,
+				33FF5DF55508EB3D1C0655F2 /* PocketMac */,
+				24AFFDEBC765FB5FE1146CBD /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		24AFFDEBC765FB5FE1146CBD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B8BBECE0B127B85F5C9FB9B2 /* PocketMacApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		33FF5DF55508EB3D1C0655F2 /* PocketMac */ = {
+			isa = PBXGroup;
+			children = (
+				C3F4AB1D226EAFD6FC40B089 /* App */,
+				F36D807C2BC296971A758E5F /* Connection */,
+				9582BD4AC98397458F77C601 /* Deck */,
+				D0B14DE182B9ADBE28D5734C /* Discovery */,
+				3D888833B96387E20F295927 /* Identity */,
+				E1690A60ED2410DAFDC7083A /* Keyboard */,
+				5F80F74D2D793863C433D8FF /* Pairing */,
+				35F0A0515D71639D1CAB81BC /* Resources */,
+				3EB230F06283F1A2CE5EF6CF /* Trackpad */,
+			);
+			path = PocketMac;
+			sourceTree = "<group>";
+		};
+		35F0A0515D71639D1CAB81BC /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				5A96A0DEA25E646502214759 /* Assets.xcassets */,
+				80EA1B2F695F7BD8E3E1484F /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		3D888833B96387E20F295927 /* Identity */ = {
+			isa = PBXGroup;
+			children = (
+				4A75652219ECD2B22246C9E3 /* IdentityService.swift */,
+				D9265D080B404F393707B776 /* PeerVault.swift */,
+			);
+			path = Identity;
+			sourceTree = "<group>";
+		};
+		3EB230F06283F1A2CE5EF6CF /* Trackpad */ = {
+			isa = PBXGroup;
+			children = (
+				BB072B97E6357838EE10A1F1 /* HapticsEngine.swift */,
+				C1AB17C4FD40DADBB8434FE6 /* TrackpadSurface.swift */,
+				2D77DDEAFFAF80151742F320 /* TrackpadView.swift */,
+			);
+			path = Trackpad;
+			sourceTree = "<group>";
+		};
+		47F5071C2C5E6A59EC4224E0 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				56693A542CF8CBCB8423E4FE /* PocketMacKit */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		5F80F74D2D793863C433D8FF /* Pairing */ = {
+			isa = PBXGroup;
+			children = (
+				40FA340237D612A920068E70 /* PairingView.swift */,
+				4E3ADD8FB0975161B28BB6A7 /* QRScannerView.swift */,
+			);
+			path = Pairing;
+			sourceTree = "<group>";
+		};
+		9582BD4AC98397458F77C601 /* Deck */ = {
+			isa = PBXGroup;
+			children = (
+				E978B74A2FF0C3417BD4074C /* DeckStore.swift */,
+				9990E9C32D4200FF6487FDB1 /* TileDeckView.swift */,
+				C15038AA3068151AF20DFA86 /* TileModel.swift */,
+			);
+			path = Deck;
+			sourceTree = "<group>";
+		};
+		C3F4AB1D226EAFD6FC40B089 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				4B836ECC767145940FF2C3A5 /* AppModel.swift */,
+				9635B689A95B7FD18E9CE39C /* PocketMacApp.swift */,
+				891F863E670005C64955CB98 /* RemoteView.swift */,
+				30BD77BF02746744738C2A56 /* RootView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		D0B14DE182B9ADBE28D5734C /* Discovery */ = {
+			isa = PBXGroup;
+			children = (
+				7930D5D54304F1A77C3EEE4C /* DiscoveryService.swift */,
+				8F980FA9EB2DB69E6B81A41F /* DiscoveryView.swift */,
+			);
+			path = Discovery;
+			sourceTree = "<group>";
+		};
+		E1690A60ED2410DAFDC7083A /* Keyboard */ = {
+			isa = PBXGroup;
+			children = (
+				D516F26C33E4A451CFCF1961 /* KeyboardBarView.swift */,
+			);
+			path = Keyboard;
+			sourceTree = "<group>";
+		};
+		F36D807C2BC296971A758E5F /* Connection */ = {
+			isa = PBXGroup;
+			children = (
+				76A668B6F886B281AA354327 /* ConnectionChip.swift */,
+				0E6369A285FBD6A7AF30BE26 /* ConnectionController.swift */,
+				5D87C3B2DAE59397DC624539 /* ConnectionState.swift */,
+				DD48B282E057FA9D2920FBBE /* PathSelector.swift */,
+			);
+			path = Connection;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		21C830CA9D9BD9674188D5BF /* PocketMacApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 483D920ED1977E2194AEDC31 /* Build configuration list for PBXNativeTarget "PocketMacApp" */;
+			buildPhases = (
+				8109E8F0839B54D1437D16B9 /* Sources */,
+				1621CF4C301BCBE7E77DC3E0 /* Resources */,
+				B661A49F94473D196FE5ED02 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PocketMacApp;
+			packageProductDependencies = (
+				E0A9A6E4C386F355C5911668 /* PocketMacKit */,
+			);
+			productName = PocketMacApp;
+			productReference = B8BBECE0B127B85F5C9FB9B2 /* PocketMacApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		19EE57D7A1EE462B5381947F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					21C830CA9D9BD9674188D5BF = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = C5FFD2DFE1DA82720EA614A8 /* Build configuration list for PBXProject "PocketMac" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 0883E43D28D9AC92300F742E;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D2424F8E99B3958B92B1B672 /* XCLocalSwiftPackageReference "../shared/PocketMacKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 24AFFDEBC765FB5FE1146CBD /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				21C830CA9D9BD9674188D5BF /* PocketMacApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1621CF4C301BCBE7E77DC3E0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				89AC945D6789437BC50243C2 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8109E8F0839B54D1437D16B9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2513C4BC8DF5F3DAA67AB89F /* AppModel.swift in Sources */,
+				E7F0D8066C4721EADD28578B /* ConnectionChip.swift in Sources */,
+				EBD2D6F6AB66B30CF4657C78 /* ConnectionController.swift in Sources */,
+				A8C756F9C4130DE6B9156D1A /* ConnectionState.swift in Sources */,
+				1F41CBBD8C020D6E8C2149FD /* DeckStore.swift in Sources */,
+				B5E66C47FE4E978517EE3F18 /* DiscoveryService.swift in Sources */,
+				4CDAC2743406CA7BEA584FC9 /* DiscoveryView.swift in Sources */,
+				01C497B4E8FCB21BF14DD39A /* HapticsEngine.swift in Sources */,
+				E758E3FF1665E065C8CA34B3 /* IdentityService.swift in Sources */,
+				D58805C3338BF0722C083F36 /* KeyboardBarView.swift in Sources */,
+				2BDD6FE8040E623219326BEE /* PairingView.swift in Sources */,
+				BC1B271E2C709BC971731586 /* PathSelector.swift in Sources */,
+				F4D866C8A6BA55B65FD9131D /* PeerVault.swift in Sources */,
+				AFE5D5CFB3CB431F24A9084E /* PocketMacApp.swift in Sources */,
+				AFD9884C69663356C05F445F /* QRScannerView.swift in Sources */,
+				B37511E288B9F39E5A07880E /* RemoteView.swift in Sources */,
+				542A0C067612DC06E50C4523 /* RootView.swift in Sources */,
+				9173CF42392CB0E907C5741C /* TileDeckView.swift in Sources */,
+				ECD786265C6896D31BFC3191 /* TileModel.swift in Sources */,
+				EE5C4B292AFB868E0A4CBF33 /* TrackpadSurface.swift in Sources */,
+				7FE9C2D47D46AB394EB2D79C /* TrackpadView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		172CB8A34D3C97E63B79772E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PocketMac/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.innoedge.pocketmac;
+				PRODUCT_NAME = PocketMac;
+				SDKROOT = iphoneos;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		429E1FC1C6BEE0130138F50C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PocketMac/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.innoedge.pocketmac;
+				PRODUCT_NAME = PocketMac;
+				SDKROOT = iphoneos;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		95E55E71C4D09A31655EBA73 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		ECD2975C9003129CAADB24DE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		483D920ED1977E2194AEDC31 /* Build configuration list for PBXNativeTarget "PocketMacApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				429E1FC1C6BEE0130138F50C /* Debug */,
+				172CB8A34D3C97E63B79772E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C5FFD2DFE1DA82720EA614A8 /* Build configuration list for PBXProject "PocketMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ECD2975C9003129CAADB24DE /* Debug */,
+				95E55E71C4D09A31655EBA73 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		D2424F8E99B3958B92B1B672 /* XCLocalSwiftPackageReference "../shared/PocketMacKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../shared/PocketMacKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E0A9A6E4C386F355C5911668 /* PocketMacKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PocketMacKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 19EE57D7A1EE462B5381947F /* Project object */;
+}

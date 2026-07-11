@@ -274,21 +274,37 @@ func TestRelay_SlowConsumer_Dropped(t *testing.T) {
 		t.Fatalf("session not established, got %q", got)
 	}
 
-	// B stops reading entirely; A floods. The relay's write to B stalls past
-	// WriteTimeout, tears the session down, and A then sees a write failure.
-	payload := bytes.Repeat([]byte{0xAB}, 60000)
-	deadline := time.Now().Add(5 * time.Second)
-	var writeErr error
-	for time.Now().Before(deadline) {
-		ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
-		writeErr = a.Write(ctx, websocket.MessageBinary, payload)
-		cancel()
-		if writeErr != nil {
-			break
+	// B stops reading entirely. A floods in the background so the relay's write
+	// to B stalls behind TCP backpressure. Past WriteTimeout the relay tears the
+	// session down instead of buffering without bound.
+	//
+	// We detect the teardown via A's *read*: when the relay closes A's side, a
+	// blocking read returns promptly. (Watching A's writes would not work — A
+	// never reads, so it never processes the close frame and loopback happily
+	// absorbs gigabytes of its outbound data.)
+	stop := make(chan struct{})
+	go func() {
+		payload := bytes.Repeat([]byte{0xAB}, 60000)
+		for {
+			select {
+			case <-stop:
+				return
+			default:
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			err := a.Write(ctx, websocket.MessageBinary, payload)
+			cancel()
+			if err != nil {
+				return // session torn down; stop flooding
+			}
 		}
-	}
-	if writeErr == nil {
-		t.Fatal("slow-consumer session was not torn down: relay kept accepting writes")
+	}()
+	defer close(stop)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+	defer cancel()
+	if _, _, err := a.Read(ctx); err == nil {
+		t.Fatal("slow-consumer session was not torn down: A's read returned no error")
 	}
 }
 

@@ -120,7 +120,7 @@ final class ConnectionController: InputSink {
                 do {
                     try await session.send(frame)
                 } catch {
-                    await self?.linkFailed(error)
+                    self?.linkFailed(error) // pump task inherits @MainActor — same-actor call
                     break
                 }
             }
@@ -128,10 +128,12 @@ final class ConnectionController: InputSink {
     }
 
     private func startReceiveLoop(session: SecureSession) {
-        receiveTask = Task { [weak self] in
-            await session.run(onFrame: { frame in
+        // The onFrame/onError closures run inside the session actor's domain, so each captures a
+        // fresh weak self and hops back to the main actor.
+        receiveTask = Task {
+            await session.run(onFrame: { [weak self] frame in
                 await self?.handle(frame)
-            }, onError: { error in
+            }, onError: { [weak self] error in
                 await self?.linkFailed(error)
             })
         }
@@ -141,7 +143,7 @@ final class ConnectionController: InputSink {
         heartbeatTask = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(2))
-                await self?.sendPing()
+                self?.sendPing() // heartbeat task inherits @MainActor — same-actor call
             }
         }
     }
