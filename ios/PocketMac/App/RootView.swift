@@ -35,5 +35,9 @@ struct RootView: View {
         .sheet(isPresented: $showPairing) { PairingView() }
         .sheet(isPresented: $app.showPairingSheet) { PairingView() }
         .tint(.accentColor)
+        .onAppear { app.start() }
+        .onChange(of: app.discovery.services) { _, _ in
+            app.pathCoordinator.discoveryChanged() // LAN service appeared/vanished → re-select path
+        }
     }
 }

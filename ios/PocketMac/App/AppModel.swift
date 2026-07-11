@@ -11,8 +11,12 @@ final class AppModel {
     let identity: IdentityService
     let connection: ConnectionController
     let discovery: DiscoveryService
+    let pathCoordinator: PathCoordinator
     let deck: DeckStore
     private let vault: PeerVault
+
+    /// UserDefaults key for the configured relay endpoint (set once the relay is deployed).
+    static let relayURLDefaultsKey = "com.innoedge.pocketmac.relayURL"
 
     /// The currently paired Mac (nil until first pairing). Persisted in `PeerVault`.
     private(set) var pairedMac: PairedMac?
@@ -26,12 +30,27 @@ final class AppModel {
     init() {
         let identity = IdentityService()
         self.identity = identity
-        self.connection = ConnectionController(identity: identity)
-        self.discovery = DiscoveryService()
+        let connection = ConnectionController(identity: identity)
+        let discovery = DiscoveryService()
+        self.connection = connection
+        self.discovery = discovery
+        self.pathCoordinator = PathCoordinator(connection: connection, discovery: discovery)
         self.deck = DeckStore()
         let vault = PeerVault()
         self.vault = vault
         self.pairedMac = vault.load()
+
+        if let string = UserDefaults.standard.string(forKey: Self.relayURLDefaultsKey),
+           let url = URL(string: string) {
+            pathCoordinator.relayURL = url
+        }
+    }
+
+    /// Called when the UI appears: if a Mac is already paired, start keeping the best-path session up.
+    func start() {
+        if let mac = pairedMac {
+            pathCoordinator.enable(for: mac)
+        }
     }
 
     /// This phone's identity fingerprint, shown during pairing.
@@ -64,6 +83,7 @@ final class AppModel {
         pairedMac = mac
         pendingPairing = nil
         showPairingSheet = false
+        pathCoordinator.enable(for: mac) // auto-connect over the best available path
     }
 
     func cancelPairing() {
@@ -71,7 +91,7 @@ final class AppModel {
     }
 
     func unpair() {
-        connection.disconnect()
+        pathCoordinator.disable()
         vault.clear()
         pairedMac = nil
     }

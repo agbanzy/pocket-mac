@@ -11,6 +11,7 @@
 		1F41CBBD8C020D6E8C2149FD /* DeckStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E978B74A2FF0C3417BD4074C /* DeckStore.swift */; };
 		2513C4BC8DF5F3DAA67AB89F /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B836ECC767145940FF2C3A5 /* AppModel.swift */; };
 		2BDD6FE8040E623219326BEE /* PairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FA340237D612A920068E70 /* PairingView.swift */; };
+		30AD97EC004358DCD1CDF30C /* PathCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1416906110668C0796C5B9F8 /* PathCoordinator.swift */; };
 		4CDAC2743406CA7BEA584FC9 /* DiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F980FA9EB2DB69E6B81A41F /* DiscoveryView.swift */; };
 		542A0C067612DC06E50C4523 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BD77BF02746744738C2A56 /* RootView.swift */; };
 		7FE9C2D47D46AB394EB2D79C /* TrackpadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D77DDEAFFAF80151742F320 /* TrackpadView.swift */; };
@@ -34,6 +35,7 @@
 
 /* Begin PBXFileReference section */
 		0E6369A285FBD6A7AF30BE26 /* ConnectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionController.swift; sourceTree = "<group>"; };
+		1416906110668C0796C5B9F8 /* PathCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PathCoordinator.swift; sourceTree = "<group>"; };
 		2D77DDEAFFAF80151742F320 /* TrackpadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackpadView.swift; sourceTree = "<group>"; };
 		30BD77BF02746744738C2A56 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		40FA340237D612A920068E70 /* PairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingView.swift; sourceTree = "<group>"; };
@@ -194,6 +196,7 @@
 				76A668B6F886B281AA354327 /* ConnectionChip.swift */,
 				0E6369A285FBD6A7AF30BE26 /* ConnectionController.swift */,
 				5D87C3B2DAE59397DC624539 /* ConnectionState.swift */,
+				1416906110668C0796C5B9F8 /* PathCoordinator.swift */,
 				DD48B282E057FA9D2920FBBE /* PathSelector.swift */,
 			);
 			path = Connection;
@@ -285,6 +288,7 @@
 				E758E3FF1665E065C8CA34B3 /* IdentityService.swift in Sources */,
 				D58805C3338BF0722C083F36 /* KeyboardBarView.swift in Sources */,
 				2BDD6FE8040E623219326BEE /* PairingView.swift in Sources */,
+				30AD97EC004358DCD1CDF30C /* PathCoordinator.swift in Sources */,
 				BC1B271E2C709BC971731586 /* PathSelector.swift in Sources */,
 				F4D866C8A6BA55B65FD9131D /* PeerVault.swift in Sources */,
 				AFE5D5CFB3CB431F24A9084E /* PocketMacApp.swift in Sources */,

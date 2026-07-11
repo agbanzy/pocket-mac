@@ -24,6 +24,8 @@ final class ConnectionController: InputSink {
     private(set) var state: ConnectionState = .idle
     /// Live round-trip latency in ms (from control ping/pong), or nil until the first sample.
     private(set) var latencyMS: Int?
+    /// Which path the current session is running over (for the connection chip). Nil when not secured.
+    private(set) var currentPath: ConnectionPath?
 
     /// The relay endpoint (`wss://…/ws`) for the away-from-home path. Nil until configured/deployed;
     /// the `.relay` path reports "No relay configured" while unset.
@@ -89,6 +91,7 @@ final class ConnectionController: InputSink {
             startOutboundPump(session: session)
             startReceiveLoop(session: session)
             startHeartbeat()
+            currentPath = path.connectionPath
             state = .secured
 
             // Post-handshake application hello so the Mac can show who connected.
@@ -110,6 +113,7 @@ final class ConnectionController: InputSink {
         session = nil
         pendingPings.removeAll()
         latencyMS = nil
+        currentPath = nil
         if closing != nil { Task { await closing?.close() } }
         if state.isSecured || state == .connecting { state = .idle }
     }

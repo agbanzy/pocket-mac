@@ -57,7 +57,8 @@ struct RemoteView: View {
         HStack(spacing: 10) {
             ConnectionChip(state: app.connection.state,
                            latencyMS: app.connection.latencyMS,
-                           deviceName: app.pairedMac?.displayName)
+                           deviceName: app.pairedMac?.displayName,
+                           path: app.connection.currentPath)
             Spacer(minLength: 6)
             if app.pairedMac != nil {
                 if isSecured {
