@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+
+# Swift / SwiftPM
+.build/
+.swiftpm/
+*.xcuserstate
+xcuserdata/
+DerivedData/
+build/
+
+# Xcode
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Go
+relay/relayd
+relay/*.test
+relay/coverage.out
+
+# Secrets / local config (never commit)
+*.env
+.env.*
+secrets.local.*
+
+# Proof artifacts
+proof-*.mov
+proof-*.png
