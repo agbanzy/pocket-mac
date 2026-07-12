@@ -99,6 +99,8 @@ public struct FrameCodec: FrameCoding {
             w.writeString(text)
         case .setModifiers(let modifiers):
             w.writeUInt8(modifiers.rawValue)
+        case .mouseMoveAbsolute(let x, let y):
+            w.writeUInt16(x); w.writeUInt16(y)
         }
     }
 
@@ -206,6 +208,8 @@ public struct FrameCodec: FrameCoding {
             return .unicodeText(try r.readString())
         case .setModifiers:
             return .setModifiers(ModifierFlags(rawValue: try r.readUInt8()))
+        case .mouseMoveAbsolute:
+            return .mouseMoveAbsolute(x: try r.readUInt16(), y: try r.readUInt16())
         }
     }
 

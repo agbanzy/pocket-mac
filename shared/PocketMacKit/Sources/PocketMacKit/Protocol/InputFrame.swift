@@ -33,6 +33,7 @@ enum InputOpcode: UInt8 {
     case keyUp = 6
     case unicodeText = 7
     case setModifiers = 8
+    case mouseMoveAbsolute = 9
 }
 
 /// A real-time input event. High-frequency, fire-and-forget — the latency-critical hot path.
@@ -55,6 +56,9 @@ public enum InputFrame: Sendable, Equatable {
     case unicodeText(String)
     /// Sets the sticky modifier state (e.g. a held ⌘ from an on-screen modifier row).
     case setModifiers(ModifierFlags)
+    /// Moves the cursor to an ABSOLUTE screen position, normalized to 0…65535 across the display's
+    /// width/height. Used by the screen view: tap where you see it and the cursor goes there.
+    case mouseMoveAbsolute(x: UInt16, y: UInt16)
 
     var opcode: InputOpcode {
         switch self {
@@ -67,6 +71,7 @@ public enum InputFrame: Sendable, Equatable {
         case .keyUp: .keyUp
         case .unicodeText: .unicodeText
         case .setModifiers: .setModifiers
+        case .mouseMoveAbsolute: .mouseMoveAbsolute
         }
     }
 }

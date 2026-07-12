@@ -33,7 +33,21 @@ final class CGEventTranslator: @unchecked Sendable {
             type(text)
         case .setModifiers(let modifiers):
             lock.lock(); stickyModifiers = modifiers; lock.unlock()
+        case .mouseMoveAbsolute(let x, let y):
+            moveAbsolute(x: x, y: y)
         }
+    }
+
+    /// Moves the cursor to a normalized (0…65535) absolute position on the main display — the
+    /// screen-view "tap where you see it" path.
+    private func moveAbsolute(x: UInt16, y: UInt16) {
+        let bounds = CGDisplayBounds(CGMainDisplayID())
+        let target = CGPoint(x: bounds.minX + CGFloat(x) / 65535.0 * bounds.width,
+                             y: bounds.minY + CGFloat(y) / 65535.0 * bounds.height)
+        lock.lock(); let dragging = leftButtonDown; lock.unlock()
+        CGEvent(mouseEventSource: source, mouseType: dragging ? .leftMouseDragged : .mouseMoved,
+                mouseCursorPosition: target, mouseButton: .left)?
+            .post(tap: .cghidEventTap)
     }
 
     // MARK: Pointer

@@ -17,6 +17,7 @@ final class ScreenHostView: UIView {
         super.init(frame: frame)
         displayLayer.videoGravity = .resizeAspect
         backgroundColor = .black
+        isUserInteractionEnabled = false // let the SwiftUI control gesture above receive touches
     }
     required init?(coder: NSCoder) { fatalError() }
 
@@ -145,22 +146,27 @@ struct ScreenView: UIViewRepresentable {
     func enqueue(_ annexB: Data) { host.enqueue(annexB: annexB) }
 }
 
-/// The "Screen" surface: shows the Mac's live screen and manages the stream's lifecycle (asks the
-/// Mac to start streaming on appear, stop on leave). Control still happens via the Trackpad/Deck
-/// tabs for now; an on-video control overlay is the next step.
+/// The "Screen" surface: shows the Mac's live screen AND lets you operate it directly — tap where you
+/// see something to click it there, drag to move the cursor. Taps map through the aspect-fit letterbox
+/// to an absolute position on the Mac's display.
 struct ScreenModeView: View {
     let connection: ConnectionController
     let connected: Bool
     @State private var screen = ScreenView()
+    @State private var videoSize = CGSize(width: 16, height: 10)
 
     var body: some View {
-        ZStack {
-            Color.black
-            screen
-            if !connected {
-                ContentUnavailableView("Not connected", systemImage: "display.trianglebadge.exclamationmark")
-                    .foregroundStyle(.white)
+        GeometryReader { geo in
+            ZStack {
+                Color.black
+                screen
+                if !connected {
+                    ContentUnavailableView("Not connected", systemImage: "display.trianglebadge.exclamationmark")
+                        .foregroundStyle(.white)
+                }
             }
+            .contentShape(Rectangle())
+            .gesture(controlGesture(in: geo.size))
         }
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding(.horizontal)
@@ -174,7 +180,45 @@ struct ScreenModeView: View {
 
     private func startIfPossible() {
         guard connected else { return }
-        connection.onVideoFrame = { data in screen.enqueue(data) }
+        connection.onVideoFrame = { data, w, h in
+            screen.enqueue(data)
+            if w > 0, h > 0 { videoSize = CGSize(width: w, height: h) }
+        }
         connection.startVideo(fps: 30)
+    }
+
+    /// Drag positions the cursor live (so you see where you'll click); a tap (small movement) clicks.
+    private func controlGesture(in viewSize: CGSize) -> some Gesture {
+        DragGesture(minimumDistance: 0)
+            .onChanged { value in
+                if let n = normalized(value.location, in: viewSize) {
+                    connection.send(.input(.mouseMoveAbsolute(x: n.x, y: n.y)))
+                }
+            }
+            .onEnded { value in
+                guard let n = normalized(value.location, in: viewSize) else { return }
+                connection.send(.input(.mouseMoveAbsolute(x: n.x, y: n.y)))
+                let moved = hypot(value.translation.width, value.translation.height)
+                if moved < 12 { // it was a tap → click there
+                    connection.send(.input(.mouseClick(button: .left, count: 1)))
+                }
+            }
+    }
+
+    /// Maps a view point to normalized 0…65535 within the aspect-fit video content rect (accounting
+    /// for the letterbox/pillarbox bars), or nil if the tap landed on a bar.
+    private func normalized(_ point: CGPoint, in viewSize: CGSize) -> (x: UInt16, y: UInt16)? {
+        guard videoSize.width > 0, videoSize.height > 0, viewSize.width > 0, viewSize.height > 0 else { return nil }
+        let viewAspect = viewSize.width / viewSize.height
+        let videoAspect = videoSize.width / videoSize.height
+        var contentW = viewSize.width, contentH = viewSize.height
+        if videoAspect > viewAspect { contentH = viewSize.width / videoAspect }
+        else { contentW = viewSize.height * videoAspect }
+        let originX = (viewSize.width - contentW) / 2
+        let originY = (viewSize.height - contentH) / 2
+        let fx = (point.x - originX) / contentW
+        let fy = (point.y - originY) / contentH
+        guard fx >= 0, fx <= 1, fy >= 0, fy <= 1 else { return nil }
+        return (UInt16(fx * 65535), UInt16(fy * 65535))
     }
 }

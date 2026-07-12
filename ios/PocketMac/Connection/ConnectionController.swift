@@ -42,8 +42,8 @@ final class ConnectionController: InputSink {
     private var pingNonce: UInt32 = 0
 
     private var reassembler = VideoReassembler()
-    /// Called on the main actor with each complete Annex-B video frame from the Mac.
-    var onVideoFrame: ((Data) -> Void)?
+    /// Called on the main actor with each complete Annex-B video frame + the Mac's pixel size.
+    var onVideoFrame: ((Data, Int, Int) -> Void)?
 
     init(identity: IdentityService) {
         self.identity = identity
@@ -187,7 +187,7 @@ final class ConnectionController: InputSink {
             send(.control(.pong(nonce: nonce)))
         case .video(let chunk):
             if let frame = reassembler.accept(chunk) {
-                onVideoFrame?(frame.annexB)
+                onVideoFrame?(frame.annexB, frame.width, frame.height)
             }
         default:
             break
