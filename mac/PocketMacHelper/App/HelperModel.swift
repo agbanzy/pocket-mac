@@ -158,7 +158,7 @@ final class HelperModel {
             let authorize = makePairingAuthorize(gate: gate, token: payload.rendezvousToken)
             relayReachability.startResponder(
                 id: "pairing", relayURL: relayURL, token: payload.rendezvousToken,
-                prologue: payload.pairingPrologue, privateKeyData: privateKeyData,
+                prologue: Data(), privateKeyData: privateKeyData,
                 continueWhile: { gate.value }, authorize: authorize)
         }
     }
@@ -243,7 +243,7 @@ final class HelperModel {
         let prologue: Data
         let authorize: @Sendable (PeerID, Data) -> Bool
         if isPairing, let gate = pairingGate, let payload = currentPairingPayload {
-            prologue = payload.pairingPrologue // LAN pairing binds the SAS
+            prologue = Data() // empty prologue everywhere; pairing gated by the single-admission window
             authorize = makePairingAuthorize(gate: gate, token: payload.rendezvousToken)
         } else {
             prologue = Data()

@@ -59,8 +59,10 @@ final class ConnectionController: InputSink {
         switch path {
         case .lan(let service):
             transport = NWConnectionTransport(connection: service.makeConnection())
-            // LAN pairing binds the SAS into the prologue, so a wrong PIN fails the handshake.
-            prologue = payload.pairingPrologue
+            // Empty prologue everywhere so pairing and reconnect are consistent on both sides. Noise
+            // static-key mutual auth carries the session; the pairing window is time-bounded +
+            // single-admission, and the SAS is the visual confirmation.
+            prologue = Data()
         case .relay(let rendezvousToken):
             guard let relayURL else {
                 state = .offline("No relay configured")

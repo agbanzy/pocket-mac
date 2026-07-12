@@ -166,7 +166,7 @@ do {
         // pairing responder now requires it. (A reconnect by an already-paired peer would use an
         // empty prologue instead, carried by Noise static-key auth.)
         let keys = try await handshake.performInitiator(
-            over: transport, localStatic: privateKey, remoteStatic: macPublicKey, prologue: payload.pairingPrologue)
+            over: transport, localStatic: privateKey, remoteStatic: macPublicKey, prologue: Data())
         log("Secure session established OVER THE RELAY with \(keys.peerID.fingerprint)")
         try await driveAndReport(SecureSession(transport: transport, channel: AEADChannel(keys: keys)), over: "relay")
     } else {
@@ -178,7 +178,7 @@ do {
         let transport = NWConnectionTransport(connection: service.makeConnection())
         try await transport.start()
         let keys = try await handshake.performInitiator(
-            over: transport, localStatic: privateKey, remoteStatic: macPublicKey, prologue: payload.pairingPrologue)
+            over: transport, localStatic: privateKey, remoteStatic: macPublicKey, prologue: Data())
         log("Secure session established over LAN with \(keys.peerID.fingerprint)")
         try await driveAndReport(SecureSession(transport: transport, channel: AEADChannel(keys: keys)), over: "LAN")
     }
