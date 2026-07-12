@@ -9,6 +9,7 @@ public enum FrameDomain: UInt8, Sendable, CaseIterable {
     case control = 0
     case input = 1
     case action = 2
+    case video = 3
 }
 
 /// A single decoded control-channel message. The root type exchanged over a ``SecureSession``.
@@ -16,6 +17,7 @@ public enum Frame: Sendable, Equatable {
     case control(ControlFrame)
     case input(InputFrame)
     case action(ActionFrame)
+    case video(VideoChunk)
 
     /// The domain this frame belongs to. Used by the codec to emit the domain byte.
     public var domain: FrameDomain {
@@ -23,6 +25,7 @@ public enum Frame: Sendable, Equatable {
         case .control: .control
         case .input: .input
         case .action: .action
+        case .video: .video
         }
     }
 }

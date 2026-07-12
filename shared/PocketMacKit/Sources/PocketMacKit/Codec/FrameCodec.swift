@@ -38,6 +38,9 @@ public struct FrameCodec: FrameCoding {
         case .action(let a):
             opcode = a.action.opcode.rawValue
             encodeAction(a, into: &payload)
+        case .video(let v):
+            opcode = 0
+            encodeVideo(v, into: &payload)
         }
 
         let payloadData = payload.data
@@ -141,6 +144,8 @@ public struct FrameCodec: FrameCoding {
             return .input(try decodeInput(opcodeByte, from: &payload))
         case .action:
             return .action(try decodeAction(opcodeByte, from: &payload))
+        case .video:
+            return .video(try decodeVideo(from: &payload))
         }
     }
 
@@ -221,6 +226,28 @@ public struct FrameCodec: FrameCoding {
             action = .systemControl(control)
         }
         return ActionFrame(tileID: tileID, action: action)
+    }
+
+    private func encodeVideo(_ v: VideoChunk, into w: inout BinaryWriter) {
+        w.writeUInt32(v.frameID)
+        w.writeUInt16(v.chunkIndex)
+        w.writeUInt16(v.chunkCount)
+        w.writeUInt8(v.flags)
+        w.writeUInt16(v.width)
+        w.writeUInt16(v.height)
+        w.writeRaw(v.data)
+    }
+
+    private func decodeVideo(from r: inout BinaryReader) throws -> VideoChunk {
+        let frameID = try r.readUInt32()
+        let chunkIndex = try r.readUInt16()
+        let chunkCount = try r.readUInt16()
+        let flags = try r.readUInt8()
+        let width = try r.readUInt16()
+        let height = try r.readUInt16()
+        let data = try r.readRaw(r.remaining)
+        return VideoChunk(frameID: frameID, chunkIndex: chunkIndex, chunkCount: chunkCount,
+                          isKeyframe: flags & 0x1 != 0, width: width, height: height, data: data)
     }
 
     private func readButton(_ r: inout BinaryReader) throws -> MouseButton {
