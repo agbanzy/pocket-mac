@@ -14,6 +14,7 @@
 		30AD97EC004358DCD1CDF30C /* PathCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1416906110668C0796C5B9F8 /* PathCoordinator.swift */; };
 		4CDAC2743406CA7BEA584FC9 /* DiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F980FA9EB2DB69E6B81A41F /* DiscoveryView.swift */; };
 		542A0C067612DC06E50C4523 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BD77BF02746744738C2A56 /* RootView.swift */; };
+		6919947C9553F5DD6252CA4D /* ScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 775257A500399D8CE25AD3DD /* ScreenView.swift */; };
 		7FE9C2D47D46AB394EB2D79C /* TrackpadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D77DDEAFFAF80151742F320 /* TrackpadView.swift */; };
 		89AC945D6789437BC50243C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A96A0DEA25E646502214759 /* Assets.xcassets */; };
 		9173CF42392CB0E907C5741C /* TileDeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9990E9C32D4200FF6487FDB1 /* TileDeckView.swift */; };
@@ -46,6 +47,7 @@
 		5A96A0DEA25E646502214759 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5D87C3B2DAE59397DC624539 /* ConnectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionState.swift; sourceTree = "<group>"; };
 		76A668B6F886B281AA354327 /* ConnectionChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionChip.swift; sourceTree = "<group>"; };
+		775257A500399D8CE25AD3DD /* ScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenView.swift; sourceTree = "<group>"; };
 		7930D5D54304F1A77C3EEE4C /* DiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryService.swift; sourceTree = "<group>"; };
 		80EA1B2F695F7BD8E3E1484F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		891F863E670005C64955CB98 /* RemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteView.swift; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 				E1690A60ED2410DAFDC7083A /* Keyboard */,
 				5F80F74D2D793863C433D8FF /* Pairing */,
 				35F0A0515D71639D1CAB81BC /* Resources */,
+				D8789CAC439697E2222EB7A6 /* Streaming */,
 				3EB230F06283F1A2CE5EF6CF /* Trackpad */,
 			);
 			path = PocketMac;
@@ -180,6 +183,14 @@
 				8F980FA9EB2DB69E6B81A41F /* DiscoveryView.swift */,
 			);
 			path = Discovery;
+			sourceTree = "<group>";
+		};
+		D8789CAC439697E2222EB7A6 /* Streaming */ = {
+			isa = PBXGroup;
+			children = (
+				775257A500399D8CE25AD3DD /* ScreenView.swift */,
+			);
+			path = Streaming;
 			sourceTree = "<group>";
 		};
 		E1690A60ED2410DAFDC7083A /* Keyboard */ = {
@@ -296,6 +307,7 @@
 				AFD9884C69663356C05F445F /* QRScannerView.swift in Sources */,
 				B37511E288B9F39E5A07880E /* RemoteView.swift in Sources */,
 				542A0C067612DC06E50C4523 /* RootView.swift in Sources */,
+				6919947C9553F5DD6252CA4D /* ScreenView.swift in Sources */,
 				9173CF42392CB0E907C5741C /* TileDeckView.swift in Sources */,
 				ECD786265C6896D31BFC3191 /* TileModel.swift in Sources */,
 				EE5C4B292AFB868E0A4CBF33 /* TrackpadSurface.swift in Sources */,

@@ -7,6 +7,8 @@ enum ControlOpcode: UInt8 {
     case error = 2
     case ping = 3
     case pong = 4
+    case startVideo = 5
+    case stopVideo = 6
 }
 
 /// Post-handshake application hello. Advertises peer name, app version, and capability flags
@@ -34,6 +36,10 @@ public enum ControlFrame: Sendable, Equatable {
     /// Application-level liveness probe (paired with ``pong(nonce:)``).
     case ping(nonce: UInt32)
     case pong(nonce: UInt32)
+    /// Phone → Mac: begin screen streaming at the given frame rate.
+    case startVideo(fps: UInt8)
+    /// Phone → Mac: stop screen streaming.
+    case stopVideo
 
     var opcode: ControlOpcode {
         switch self {
@@ -42,6 +48,8 @@ public enum ControlFrame: Sendable, Equatable {
         case .error: .error
         case .ping: .ping
         case .pong: .pong
+        case .startVideo: .startVideo
+        case .stopVideo: .stopVideo
         }
     }
 }

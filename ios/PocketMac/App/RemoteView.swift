@@ -10,6 +10,7 @@ struct RemoteView: View {
     @State private var surface: Surface = .trackpad
 
     enum Surface: String, CaseIterable, Identifiable {
+        case screen = "Screen"
         case trackpad = "Trackpad"
         case deck = "Deck"
         var id: String { rawValue }
@@ -32,6 +33,8 @@ struct RemoteView: View {
 
                 Group {
                     switch surface {
+                    case .screen:
+                        ScreenModeView(connection: app.connection, connected: isSecured)
                     case .trackpad:
                         TrackpadPanel(sink: app.connection, connected: isSecured)
                     case .deck:

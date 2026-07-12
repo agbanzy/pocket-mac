@@ -127,6 +127,9 @@ private actor SessionRunner {
         self.actions = actions
     }
 
+    private var streamer: ScreenStreamer?
+    private var videoPump: Task<Void, Never>?
+
     func handle(_ frame: Frame) async {
         switch frame {
         case .input(let input):
@@ -140,9 +143,55 @@ private actor SessionRunner {
                 try? await session.send(.control(.error(code: .internalError, message: String(describing: error))))
             }
         case .control(let control):
-            if case .ping(let nonce) = control {
+            switch control {
+            case .ping(let nonce):
                 try? await session.send(.control(.pong(nonce: nonce)))
+            case .startVideo(let fps):
+                await startStreaming(fps: Int(fps))
+            case .stopVideo:
+                stopStreaming()
+            default:
+                break
             }
+        case .video:
+            break // the Mac is the video SOURCE — it never receives video
         }
     }
+
+    /// Starts screen capture and streams encoded frames to the phone. Chunks flow through a single
+    /// serialized pump so they arrive in order; the newest are kept under backpressure.
+    private func startStreaming(fps: Int) async {
+        guard streamer == nil else { return }
+        let session = self.session
+        let counter = VideoFrameCounter()
+        let (stream, continuation) = AsyncStream<VideoChunk>.makeStream(bufferingPolicy: .bufferingNewest(400))
+        videoPump = Task { for await chunk in stream { try? await session.send(.video(chunk)) } }
+
+        let streamer = ScreenStreamer(onEncodedFrame: { annexB, isKeyframe, width, height in
+            let id = counter.next()
+            for chunk in VideoChunk.chunk(frameID: id, annexB: annexB, isKeyframe: isKeyframe, width: width, height: height) {
+                continuation.yield(chunk)
+            }
+        })
+        do {
+            try await streamer.start(fps: fps)
+            self.streamer = streamer
+        } catch {
+            continuation.finish()
+            videoPump?.cancel(); videoPump = nil
+            try? await session.send(.control(.error(code: .internalError, message: "screen capture failed: \(error.localizedDescription)")))
+        }
+    }
+
+    private func stopStreaming() {
+        streamer?.stop(); streamer = nil
+        videoPump?.cancel(); videoPump = nil
+    }
+}
+
+/// Monotonic video frame id, incremented from the capture queue.
+final class VideoFrameCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var value: UInt32 = 0
+    func next() -> UInt32 { lock.lock(); defer { lock.unlock() }; value &+= 1; return value }
 }

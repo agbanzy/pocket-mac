@@ -72,6 +72,10 @@ public struct FrameCodec: FrameCoding {
             w.writeUInt32(nonce)
         case .pong(let nonce):
             w.writeUInt32(nonce)
+        case .startVideo(let fps):
+            w.writeUInt8(fps)
+        case .stopVideo:
+            break
         }
     }
 
@@ -169,6 +173,10 @@ public struct FrameCodec: FrameCoding {
             return .ping(nonce: try r.readUInt32())
         case .pong:
             return .pong(nonce: try r.readUInt32())
+        case .startVideo:
+            return .startVideo(fps: try r.readUInt8())
+        case .stopVideo:
+            return .stopVideo
         }
     }
 
