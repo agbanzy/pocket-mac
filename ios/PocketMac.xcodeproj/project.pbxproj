@@ -17,6 +17,7 @@
 		6919947C9553F5DD6252CA4D /* ScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 775257A500399D8CE25AD3DD /* ScreenView.swift */; };
 		7FE9C2D47D46AB394EB2D79C /* TrackpadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D77DDEAFFAF80151742F320 /* TrackpadView.swift */; };
 		89AC945D6789437BC50243C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A96A0DEA25E646502214759 /* Assets.xcassets */; };
+		8D6E0B42CC8A4DB6D0C96718 /* ScreenControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD18E4B291D81B6EAA320B7E /* ScreenControlView.swift */; };
 		9173CF42392CB0E907C5741C /* TileDeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9990E9C32D4200FF6487FDB1 /* TileDeckView.swift */; };
 		A8C756F9C4130DE6B9156D1A /* ConnectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D87C3B2DAE59397DC624539 /* ConnectionState.swift */; };
 		AFD9884C69663356C05F445F /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E3ADD8FB0975161B28BB6A7 /* QRScannerView.swift */; };
@@ -62,6 +63,7 @@
 		D9265D080B404F393707B776 /* PeerVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerVault.swift; sourceTree = "<group>"; };
 		DD48B282E057FA9D2920FBBE /* PathSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PathSelector.swift; sourceTree = "<group>"; };
 		E978B74A2FF0C3417BD4074C /* DeckStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckStore.swift; sourceTree = "<group>"; };
+		FD18E4B291D81B6EAA320B7E /* ScreenControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenControlView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -188,6 +190,7 @@
 		D8789CAC439697E2222EB7A6 /* Streaming */ = {
 			isa = PBXGroup;
 			children = (
+				FD18E4B291D81B6EAA320B7E /* ScreenControlView.swift */,
 				775257A500399D8CE25AD3DD /* ScreenView.swift */,
 			);
 			path = Streaming;
@@ -307,6 +310,7 @@
 				AFD9884C69663356C05F445F /* QRScannerView.swift in Sources */,
 				B37511E288B9F39E5A07880E /* RemoteView.swift in Sources */,
 				542A0C067612DC06E50C4523 /* RootView.swift in Sources */,
+				8D6E0B42CC8A4DB6D0C96718 /* ScreenControlView.swift in Sources */,
 				6919947C9553F5DD6252CA4D /* ScreenView.swift in Sources */,
 				9173CF42392CB0E907C5741C /* TileDeckView.swift in Sources */,
 				ECD786265C6896D31BFC3191 /* TileModel.swift in Sources */,
