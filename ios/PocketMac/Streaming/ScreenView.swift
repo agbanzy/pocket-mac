@@ -152,8 +152,6 @@ struct ScreenModeView: View {
                     .foregroundStyle(.white)
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .padding(.horizontal)
         .onAppear { if connected { connection.startVideo(fps: 30) } }
         .onDisappear {
             connection.stopVideo()
