@@ -2,12 +2,27 @@ import Foundation
 import CryptoKit
 import PocketMacKit
 
-/// Runs the Noise responder handshake over an inbound connection (LAN or relay — any ``Transport``),
-/// authorizes the peer, then drives a receive loop that turns decrypted frames into real input and
-/// actions. Two entry points: `accept` (fire-and-forget, for the many concurrent LAN connections)
-/// and `serve` (awaits the session's end, so the relay-reachability loop knows when to re-dial).
+/// Accepts one inbound connection: throttles handshake attempts, runs the Noise responder handshake
+/// (authorizing the peer), then drives a receive loop that turns decrypted frames into real input.
+///
+/// Tracks every live session by `PeerID` so ``terminate(_:)`` can cut off a peer's **active** session
+/// immediately on revocation — not just its future handshakes.
 actor SessionAccepter {
     private let handshake = NoisePatternHandshake()
+
+    private var nextID = 0
+    private var active: [Int: ActiveSession] = [:]
+
+    /// Throttle on handshake ATTEMPTS (distinct from the post-auth input `RateLimiter`): a floor
+    /// against SAS brute-force / connection floods. ~2 attempts/s sustained, burst 10 — far above any
+    /// legitimate reconnect rate, far below a useful brute-force rate.
+    private var handshakeLimiter = RateLimiter(capacity: 10, refillPerSecond: 2)
+
+    private struct ActiveSession {
+        let peerID: PeerID
+        let task: Task<Void, Never>
+        let transport: any Transport
+    }
 
     /// LAN: establish and launch the session's receive loop detached; returns the peer id (or nil).
     func accept(
@@ -18,13 +33,19 @@ actor SessionAccepter {
         translator: CGEventTranslator,
         actions: ActionExecutor
     ) async -> PeerID? {
+        guard handshakeLimiter.allow() else { transport.close(); return nil }
         guard let established = try? await establish(
             transport: transport, privateKeyData: privateKeyData, prologue: prologue,
             authorize: authorize, translator: translator, actions: actions) else {
             transport.close()
             return nil
         }
-        Task.detached { await established.run() }
+        let id = nextID; nextID += 1
+        let task = Task.detached { [weak self] in
+            await established.run()
+            await self?.deregister(id)
+        }
+        active[id] = ActiveSession(peerID: established.peerID, task: task, transport: transport)
         return established.peerID
     }
 
@@ -38,17 +59,37 @@ actor SessionAccepter {
         translator: CGEventTranslator,
         actions: ActionExecutor
     ) async {
+        guard handshakeLimiter.allow() else { transport.close(); return }
         guard let established = try? await establish(
             transport: transport, privateKeyData: privateKeyData, prologue: prologue,
             authorize: authorize, translator: translator, actions: actions) else {
             transport.close()
             return
         }
-        await established.run()
+        let id = nextID; nextID += 1
+        let task = Task { await established.run() }
+        active[id] = ActiveSession(peerID: established.peerID, task: task, transport: transport)
+        await task.value // inline — returns when the session ends or is terminated
+        active[id] = nil
+    }
+
+    /// Immediately cut off every active session for `peerID` (revocation). Cancels the receive loop
+    /// and closes the transport so an in-flight `receive()` unblocks at once.
+    func terminate(_ peerID: PeerID) {
+        for (id, session) in active where session.peerID == peerID {
+            session.task.cancel()
+            session.transport.close()
+            active[id] = nil
+        }
+    }
+
+    private func deregister(_ id: Int) {
+        active[id] = nil
     }
 
     private struct Established {
         let peerID: PeerID
+        let transport: any Transport
         let run: @Sendable () async -> Void
     }
 
@@ -66,7 +107,8 @@ actor SessionAccepter {
             over: transport, localStatic: privateKey, prologue: prologue, authorize: authorize)
         let session = SecureSession(transport: transport, channel: AEADChannel(keys: keys))
         let runner = SessionRunner(session: session, translator: translator, actions: actions)
-        return Established(peerID: keys.peerID, run: { await session.run(onFrame: { await runner.handle($0) }) })
+        return Established(peerID: keys.peerID, transport: transport,
+                           run: { await session.run(onFrame: { frame in await runner.handle(frame) }) })
     }
 }
 

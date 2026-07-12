@@ -31,21 +31,26 @@ final class RelayReachability: @unchecked Sendable {
     /// Starts (or restarts) a maintained responder rendezvous, keyed by `id` so it can be replaced or
     /// stopped later. `authorize` gates who may open the session; `prologue` binds the SAS during a
     /// pairing window (empty for an already-paired peer).
+    /// - Parameter continueWhile: checked at the top of each loop iteration. The pairing responder
+    ///   passes `{ gate.value }` so that once the pairing window closes (gate consumed or expired) it
+    ///   self-terminates AFTER its current session finishes — never cancelled mid-session. Per-peer
+    ///   reconnect responders pass `{ true }` to loop indefinitely.
     func startResponder(
         id: String,
         relayURL: URL,
         token: Data,
         prologue: Data,
         privateKeyData: Data,
+        continueWhile: @escaping @Sendable () -> Bool = { true },
         authorize: @escaping @Sendable (PeerID, Data) -> Bool
     ) {
         let task = Task { [accepter, translator, actions, backoff] in
-            while !Task.isCancelled {
+            while !Task.isCancelled && continueWhile() {
                 let transport = RelayTransport(relayURL: relayURL, rendezvousToken: token)
                 await accepter.serve(
                     transport: transport, privateKeyData: privateKeyData, prologue: prologue,
                     authorize: authorize, translator: translator, actions: actions)
-                if Task.isCancelled { break }
+                if Task.isCancelled || !continueWhile() { break }
                 try? await Task.sleep(for: backoff) // session ended / timed out — re-establish
             }
         }

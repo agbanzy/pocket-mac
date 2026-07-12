@@ -162,10 +162,11 @@ do {
         log("Connecting to the Mac THROUGH the relay at \(relayURL)…")
         let transport = RelayTransport(relayURL: relayURL, rendezvousToken: payload.rendezvousToken)
         try await transport.start()
-        // The relay path uses an empty prologue: Noise static-key auth carries it; SAS is a
-        // LAN-pairing defense confirmed out-of-band via the QR.
+        // Pairing over the relay binds the SAS into the prologue (same as LAN) — the hardened relay
+        // pairing responder now requires it. (A reconnect by an already-paired peer would use an
+        // empty prologue instead, carried by Noise static-key auth.)
         let keys = try await handshake.performInitiator(
-            over: transport, localStatic: privateKey, remoteStatic: macPublicKey, prologue: Data())
+            over: transport, localStatic: privateKey, remoteStatic: macPublicKey, prologue: payload.pairingPrologue)
         log("Secure session established OVER THE RELAY with \(keys.peerID.fingerprint)")
         try await driveAndReport(SecureSession(transport: transport, channel: AEADChannel(keys: keys)), over: "relay")
     } else {
