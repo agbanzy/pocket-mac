@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pocket Mac — control &amp; stream your Mac from your iPhone</title>
+<meta name="description" content="Control your Mac from your iPhone — trackpad, keyboard, action deck, and a full screen-streaming remote desktop — over WiFi or the internet via a zero-knowledge relay. No port-forwarding.">
+<style>
+  :root{
+    --bg:#0a0b12; --bg2:#111324; --card:#161930; --ink:#eef1ff; --muted:#9aa3c7;
+    --brand:#5b7cff; --brand2:#9a6bff; --accent:#3ddc97; --line:rgba(255,255,255,.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1200px 700px at 70% -10%,rgba(122,92,255,.18),transparent 60%),radial-gradient(900px 600px at 0% 10%,rgba(91,124,255,.15),transparent 55%),var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:14px;font-weight:600;text-decoration:none;transition:transform .15s ease,box-shadow .15s ease}
+  .btn:hover{transform:translateY(-2px)}
+  .btn-primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;box-shadow:0 10px 30px rgba(122,92,255,.35)}
+  .btn-ghost{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--ink)}
+  .btn-coffee{background:#ffdd00;color:#111}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(12px);background:rgba(10,11,18,.6);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.2px}
+  .brand .logo{width:34px;height:34px}
+  .nav-links{display:flex;gap:22px;align-items:center}
+  .nav-links a{color:var(--muted);text-decoration:none;font-size:14px}
+  .nav-links a:hover{color:var(--ink)}
+  @media(max-width:720px){.nav-links a:not(.btn){display:none}}
+
+  /* hero */
+  .hero{padding:84px 0 40px;text-align:center}
+  .hero .logo-big{width:104px;height:104px;filter:drop-shadow(0 18px 40px rgba(122,92,255,.45));animation:float 5s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  h1{font-size:clamp(38px,7vw,68px);line-height:1.03;margin:22px 0 10px;font-weight:800;letter-spacing:-1.5px}
+  .grad{background:linear-gradient(120deg,var(--brand),var(--brand2) 60%,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);font-size:clamp(17px,2.4vw,21px);max-width:640px;margin:0 auto 28px}
+  .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .pill{display:inline-block;margin-top:18px;font-size:13px;color:var(--muted);border:1px solid var(--line);padding:6px 14px;border-radius:999px}
+
+  /* reveal on scroll */
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  section{padding:56px 0}
+  h2{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-.5px;margin:0 0 8px}
+  .lead{color:var(--muted);max-width:640px;margin:0 0 30px}
+  .center{text-align:center;margin-inline:auto}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+  .card{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:18px;padding:22px}
+  .card .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(91,124,255,.14);margin-bottom:14px;font-size:20px}
+  .card h3{margin:0 0 6px;font-size:17px}
+  .card p{margin:0;color:var(--muted);font-size:14.5px}
+
+  /* steps */
+  .steps{counter-reset:s;display:grid;gap:14px}
+  .step{display:flex;gap:18px;align-items:flex-start;background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+  .step .n{counter-increment:s;flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+  .step .n::before{content:counter(s)}
+  .step h3{margin:2px 0 4px;font-size:17px}
+  .step p{margin:0;color:var(--muted);font-size:14.5px}
+
+  .security{background:linear-gradient(180deg,rgba(61,220,151,.06),transparent);border:1px solid rgba(61,220,151,.2);border-radius:20px;padding:30px}
+  .security h2{color:var(--accent)}
+  .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .chip{font-size:13px;color:var(--ink);border:1px solid var(--line);background:rgba(255,255,255,.03);padding:7px 13px;border-radius:999px}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;color:var(--muted);font-size:14px}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;align-items:center}
+  .footlinks{display:flex;gap:18px;flex-wrap:wrap}
+  .footlinks a{color:var(--muted);text-decoration:none}
+  .footlinks a:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<!-- Reusable logo -->
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#5b7cff"/><stop offset="1" stop-color="#9a6bff"/>
+  </linearGradient>
+  <symbol id="pm" viewBox="0 0 120 120">
+    <rect x="6" y="6" width="108" height="108" rx="28" fill="url(#g)"/>
+    <rect x="30" y="26" width="60" height="42" rx="6" fill="#fff"/>
+    <rect x="30" y="26" width="60" height="12" rx="6" fill="rgba(0,0,0,.12)"/>
+    <circle cx="37" cy="32" r="2.2" fill="#ff6b6b"/><circle cx="44" cy="32" r="2.2" fill="#ffd93d"/><circle cx="51" cy="32" r="2.2" fill="#6bcb77"/>
+    <rect x="46" y="70" width="28" height="30" rx="6" fill="#0a0b12" stroke="#fff" stroke-width="3"/>
+    <rect x="52" y="76" width="16" height="16" rx="2" fill="#fff"/>
+    <path d="M60 52 l14 10 -6 1 4 8 -4 2 -4 -8 -5 4 z" fill="url(#g)" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+  </symbol>
+</defs></svg>
+
+<nav><div class="wrap">
+  <div class="brand"><svg class="logo"><use href="#pm"/></svg> Pocket&nbsp;Mac</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#security">Security</a>
+    <a class="btn btn-ghost" href="https://github.com/agbanzy/pocket-mac" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <svg class="logo-big"><use href="#pm"/></svg>
+  <h1>Your Mac,<br><span class="grad">in your pocket.</span></h1>
+  <p class="sub">See and control your Mac from your iPhone — trackpad, keyboard, an action deck, and a full screen-streaming remote desktop. On WiFi, or anywhere over a zero-knowledge relay. No port-forwarding.</p>
+  <div class="cta">
+    <a class="btn btn-primary" href="#how">See how it works</a>
+    <a class="btn btn-ghost" href="https://github.com/agbanzy/pocket-mac" target="_blank" rel="noopener">★ Star on GitHub</a>
+  </div>
+  <div class="pill">iOS app — coming to the App Store · open source today</div>
+</div></header>
+
+<section id="features"><div class="wrap">
+  <h2 class="reveal">Everything you need to work remotely</h2>
+  <p class="lead reveal">One app. See the screen, operate it by touch, or use it as a precision remote.</p>
+  <div class="grid">
+    <div class="card reveal"><div class="ic">🖥️</div><h3>Live screen streaming</h3><p>H.264 video of your Mac, full-screen in landscape. Tap what you see to click it.</p></div>
+    <div class="card reveal"><div class="ic">👆</div><h3>Tap, drag, scroll, zoom</h3><p>Tap to click, hold-drag to move files, two-finger scroll, pinch to zoom, long-press to right-click.</p></div>
+    <div class="card reveal"><div class="ic">⌨️</div><h3>Keyboard &amp; trackpad</h3><p>A real trackpad with predicted touch, plus a pop-up keyboard that types straight to your Mac.</p></div>
+    <div class="card reveal"><div class="ic">🎛️</div><h3>Action deck</h3><p>One-tap tiles: launch apps, play/pause, volume, brightness, lock, run Shortcuts.</p></div>
+    <div class="card reveal"><div class="ic">🌍</div><h3>Works anywhere</h3><p>Same WiFi or across the internet — it switches paths automatically. Leave your Mac, work from anywhere.</p></div>
+    <div class="card reveal"><div class="ic">🔒</div><h3>End-to-end encrypted</h3><p>Noise IK + ChaCha20-Poly1305. The relay only ever sees ciphertext — never your screen or keystrokes.</p></div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <h2 class="reveal">Up and running in a minute</h2>
+  <p class="lead reveal">Pair once, then it just reconnects.</p>
+  <div class="steps">
+    <div class="step reveal"><div class="n"></div><div><h3>Install the helper on your Mac</h3><p>A tiny menu-bar app. Grant Accessibility (control) and Screen Recording (view) once.</p></div></div>
+    <div class="step reveal"><div class="n"></div><div><h3>Scan the QR with your iPhone</h3><p>A time-limited, single-use code pairs the two over an authenticated, encrypted channel.</p></div></div>
+    <div class="step reveal"><div class="n"></div><div><h3>See &amp; control your Mac</h3><p>Open the Screen tab, rotate to landscape, and operate your Mac by touch — apps, docs, email.</p></div></div>
+    <div class="step reveal"><div class="n"></div><div><h3>Leave — and keep working</h3><p>Off WiFi, it reconnects through the relay automatically. No VPN, no port-forwarding.</p></div></div>
+  </div>
+</div></section>
+
+<section id="security"><div class="wrap">
+  <div class="security reveal">
+    <h2>Zero-knowledge by design</h2>
+    <p class="lead" style="margin-bottom:0">Your Mac's screen and every keystroke are end-to-end encrypted between your devices. The relay that connects you when you're away blind-forwards ciphertext and can never read it.</p>
+    <div class="chips">
+      <span class="chip">Noise IK handshake</span>
+      <span class="chip">ChaCha20-Poly1305</span>
+      <span class="chip">X25519 device identity</span>
+      <span class="chip">Replay + tamper protection</span>
+      <span class="chip">Time-limited pairing</span>
+      <span class="chip">Instant revocation</span>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap center" style="text-align:center">
+  <h2 class="reveal">Free &amp; open source</h2>
+  <p class="lead center reveal">Built in the open. If it saves you a trip to your desk, you can buy me a coffee.</p>
+  <div class="cta reveal">
+    <a class="btn btn-ghost" href="https://github.com/agbanzy/pocket-mac" target="_blank" rel="noopener">View source on GitHub</a>
+    <a class="btn btn-coffee" href="https://www.buymeacoffee.com/agbanzy" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="brand"><svg class="logo"><use href="#pm"/></svg> Pocket Mac</div>
+  <div class="footlinks">
+    <a href="https://github.com/agbanzy/pocket-mac" target="_blank" rel="noopener">GitHub</a>
+    <a href="#features">Features</a>
+    <a href="#security">Security</a>
+    <span>© 2026 Innoedge Technologies</span>
+  </div>
+</div></footer>
+
+<script>
+  const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
+  document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(i%6*60)+'ms';io.observe(el)});
+</script>
+</body>
+</html>

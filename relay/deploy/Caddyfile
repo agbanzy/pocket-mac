@@ -1,0 +1,13 @@
+# Caddy config on the Pocket Mac droplet.
+# - the zero-knowledge relay (WSS) at the IP-as-hostname (no domain needed)
+# - the landing page at pocketpc.innoedgetech.com (add the DNS A record below and Caddy auto-issues TLS)
+
+165.227.155.134.sslip.io {
+	reverse_proxy localhost:8080
+}
+
+pocketpc.innoedgetech.com {
+	root * /var/www/pocketmac
+	file_server
+	encode gzip
+}
