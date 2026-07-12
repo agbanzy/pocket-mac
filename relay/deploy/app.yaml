@@ -1,0 +1,21 @@
+# DigitalOcean App Platform spec for the Pocket Mac zero-knowledge relay.
+# Deploy:  doctl apps create --spec relay/deploy/app.yaml
+# Update:  doctl apps update <app-id> --spec relay/deploy/app.yaml
+#
+# App Platform terminates TLS at its edge and forwards WebSocket traffic to the container on
+# http_port 8080, so clients get wss://<app>.ondigitalocean.app/ws with managed certs and no domain.
+name: pocketmac-relay
+region: fra                       # Frankfurt — closest App Platform region + matches the docufy DOCR
+services:
+  - name: relay
+    image:
+      registry_type: DOCR         # pulls from the account container registry (docufy)
+      repository: pocketmac-relay
+      tag: latest
+    http_port: 8080               # the relay binds :8080; App Platform sets PORT=8080
+    instance_size_slug: apps-s-1vcpu-0.5gb   # smallest basic instance (~$5/mo)
+    instance_count: 1
+    health_check:
+      http_path: /healthz
+      initial_delay_seconds: 5
+      period_seconds: 10

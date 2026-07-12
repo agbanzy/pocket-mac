@@ -36,10 +36,15 @@ without the grant. Grant it, then `./probe/.build/debug/PocketMacProbe --assert`
 - **Both transport paths proven** end-to-end against the real helper (`prove-remote.sh`,
   `relay-roundtrip.sh`). Cursor movement pends the Accessibility grant.
 
+## Deployed
+The zero-knowledge relay is **live** at `wss://165.227.155.134.sslip.io/ws` (DigitalOcean fra1,
+Caddy + Let's Encrypt TLS, no domain). A session has been proven **iPhone→internet→relay→Mac**
+end-to-end against it. See `relay/deploy/`. The iOS app defaults to this URL; the helper takes `--relay`.
+
 ## Remaining for v1.0 (phased in the plan)
-Deploy the relay to a droplet (`RelayTransport`/reachability are ready — it's a URL flip); seamless
-LAN↔relay path switching (`NWPathMonitor`); APNs push-to-wake + the opt-in keep-awake toggle; a
-hardening pass (red-sec, `TLSChannel` contingency, sliding-window replay).
+APNs push-to-wake + the opt-in keep-awake toggle (needs an APNs key); optional deeper hardening
+(`TLSChannel` contingency, sliding-window replay). The critical security pass (pairing-window
+auth-bypass, revoke-kills-session, handshake throttle) is **done** — see `docs/security-model.md`.
 
 ## Distribution note
 The Mac helper synthesizes global input and is an Accessibility client, which the App Sandbox

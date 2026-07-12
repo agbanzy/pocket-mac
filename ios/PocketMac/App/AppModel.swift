@@ -15,8 +15,11 @@ final class AppModel {
     let deck: DeckStore
     private let vault: PeerVault
 
-    /// UserDefaults key for the configured relay endpoint (set once the relay is deployed).
+    /// UserDefaults key for the configured relay endpoint (overrides the default below).
     static let relayURLDefaultsKey = "com.innoedge.pocketmac.relayURL"
+    /// The deployed zero-knowledge relay (DigitalOcean, Frankfurt, managed TLS via Caddy + sslip.io).
+    /// Used when no override is set in UserDefaults.
+    static let defaultRelayURL = "wss://165.227.155.134.sslip.io/ws"
 
     /// The currently paired Mac (nil until first pairing). Persisted in `PeerVault`.
     private(set) var pairedMac: PairedMac?
@@ -40,8 +43,8 @@ final class AppModel {
         self.vault = vault
         self.pairedMac = vault.load()
 
-        if let string = UserDefaults.standard.string(forKey: Self.relayURLDefaultsKey),
-           let url = URL(string: string) {
+        let relayURLString = UserDefaults.standard.string(forKey: Self.relayURLDefaultsKey) ?? Self.defaultRelayURL
+        if let url = URL(string: relayURLString) {
             pathCoordinator.relayURL = url
         }
     }
