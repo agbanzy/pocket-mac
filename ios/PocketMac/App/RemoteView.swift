@@ -10,6 +10,7 @@ struct RemoteView: View {
     @State private var surface: Surface = .trackpad
     @State private var keyboardActive = false
     @State private var lastScrollY: CGFloat = 0
+    @State private var floatExpanded = false
 
     enum Surface: String, CaseIterable, Identifiable {
         case screen = "Screen"
@@ -34,12 +35,16 @@ struct RemoteView: View {
         .background(surface == .screen && app.pairedMac != nil ? Color.black : Color(.systemGroupedBackground))
     }
 
-    /// The Screen tab: the Mac fills the whole phone (great in landscape), with a compact floating
-    /// toolbar to switch surfaces and see status.
+    /// The Screen tab: the Mac fills the whole phone (great in landscape), with an AssistiveTouch-style
+    /// draggable circular control (tap to expand into the switcher + keyboard + status).
     private var screenLayout: some View {
         ScreenModeView(connection: app.connection, connected: isSecured)
             .ignoresSafeArea()
-            .overlay(alignment: .top) { floatingBar }
+            .overlay {
+                FloatingControl(expanded: $floatExpanded, statusTint: app.connection.state.tint) {
+                    floatPanel
+                }
+            }
             .overlay(alignment: .trailing) { scrollStrip }
             .background(
                 // Hidden field: focusing it pops the iOS keyboard; keystrokes stream to the Mac.
@@ -49,27 +54,26 @@ struct RemoteView: View {
             .statusBarHidden()
     }
 
-    private var floatingBar: some View {
-        HStack(spacing: 10) {
+    /// The contents shown when the floating control is expanded (the FloatingControl supplies the card).
+    private var floatPanel: some View {
+        VStack(spacing: 12) {
             Picker("Surface", selection: $surface) {
                 ForEach(Surface.allCases) { Text($0.rawValue).tag($0) }
             }
             .pickerStyle(.segmented)
-            .frame(maxWidth: 220)
+            .frame(width: 240)
 
-            Button { keyboardActive.toggle() } label: {
-                Image(systemName: keyboardActive ? "keyboard.chevron.compact.down.fill" : "keyboard")
-            }
-            .foregroundStyle(keyboardActive ? Color.accentColor : .white)
-
-            Circle().fill(app.connection.state.tint).frame(width: 9, height: 9)
-            if let ms = app.connection.latencyMS {
-                Text("\(ms)ms").font(.caption2.monospacedDigit()).foregroundStyle(.white.opacity(0.75))
+            HStack(spacing: 16) {
+                Button { keyboardActive.toggle() } label: {
+                    Image(systemName: keyboardActive ? "keyboard.chevron.compact.down.fill" : "keyboard")
+                        .foregroundStyle(keyboardActive ? Color.accentColor : .white)
+                }
+                Circle().fill(app.connection.state.tint).frame(width: 9, height: 9)
+                if let ms = app.connection.latencyMS {
+                    Text("\(ms)ms").font(.caption2.monospacedDigit()).foregroundStyle(.white.opacity(0.75))
+                }
             }
         }
-        .padding(.horizontal, 12).padding(.vertical, 8)
-        .background(.ultraThinMaterial, in: Capsule())
-        .padding(.top, 8)
     }
 
     /// A dedicated scroll rail on the right edge — drag up/down to scroll the focused Mac app.

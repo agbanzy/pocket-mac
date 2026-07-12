@@ -12,6 +12,7 @@
 		2513C4BC8DF5F3DAA67AB89F /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B836ECC767145940FF2C3A5 /* AppModel.swift */; };
 		2BDD6FE8040E623219326BEE /* PairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FA340237D612A920068E70 /* PairingView.swift */; };
 		30AD97EC004358DCD1CDF30C /* PathCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1416906110668C0796C5B9F8 /* PathCoordinator.swift */; };
+		475A9C29E24CEA887DD5DC0D /* FloatingControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D914FFF7C006992F043F0C71 /* FloatingControl.swift */; };
 		4CDAC2743406CA7BEA584FC9 /* DiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F980FA9EB2DB69E6B81A41F /* DiscoveryView.swift */; };
 		542A0C067612DC06E50C4523 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BD77BF02746744738C2A56 /* RootView.swift */; };
 		6919947C9553F5DD6252CA4D /* ScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 775257A500399D8CE25AD3DD /* ScreenView.swift */; };
@@ -25,6 +26,7 @@
 		B37511E288B9F39E5A07880E /* RemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 891F863E670005C64955CB98 /* RemoteView.swift */; };
 		B5E66C47FE4E978517EE3F18 /* DiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7930D5D54304F1A77C3EEE4C /* DiscoveryService.swift */; };
 		B999C5F2FE17E82EA10ED498 /* PocketMacKit in Frameworks */ = {isa = PBXBuildFile; productRef = E0A9A6E4C386F355C5911668 /* PocketMacKit */; };
+		BB85A5849B6910ACD2031A3D /* CoffeeSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73674E7E710E3AE54AC1D8E9 /* CoffeeSheetView.swift */; };
 		BC1B271E2C709BC971731586 /* PathSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48B282E057FA9D2920FBBE /* PathSelector.swift */; };
 		D58805C3338BF0722C083F36 /* KeyboardBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D516F26C33E4A451CFCF1961 /* KeyboardBarView.swift */; };
 		E758E3FF1665E065C8CA34B3 /* IdentityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A75652219ECD2B22246C9E3 /* IdentityService.swift */; };
@@ -47,6 +49,7 @@
 		56693A542CF8CBCB8423E4FE /* PocketMacKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PocketMacKit; path = ../shared/PocketMacKit; sourceTree = SOURCE_ROOT; };
 		5A96A0DEA25E646502214759 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5D87C3B2DAE59397DC624539 /* ConnectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionState.swift; sourceTree = "<group>"; };
+		73674E7E710E3AE54AC1D8E9 /* CoffeeSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoffeeSheetView.swift; sourceTree = "<group>"; };
 		76A668B6F886B281AA354327 /* ConnectionChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionChip.swift; sourceTree = "<group>"; };
 		775257A500399D8CE25AD3DD /* ScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenView.swift; sourceTree = "<group>"; };
 		7930D5D54304F1A77C3EEE4C /* DiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryService.swift; sourceTree = "<group>"; };
@@ -60,6 +63,7 @@
 		C15038AA3068151AF20DFA86 /* TileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileModel.swift; sourceTree = "<group>"; };
 		C1AB17C4FD40DADBB8434FE6 /* TrackpadSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackpadSurface.swift; sourceTree = "<group>"; };
 		D516F26C33E4A451CFCF1961 /* KeyboardBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardBarView.swift; sourceTree = "<group>"; };
+		D914FFF7C006992F043F0C71 /* FloatingControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingControl.swift; sourceTree = "<group>"; };
 		D9265D080B404F393707B776 /* PeerVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerVault.swift; sourceTree = "<group>"; };
 		DD48B282E057FA9D2920FBBE /* PathSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PathSelector.swift; sourceTree = "<group>"; };
 		E978B74A2FF0C3417BD4074C /* DeckStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckStore.swift; sourceTree = "<group>"; };
@@ -171,6 +175,7 @@
 			isa = PBXGroup;
 			children = (
 				4B836ECC767145940FF2C3A5 /* AppModel.swift */,
+				73674E7E710E3AE54AC1D8E9 /* CoffeeSheetView.swift */,
 				9635B689A95B7FD18E9CE39C /* PocketMacApp.swift */,
 				891F863E670005C64955CB98 /* RemoteView.swift */,
 				30BD77BF02746744738C2A56 /* RootView.swift */,
@@ -190,6 +195,7 @@
 		D8789CAC439697E2222EB7A6 /* Streaming */ = {
 			isa = PBXGroup;
 			children = (
+				D914FFF7C006992F043F0C71 /* FloatingControl.swift */,
 				FD18E4B291D81B6EAA320B7E /* ScreenControlView.swift */,
 				775257A500399D8CE25AD3DD /* ScreenView.swift */,
 			);
@@ -293,12 +299,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				2513C4BC8DF5F3DAA67AB89F /* AppModel.swift in Sources */,
+				BB85A5849B6910ACD2031A3D /* CoffeeSheetView.swift in Sources */,
 				E7F0D8066C4721EADD28578B /* ConnectionChip.swift in Sources */,
 				EBD2D6F6AB66B30CF4657C78 /* ConnectionController.swift in Sources */,
 				A8C756F9C4130DE6B9156D1A /* ConnectionState.swift in Sources */,
 				1F41CBBD8C020D6E8C2149FD /* DeckStore.swift in Sources */,
 				B5E66C47FE4E978517EE3F18 /* DiscoveryService.swift in Sources */,
 				4CDAC2743406CA7BEA584FC9 /* DiscoveryView.swift in Sources */,
+				475A9C29E24CEA887DD5DC0D /* FloatingControl.swift in Sources */,
 				01C497B4E8FCB21BF14DD39A /* HapticsEngine.swift in Sources */,
 				E758E3FF1665E065C8CA34B3 /* IdentityService.swift in Sources */,
 				D58805C3338BF0722C083F36 /* KeyboardBarView.swift in Sources */,

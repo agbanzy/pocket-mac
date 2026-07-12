@@ -30,6 +30,11 @@ final class AppModel {
     /// Set when a `pocketmac://pair?…` deep link arrives, to raise the pairing sheet.
     var showPairingSheet = false
 
+    /// Raised once, after the 5th successful session, to invite an open-source coffee tip.
+    var showCoffeeSheet = false
+    private static let useCountKey = "com.innoedge.pocketmac.useCount"
+    private static let coffeeShownKey = "com.innoedge.pocketmac.coffeeShown"
+
     init() {
         let identity = IdentityService()
         self.identity = identity
@@ -53,6 +58,18 @@ final class AppModel {
     func start() {
         if let mac = pairedMac {
             pathCoordinator.enable(for: mac)
+        }
+    }
+
+    /// Counts a successful session; on the 5th, raises the coffee sheet once (then never again).
+    func recordUse() {
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: Self.coffeeShownKey) else { return }
+        let count = defaults.integer(forKey: Self.useCountKey) + 1
+        defaults.set(count, forKey: Self.useCountKey)
+        if count >= 5 {
+            showCoffeeSheet = true
+            defaults.set(true, forKey: Self.coffeeShownKey)
         }
     }
 

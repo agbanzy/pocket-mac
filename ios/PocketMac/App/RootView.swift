@@ -34,10 +34,14 @@ struct RootView: View {
         .sheet(isPresented: $showDevices) { DiscoveryView() }
         .sheet(isPresented: $showPairing) { PairingView() }
         .sheet(isPresented: $app.showPairingSheet) { PairingView() }
+        .sheet(isPresented: $app.showCoffeeSheet) { CoffeeSheetView() }
         .tint(.accentColor)
         .onAppear { app.start() }
         .onChange(of: app.discovery.services) { _, _ in
             app.pathCoordinator.discoveryChanged() // LAN service appeared/vanished → re-select path
+        }
+        .onChange(of: app.connection.state.isSecured) { _, secured in
+            if secured { app.recordUse() } // count a real session; coffee nudge on the 5th
         }
     }
 }
