@@ -71,10 +71,15 @@ final class HelperModel {
         #endif
     }
 
+    /// The deployed zero-knowledge relay, so a double-clicked helper is reachable off-LAN by default.
+    static let defaultRelayURL = "wss://165.227.155.134.sslip.io/ws"
+
     private func parseRelayURL() {
         let args = CommandLine.arguments
         if let i = args.firstIndex(of: "--relay"), i + 1 < args.count, let url = URL(string: args[i + 1]) {
-            relayURL = url
+            relayURL = url // explicit override (used by the proof scripts)
+        } else {
+            relayURL = URL(string: Self.defaultRelayURL)
         }
     }
 
