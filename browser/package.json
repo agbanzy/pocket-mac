@@ -1,0 +1,25 @@
+{
+  "name": "pocketmac-browser",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Browser client for Pocket Mac — control your Mac from any Chrome/Edge browser over the zero-knowledge relay. Mirrors the iOS client's Noise IK handshake, AEAD record layer, wire codec, and H.264 screen decode.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "serve": "node proxy.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@noble/ciphers": "^1.2.1",
+    "@noble/curves": "^1.8.1",
+    "@noble/hashes": "^1.7.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vite": "^6.0.11",
+    "vitest": "^3.0.5"
+  }
+}

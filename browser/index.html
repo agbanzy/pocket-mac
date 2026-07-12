@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Pocket Mac — control your Mac from any browser</title>
+    <meta
+      name="description"
+      content="Control your Mac from any Chrome or Edge browser over an end-to-end encrypted, zero-knowledge relay. Same Noise IK handshake as the iOS app."
+    />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='26' fill='%237a74ff'/%3E%3Crect x='30' y='26' width='60' height='42' rx='6' fill='white'/%3E%3Crect x='46' y='70' width='28' height='30' rx='6' fill='%230a0b12' stroke='white' stroke-width='3'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <!-- Pairing / disconnected view -->
+    <main id="pairing" class="panel">
+      <div class="card">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"></div>
+          <div>
+            <h1>Pocket Mac</h1>
+            <p class="tag">Control your Mac from this browser — end-to-end encrypted.</p>
+          </div>
+        </div>
+
+        <ol class="steps">
+          <li>Open <strong>Pocket Mac</strong> on your Mac and choose <strong>Pair a browser</strong>.</li>
+          <li>Copy the <code>pocketmac://pair…</code> link it shows and paste it below.</li>
+          <li>Confirm the 6-digit code matches on both ends.</li>
+        </ol>
+
+        <label class="field">
+          <span>Pairing link</span>
+          <textarea id="pair-input" rows="3" placeholder="pocketmac://pair?v=1&pk=…&n=…&rt=…&sas=123456" spellcheck="false"></textarea>
+        </label>
+
+        <details class="advanced">
+          <summary>Advanced</summary>
+          <label class="field">
+            <span>Relay endpoint</span>
+            <input id="relay-input" type="text" spellcheck="false" />
+          </label>
+        </details>
+
+        <div id="pair-error" class="error" role="alert" hidden></div>
+
+        <button id="pair-btn" class="primary">Pair &amp; Connect</button>
+
+        <div class="foot">
+          <span class="fp">This browser: <code id="fingerprint">…</code></span>
+          <button id="reset-btn" class="link">Reset identity</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Live screen view -->
+    <div id="stage" class="stage" hidden>
+      <canvas id="screen"></canvas>
+      <div id="bar" class="bar">
+        <span class="dot" id="dot"></span>
+        <span id="peer" class="peer">Connecting…</span>
+        <span id="latency" class="latency"></span>
+        <span class="spacer"></span>
+        <button id="fs-btn" class="ghost" title="Fullscreen">⛶</button>
+        <button id="disconnect-btn" class="ghost">Disconnect</button>
+      </div>
+      <div id="hint" class="hint">Click the screen to take control · type to send keys · right-click and scroll work</div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
