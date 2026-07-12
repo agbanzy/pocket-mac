@@ -146,14 +146,13 @@ final class ConnectionController: InputSink {
     }
 
     private func startReceiveLoop(session: SecureSession) {
-        // The onFrame/onError closures run inside the session actor's domain, so each captures a
-        // fresh weak self and hops back to the main actor.
-        receiveTask = Task {
+        // Frame-level errors are ignored — a single undecodable frame must NOT drop a good session.
+        // session.run() returns only when the transport itself dies; that is the real disconnect.
+        receiveTask = Task { [weak self] in
             await session.run(onFrame: { [weak self] frame in
                 await self?.handle(frame)
-            }, onError: { [weak self] error in
-                await self?.linkFailed(error)
-            })
+            }, onError: { _ in })
+            await self?.linkFailed(TransportError.closed)
         }
     }
 

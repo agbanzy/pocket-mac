@@ -27,6 +27,7 @@ final class PathCoordinator {
     private let discovery: DiscoveryService
     private var monitor: NWPathMonitor?
     private var monitorTask: Task<Void, Never>?
+    private var reconnectTask: Task<Void, Never>?
     private var currentMac: PairedMac?
     private var reselecting = false
 
@@ -42,16 +43,29 @@ final class PathCoordinator {
         connection.relayURL = relayURL
         discovery.start()
         startPathMonitor()
-        Task { await reselect() }
+        startReconnectLoop()
     }
 
     func disable() {
         isEnabled = false
         currentMac = nil
+        reconnectTask?.cancel(); reconnectTask = nil
         monitorTask?.cancel(); monitorTask = nil
         monitor?.cancel(); monitor = nil
         discovery.stop()
         connection.disconnect()
+    }
+
+    /// Keeps a session up: while not secured, retries the best path every few seconds; once secured,
+    /// leaves it completely alone. This is what makes it "just stay connected" without churn.
+    private func startReconnectLoop() {
+        reconnectTask?.cancel()
+        reconnectTask = Task { [weak self] in
+            while !Task.isCancelled {
+                await self?.reselect()
+                try? await Task.sleep(for: .seconds(3))
+            }
+        }
     }
 
     /// Call when the discovered-services list changes (from the view observing `DiscoveryService`).
