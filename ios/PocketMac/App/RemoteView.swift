@@ -8,6 +8,8 @@ struct RemoteView: View {
     @Environment(AppModel.self) private var app
     @Binding var showDevices: Bool
     @State private var surface: Surface = .trackpad
+    @State private var keyboardActive = false
+    @State private var lastScrollY: CGFloat = 0
 
     enum Surface: String, CaseIterable, Identifiable {
         case screen = "Screen"
@@ -38,6 +40,12 @@ struct RemoteView: View {
         ScreenModeView(connection: app.connection, connected: isSecured)
             .ignoresSafeArea()
             .overlay(alignment: .top) { floatingBar }
+            .overlay(alignment: .trailing) { scrollStrip }
+            .background(
+                // Hidden field: focusing it pops the iOS keyboard; keystrokes stream to the Mac.
+                HiddenKeyboardField(isActive: $keyboardActive) { app.connection.send($0) }
+                    .frame(width: 1, height: 1).opacity(0.01)
+            )
             .statusBarHidden()
     }
 
@@ -47,7 +55,12 @@ struct RemoteView: View {
                 ForEach(Surface.allCases) { Text($0.rawValue).tag($0) }
             }
             .pickerStyle(.segmented)
-            .frame(maxWidth: 260)
+            .frame(maxWidth: 220)
+
+            Button { keyboardActive.toggle() } label: {
+                Image(systemName: keyboardActive ? "keyboard.chevron.compact.down.fill" : "keyboard")
+            }
+            .foregroundStyle(keyboardActive ? Color.accentColor : .white)
 
             Circle().fill(app.connection.state.tint).frame(width: 9, height: 9)
             if let ms = app.connection.latencyMS {
@@ -57,6 +70,26 @@ struct RemoteView: View {
         .padding(.horizontal, 12).padding(.vertical, 8)
         .background(.ultraThinMaterial, in: Capsule())
         .padding(.top, 8)
+    }
+
+    /// A dedicated scroll rail on the right edge — drag up/down to scroll the focused Mac app.
+    private var scrollStrip: some View {
+        RoundedRectangle(cornerRadius: 5)
+            .fill(.ultraThinMaterial)
+            .frame(width: 30)
+            .overlay(Image(systemName: "arrow.up.arrow.down").font(.caption2).foregroundStyle(.white.opacity(0.6)))
+            .padding(.vertical, 70)
+            .padding(.trailing, 4)
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        let delta = value.translation.height - lastScrollY
+                        lastScrollY = value.translation.height
+                        let dy = Int16(clamping: Int(delta * 2))
+                        if dy != 0 { app.connection.send(.input(.scroll(dx: 0, dy: dy))) }
+                    }
+                    .onEnded { _ in lastScrollY = 0 }
+            )
     }
 
     private var controlLayout: some View {

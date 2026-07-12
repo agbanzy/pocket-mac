@@ -16,6 +16,8 @@ final class ScreenControlView: UIView, UIGestureRecognizerDelegate {
 
     private var zoomScale: CGFloat = 1
     private var panOffset: CGPoint = .zero
+    private var holdDidMove = false
+    private var holdDownSent = false
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -104,17 +106,27 @@ final class ScreenControlView: UIView, UIGestureRecognizerDelegate {
         clampOffset(); applyZoom()
     }
 
+    /// Hold still and release → right-click. Hold then drag → click-drag (move windows, drag files).
     @objc private func onHoldDrag(_ g: UILongPressGestureRecognizer) {
         guard let n = normalized(g.location(in: self)) else { return }
         switch g.state {
         case .began:
+            holdDidMove = false
+            holdDownSent = false
             send?(.input(.mouseMoveAbsolute(x: n.0, y: n.1)))
-            send?(.input(.mouseDown(.left)))
         case .changed:
+            if !holdDidMove { // first movement → this is a drag: press the button now
+                holdDidMove = true
+                holdDownSent = true
+                send?(.input(.mouseDown(.left)))
+            }
             send?(.input(.mouseMoveAbsolute(x: n.0, y: n.1)))
         case .ended, .cancelled, .failed:
-            send?(.input(.mouseMoveAbsolute(x: n.0, y: n.1)))
-            send?(.input(.mouseUp(.left)))
+            if holdDownSent {
+                send?(.input(.mouseUp(.left)))                       // finished a drag
+            } else {
+                send?(.input(.mouseClick(button: .right, count: 1))) // stationary hold → right-click
+            }
         default:
             break
         }
