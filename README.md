@@ -1,8 +1,11 @@
 # Pocket Mac
 
-Control your Mac from your iPhone — trackpad, keyboard, media keys, and a customizable grid of
-one-tap action tiles — on the same WiFi and (v1.0) over the internet, through a zero-knowledge
-relay. **No screen streaming**: a fast, secure control channel, not a remote desktop.
+See and control your Mac from your iPhone or any Chrome/Edge browser — **live screen streaming** with
+tap-to-click, keyboard, trackpad, and a customizable grid of one-tap action tiles — on the same WiFi
+or anywhere over the internet, through a zero-knowledge relay. No port-forwarding.
+
+**Download:** [Mac helper (notarized .dmg)](https://github.com/agbanzy/pocket-mac/releases/latest) ·
+[Web client](https://pocketpc.innoedgetech.com/app) · iPhone app coming to the App Store.
 
 ## Layout
 | Path | What |

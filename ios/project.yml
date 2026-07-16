@@ -2,7 +2,7 @@ name: PocketMac
 options:
   bundleIdPrefix: com.innoedge
   deploymentTarget:
-    iOS: "26.5"
+    iOS: "18.0"
   createIntermediateGroups: true
   groupSortPosition: top
   generateEmptyDirectories: false
@@ -15,7 +15,7 @@ targets:
   PocketMacApp:
     type: application
     platform: iOS
-    deploymentTarget: "26.5"
+    deploymentTarget: "18.0"
     sources:
       - path: PocketMac
     dependencies:
@@ -26,13 +26,13 @@ targets:
         PRODUCT_NAME: PocketMac
         PRODUCT_BUNDLE_IDENTIFIER: com.innoedge.pocketmac
         MARKETING_VERSION: "1.0.0"
-        CURRENT_PROJECT_VERSION: "1"
+        CURRENT_PROJECT_VERSION: "2"
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: PocketMac/Resources/Info.plist
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
         TARGETED_DEVICE_FAMILY: "1"
-        IPHONEOS_DEPLOYMENT_TARGET: "26.5"
+        IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         ENABLE_PREVIEWS: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
