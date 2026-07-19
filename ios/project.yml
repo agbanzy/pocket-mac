@@ -26,7 +26,7 @@ targets:
         PRODUCT_NAME: PocketMac
         PRODUCT_BUNDLE_IDENTIFIER: com.innoedge.pocketmac
         MARKETING_VERSION: "1.0.0"
-        CURRENT_PROJECT_VERSION: "2"
+        CURRENT_PROJECT_VERSION: "4"
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: PocketMac/Resources/Info.plist
         SWIFT_VERSION: "6.0"
@@ -41,3 +41,15 @@ targets:
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: 7T7BJT2AU7
         CODE_SIGN_IDENTITY: "Apple Development"
+
+schemes:
+  PocketMacApp:
+    build:
+      targets:
+        PocketMacApp: all
+    run:
+      config: Debug
+    profile:
+      config: Release
+    archive:
+      config: Release

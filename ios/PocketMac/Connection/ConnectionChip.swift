@@ -53,7 +53,7 @@ struct ConnectionChip: View {
 
     private var secondaryText: String? {
         switch state {
-        case .secured: path.map { "Encrypted · \($0.rawValue)" } ?? "Encrypted session"
+        case .secured: path.map { "\($0.shortLabel) · encrypted" } ?? "Encrypted session"
         case .offline(let reason): reason
         case .connecting: "Handshaking…"
         case .discovering: "Looking for your Mac"

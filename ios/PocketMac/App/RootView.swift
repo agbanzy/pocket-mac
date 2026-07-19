@@ -5,6 +5,7 @@ struct RootView: View {
     @Environment(AppModel.self) private var app
     @State private var showDevices = false
     @State private var showPairing = false
+    @State private var showSettings = false
 
     var body: some View {
         @Bindable var app = app
@@ -29,10 +30,19 @@ struct RootView: View {
                         }
                         .accessibilityLabel("Pair")
                     }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showSettings = true
+                        } label: {
+                            Image(systemName: "gearshape")
+                        }
+                        .accessibilityLabel("Settings")
+                    }
                 }
         }
         .sheet(isPresented: $showDevices) { DiscoveryView() }
         .sheet(isPresented: $showPairing) { PairingView() }
+        .sheet(isPresented: $showSettings) { SettingsView() }
         .sheet(isPresented: $app.showPairingSheet) { PairingView() }
         .sheet(isPresented: $app.showCoffeeSheet) { CoffeeSheetView() }
         .tint(.accentColor)

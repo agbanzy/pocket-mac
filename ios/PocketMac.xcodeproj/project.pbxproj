@@ -10,6 +10,7 @@
 		01C497B4E8FCB21BF14DD39A /* HapticsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB072B97E6357838EE10A1F1 /* HapticsEngine.swift */; };
 		1F41CBBD8C020D6E8C2149FD /* DeckStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E978B74A2FF0C3417BD4074C /* DeckStore.swift */; };
 		2513C4BC8DF5F3DAA67AB89F /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B836ECC767145940FF2C3A5 /* AppModel.swift */; };
+		2861E20C812D180E12CF09F3 /* ConnectionPath+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A055DD49F121D535C84CAF0 /* ConnectionPath+UI.swift */; };
 		2BDD6FE8040E623219326BEE /* PairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FA340237D612A920068E70 /* PairingView.swift */; };
 		30AD97EC004358DCD1CDF30C /* PathCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1416906110668C0796C5B9F8 /* PathCoordinator.swift */; };
 		475A9C29E24CEA887DD5DC0D /* FloatingControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D914FFF7C006992F043F0C71 /* FloatingControl.swift */; };
@@ -18,8 +19,11 @@
 		6919947C9553F5DD6252CA4D /* ScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 775257A500399D8CE25AD3DD /* ScreenView.swift */; };
 		7FE9C2D47D46AB394EB2D79C /* TrackpadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D77DDEAFFAF80151742F320 /* TrackpadView.swift */; };
 		89AC945D6789437BC50243C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A96A0DEA25E646502214759 /* Assets.xcassets */; };
+		8C9F71C215D556F71E23FA63 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DEED855216805B6A5B97418E /* PrivacyInfo.xcprivacy */; };
 		8D6E0B42CC8A4DB6D0C96718 /* ScreenControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD18E4B291D81B6EAA320B7E /* ScreenControlView.swift */; };
+		8F707A66A24F9EFECBFCB0BB /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151A9615DF5967F2E02E4FCA /* Components.swift */; };
 		9173CF42392CB0E907C5741C /* TileDeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9990E9C32D4200FF6487FDB1 /* TileDeckView.swift */; };
+		920E6A9970187345681DDD7D /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67315C798F9966398EC0A54C /* Typography.swift */; };
 		A8C756F9C4130DE6B9156D1A /* ConnectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D87C3B2DAE59397DC624539 /* ConnectionState.swift */; };
 		AFD9884C69663356C05F445F /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E3ADD8FB0975161B28BB6A7 /* QRScannerView.swift */; };
 		AFE5D5CFB3CB431F24A9084E /* PocketMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9635B689A95B7FD18E9CE39C /* PocketMacApp.swift */; };
@@ -28,7 +32,9 @@
 		B999C5F2FE17E82EA10ED498 /* PocketMacKit in Frameworks */ = {isa = PBXBuildFile; productRef = E0A9A6E4C386F355C5911668 /* PocketMacKit */; };
 		BB85A5849B6910ACD2031A3D /* CoffeeSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73674E7E710E3AE54AC1D8E9 /* CoffeeSheetView.swift */; };
 		BC1B271E2C709BC971731586 /* PathSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48B282E057FA9D2920FBBE /* PathSelector.swift */; };
+		C0686C811130FD198B30740D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4B8DB14DEFEAAD0930226E2 /* Theme.swift */; };
 		D58805C3338BF0722C083F36 /* KeyboardBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D516F26C33E4A451CFCF1961 /* KeyboardBarView.swift */; };
+		DDB1748D2F62553A1395DBDC /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E237E409CEDA62A800BFF456 /* SettingsView.swift */; };
 		E758E3FF1665E065C8CA34B3 /* IdentityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A75652219ECD2B22246C9E3 /* IdentityService.swift */; };
 		E7F0D8066C4721EADD28578B /* ConnectionChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76A668B6F886B281AA354327 /* ConnectionChip.swift */; };
 		EBD2D6F6AB66B30CF4657C78 /* ConnectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6369A285FBD6A7AF30BE26 /* ConnectionController.swift */; };
@@ -40,6 +46,7 @@
 /* Begin PBXFileReference section */
 		0E6369A285FBD6A7AF30BE26 /* ConnectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionController.swift; sourceTree = "<group>"; };
 		1416906110668C0796C5B9F8 /* PathCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PathCoordinator.swift; sourceTree = "<group>"; };
+		151A9615DF5967F2E02E4FCA /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		2D77DDEAFFAF80151742F320 /* TrackpadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackpadView.swift; sourceTree = "<group>"; };
 		30BD77BF02746744738C2A56 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		40FA340237D612A920068E70 /* PairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingView.swift; sourceTree = "<group>"; };
@@ -49,15 +56,18 @@
 		56693A542CF8CBCB8423E4FE /* PocketMacKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PocketMacKit; path = ../shared/PocketMacKit; sourceTree = SOURCE_ROOT; };
 		5A96A0DEA25E646502214759 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5D87C3B2DAE59397DC624539 /* ConnectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionState.swift; sourceTree = "<group>"; };
+		67315C798F9966398EC0A54C /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		73674E7E710E3AE54AC1D8E9 /* CoffeeSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoffeeSheetView.swift; sourceTree = "<group>"; };
 		76A668B6F886B281AA354327 /* ConnectionChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionChip.swift; sourceTree = "<group>"; };
 		775257A500399D8CE25AD3DD /* ScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenView.swift; sourceTree = "<group>"; };
 		7930D5D54304F1A77C3EEE4C /* DiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryService.swift; sourceTree = "<group>"; };
 		80EA1B2F695F7BD8E3E1484F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		891F863E670005C64955CB98 /* RemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteView.swift; sourceTree = "<group>"; };
+		8A055DD49F121D535C84CAF0 /* ConnectionPath+UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ConnectionPath+UI.swift"; sourceTree = "<group>"; };
 		8F980FA9EB2DB69E6B81A41F /* DiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryView.swift; sourceTree = "<group>"; };
 		9635B689A95B7FD18E9CE39C /* PocketMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PocketMacApp.swift; sourceTree = "<group>"; };
 		9990E9C32D4200FF6487FDB1 /* TileDeckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileDeckView.swift; sourceTree = "<group>"; };
+		A4B8DB14DEFEAAD0930226E2 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		B8BBECE0B127B85F5C9FB9B2 /* PocketMacApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PocketMacApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB072B97E6357838EE10A1F1 /* HapticsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsEngine.swift; sourceTree = "<group>"; };
 		C15038AA3068151AF20DFA86 /* TileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileModel.swift; sourceTree = "<group>"; };
@@ -66,6 +76,8 @@
 		D914FFF7C006992F043F0C71 /* FloatingControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingControl.swift; sourceTree = "<group>"; };
 		D9265D080B404F393707B776 /* PeerVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerVault.swift; sourceTree = "<group>"; };
 		DD48B282E057FA9D2920FBBE /* PathSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PathSelector.swift; sourceTree = "<group>"; };
+		DEED855216805B6A5B97418E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		E237E409CEDA62A800BFF456 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		E978B74A2FF0C3417BD4074C /* DeckStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckStore.swift; sourceTree = "<group>"; };
 		FD18E4B291D81B6EAA320B7E /* ScreenControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenControlView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -105,11 +117,13 @@
 				C3F4AB1D226EAFD6FC40B089 /* App */,
 				F36D807C2BC296971A758E5F /* Connection */,
 				9582BD4AC98397458F77C601 /* Deck */,
+				7F86FDE6BC4AF69F9BA03E19 /* DesignSystem */,
 				D0B14DE182B9ADBE28D5734C /* Discovery */,
 				3D888833B96387E20F295927 /* Identity */,
 				E1690A60ED2410DAFDC7083A /* Keyboard */,
 				5F80F74D2D793863C433D8FF /* Pairing */,
 				35F0A0515D71639D1CAB81BC /* Resources */,
+				FA6ECBDD81ACB5FA96523161 /* Settings */,
 				D8789CAC439697E2222EB7A6 /* Streaming */,
 				3EB230F06283F1A2CE5EF6CF /* Trackpad */,
 			);
@@ -121,6 +135,7 @@
 			children = (
 				5A96A0DEA25E646502214759 /* Assets.xcassets */,
 				80EA1B2F695F7BD8E3E1484F /* Info.plist */,
+				DEED855216805B6A5B97418E /* PrivacyInfo.xcprivacy */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -159,6 +174,16 @@
 				4E3ADD8FB0975161B28BB6A7 /* QRScannerView.swift */,
 			);
 			path = Pairing;
+			sourceTree = "<group>";
+		};
+		7F86FDE6BC4AF69F9BA03E19 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				151A9615DF5967F2E02E4FCA /* Components.swift */,
+				A4B8DB14DEFEAAD0930226E2 /* Theme.swift */,
+				67315C798F9966398EC0A54C /* Typography.swift */,
+			);
+			path = DesignSystem;
 			sourceTree = "<group>";
 		};
 		9582BD4AC98397458F77C601 /* Deck */ = {
@@ -215,11 +240,20 @@
 			children = (
 				76A668B6F886B281AA354327 /* ConnectionChip.swift */,
 				0E6369A285FBD6A7AF30BE26 /* ConnectionController.swift */,
+				8A055DD49F121D535C84CAF0 /* ConnectionPath+UI.swift */,
 				5D87C3B2DAE59397DC624539 /* ConnectionState.swift */,
 				1416906110668C0796C5B9F8 /* PathCoordinator.swift */,
 				DD48B282E057FA9D2920FBBE /* PathSelector.swift */,
 			);
 			path = Connection;
+			sourceTree = "<group>";
+		};
+		FA6ECBDD81ACB5FA96523161 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				E237E409CEDA62A800BFF456 /* SettingsView.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -288,6 +322,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				89AC945D6789437BC50243C2 /* Assets.xcassets in Resources */,
+				8C9F71C215D556F71E23FA63 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,8 +335,10 @@
 			files = (
 				2513C4BC8DF5F3DAA67AB89F /* AppModel.swift in Sources */,
 				BB85A5849B6910ACD2031A3D /* CoffeeSheetView.swift in Sources */,
+				8F707A66A24F9EFECBFCB0BB /* Components.swift in Sources */,
 				E7F0D8066C4721EADD28578B /* ConnectionChip.swift in Sources */,
 				EBD2D6F6AB66B30CF4657C78 /* ConnectionController.swift in Sources */,
+				2861E20C812D180E12CF09F3 /* ConnectionPath+UI.swift in Sources */,
 				A8C756F9C4130DE6B9156D1A /* ConnectionState.swift in Sources */,
 				1F41CBBD8C020D6E8C2149FD /* DeckStore.swift in Sources */,
 				B5E66C47FE4E978517EE3F18 /* DiscoveryService.swift in Sources */,
@@ -320,10 +357,13 @@
 				542A0C067612DC06E50C4523 /* RootView.swift in Sources */,
 				8D6E0B42CC8A4DB6D0C96718 /* ScreenControlView.swift in Sources */,
 				6919947C9553F5DD6252CA4D /* ScreenView.swift in Sources */,
+				DDB1748D2F62553A1395DBDC /* SettingsView.swift in Sources */,
+				C0686C811130FD198B30740D /* Theme.swift in Sources */,
 				9173CF42392CB0E907C5741C /* TileDeckView.swift in Sources */,
 				ECD786265C6896D31BFC3191 /* TileModel.swift in Sources */,
 				EE5C4B292AFB868E0A4CBF33 /* TrackpadSurface.swift in Sources */,
 				7FE9C2D47D46AB394EB2D79C /* TrackpadView.swift in Sources */,
+				920E6A9970187345681DDD7D /* Typography.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -337,12 +377,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 7T7BJT2AU7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PocketMac/Resources/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -364,12 +404,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 7T7BJT2AU7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PocketMac/Resources/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -429,7 +469,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -491,7 +531,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
