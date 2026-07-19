@@ -129,6 +129,8 @@ private actor SessionRunner {
 
     private var streamer: ScreenStreamer?
     private var videoPump: Task<Void, Never>?
+    private var agent: AgentRunner?
+    private var agentTask: Task<Void, Never>?
 
     func handle(_ frame: Frame) async {
         switch frame {
@@ -150,6 +152,12 @@ private actor SessionRunner {
                 await startStreaming(fps: Int(fps))
             case .stopVideo:
                 stopStreaming()
+            case .runTask(let prompt, let requirePin):
+                await runTask(prompt: prompt, requirePin: requirePin)
+            case .stopTask:
+                await agent?.stop()
+            case .pinResponse(let pin):
+                await agent?.providePin(pin)
             default:
                 break
             }
@@ -186,6 +194,19 @@ private actor SessionRunner {
     private func stopStreaming() {
         streamer?.stop(); streamer = nil
         videoPump?.cancel(); videoPump = nil
+    }
+
+    /// Starts (or replaces) the on-Mac Claude agent for a phone-issued task, streaming its progress
+    /// back as `.taskEvent` control frames.
+    private func runTask(prompt: String, requirePin: Bool) async {
+        agentTask?.cancel()
+        await agent?.stop()
+        let session = self.session
+        let runner = AgentRunner(emit: { kind, text in
+            try? await session.send(.control(.taskEvent(kind: kind, text: text)))
+        })
+        agent = runner
+        agentTask = Task { await runner.run(prompt: prompt, requirePin: requirePin) }
     }
 }
 

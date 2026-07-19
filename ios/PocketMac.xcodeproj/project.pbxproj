@@ -13,6 +13,7 @@
 		2861E20C812D180E12CF09F3 /* ConnectionPath+UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A055DD49F121D535C84CAF0 /* ConnectionPath+UI.swift */; };
 		2BDD6FE8040E623219326BEE /* PairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FA340237D612A920068E70 /* PairingView.swift */; };
 		30AD97EC004358DCD1CDF30C /* PathCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1416906110668C0796C5B9F8 /* PathCoordinator.swift */; };
+		393688164768E712BCC0A30C /* AgentSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D05453C2094CB5F2DF7EE1 /* AgentSession.swift */; };
 		475A9C29E24CEA887DD5DC0D /* FloatingControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D914FFF7C006992F043F0C71 /* FloatingControl.swift */; };
 		4CDAC2743406CA7BEA584FC9 /* DiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F980FA9EB2DB69E6B81A41F /* DiscoveryView.swift */; };
 		542A0C067612DC06E50C4523 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BD77BF02746744738C2A56 /* RootView.swift */; };
@@ -33,6 +34,7 @@
 		BB85A5849B6910ACD2031A3D /* CoffeeSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73674E7E710E3AE54AC1D8E9 /* CoffeeSheetView.swift */; };
 		BC1B271E2C709BC971731586 /* PathSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD48B282E057FA9D2920FBBE /* PathSelector.swift */; };
 		C0686C811130FD198B30740D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4B8DB14DEFEAAD0930226E2 /* Theme.swift */; };
+		C567ADE01FA86E65AEB87AD2 /* AskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF584E281A1945F157AB8002 /* AskView.swift */; };
 		D58805C3338BF0722C083F36 /* KeyboardBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D516F26C33E4A451CFCF1961 /* KeyboardBarView.swift */; };
 		DDB1748D2F62553A1395DBDC /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E237E409CEDA62A800BFF456 /* SettingsView.swift */; };
 		E758E3FF1665E065C8CA34B3 /* IdentityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A75652219ECD2B22246C9E3 /* IdentityService.swift */; };
@@ -65,6 +67,7 @@
 		891F863E670005C64955CB98 /* RemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteView.swift; sourceTree = "<group>"; };
 		8A055DD49F121D535C84CAF0 /* ConnectionPath+UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ConnectionPath+UI.swift"; sourceTree = "<group>"; };
 		8F980FA9EB2DB69E6B81A41F /* DiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryView.swift; sourceTree = "<group>"; };
+		93D05453C2094CB5F2DF7EE1 /* AgentSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSession.swift; sourceTree = "<group>"; };
 		9635B689A95B7FD18E9CE39C /* PocketMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PocketMacApp.swift; sourceTree = "<group>"; };
 		9990E9C32D4200FF6487FDB1 /* TileDeckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileDeckView.swift; sourceTree = "<group>"; };
 		A4B8DB14DEFEAAD0930226E2 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -80,6 +83,7 @@
 		E237E409CEDA62A800BFF456 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		E978B74A2FF0C3417BD4074C /* DeckStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckStore.swift; sourceTree = "<group>"; };
 		FD18E4B291D81B6EAA320B7E /* ScreenControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenControlView.swift; sourceTree = "<group>"; };
+		FF584E281A1945F157AB8002 /* AskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +118,7 @@
 		33FF5DF55508EB3D1C0655F2 /* PocketMac */ = {
 			isa = PBXGroup;
 			children = (
+				6AC1347F109CC3DDF7C72EAC /* Agent */,
 				C3F4AB1D226EAFD6FC40B089 /* App */,
 				F36D807C2BC296971A758E5F /* Connection */,
 				9582BD4AC98397458F77C601 /* Deck */,
@@ -174,6 +179,15 @@
 				4E3ADD8FB0975161B28BB6A7 /* QRScannerView.swift */,
 			);
 			path = Pairing;
+			sourceTree = "<group>";
+		};
+		6AC1347F109CC3DDF7C72EAC /* Agent */ = {
+			isa = PBXGroup;
+			children = (
+				93D05453C2094CB5F2DF7EE1 /* AgentSession.swift */,
+				FF584E281A1945F157AB8002 /* AskView.swift */,
+			);
+			path = Agent;
 			sourceTree = "<group>";
 		};
 		7F86FDE6BC4AF69F9BA03E19 /* DesignSystem */ = {
@@ -333,7 +347,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				393688164768E712BCC0A30C /* AgentSession.swift in Sources */,
 				2513C4BC8DF5F3DAA67AB89F /* AppModel.swift in Sources */,
+				C567ADE01FA86E65AEB87AD2 /* AskView.swift in Sources */,
 				BB85A5849B6910ACD2031A3D /* CoffeeSheetView.swift in Sources */,
 				8F707A66A24F9EFECBFCB0BB /* Components.swift in Sources */,
 				E7F0D8066C4721EADD28578B /* ConnectionChip.swift in Sources */,

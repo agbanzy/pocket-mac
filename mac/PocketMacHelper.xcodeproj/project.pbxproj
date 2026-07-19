@@ -11,6 +11,7 @@
 		0ECEDF0D2A35B2B36C14AF7D /* ListenerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00402E8659A0D0B74F78467 /* ListenerService.swift */; };
 		164605038C8125627A929A27 /* PocketMacHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406E10C12645C876707C6302 /* PocketMacHelperApp.swift */; };
 		32ABCE42C60C3C71982F0C26 /* RelayReachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62AC749EBD45E727D8E1DC57 /* RelayReachability.swift */; };
+		368E0376030EEF7F41AB75AE /* AgentRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB1CFCEC57EE54580DF6E643 /* AgentRunner.swift */; };
 		3BFA822DE0139DA4CA70B44E /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B9B9FFBEF98E9329142170 /* QRCodeView.swift */; };
 		3CEAFEF461CF35165FADE39C /* MediaKeySender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FAC1CF7696B7ED9248DE6C9 /* MediaKeySender.swift */; };
 		46F42185B8AD0C3C0FEC638A /* HelperModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 594B34EEB5427FFA35C1647A /* HelperModel.swift */; };
@@ -41,6 +42,7 @@
 		B9C2ECE3A1D3A7A11CF2F387 /* PocketMacKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PocketMacKit; path = ../shared/PocketMacKit; sourceTree = SOURCE_ROOT; };
 		BE3393753244087DB6C40CC5 /* ScreenStreamer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenStreamer.swift; sourceTree = "<group>"; };
 		C33BEC4A2D219EC4A5849F4D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		CB1CFCEC57EE54580DF6E643 /* AgentRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentRunner.swift; sourceTree = "<group>"; };
 		D42E07D09C4D19C7641024A7 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
 		D9B9B9FFBEF98E9329142170 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -86,6 +88,7 @@
 			isa = PBXGroup;
 			children = (
 				4708EB9B878EB8673572C59E /* Actions */,
+				8E4F220186F69F352FB58902 /* Agent */,
 				FE3178A2FBEE9A691D753F3A /* App */,
 				2229A6887BC8BE65C94B39B8 /* Input */,
 				A03C5955EC0E48E0263D97E9 /* LoginItem */,
@@ -166,6 +169,14 @@
 				77765320C1E80EA636A371BC /* PocketMacHelper.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		8E4F220186F69F352FB58902 /* Agent */ = {
+			isa = PBXGroup;
+			children = (
+				CB1CFCEC57EE54580DF6E643 /* AgentRunner.swift */,
+			);
+			path = Agent;
 			sourceTree = "<group>";
 		};
 		A03C5955EC0E48E0263D97E9 /* LoginItem */ = {
@@ -259,6 +270,7 @@
 			files = (
 				FEBB34A2DC9671205F4B9B36 /* AccessibilityAuthorizer.swift in Sources */,
 				FED2BF3FF179B4E27401A8C9 /* ActionExecutor.swift in Sources */,
+				368E0376030EEF7F41AB75AE /* AgentRunner.swift in Sources */,
 				5D11909EF737EA7C17277011 /* CGEventTranslator.swift in Sources */,
 				46F42185B8AD0C3C0FEC638A /* HelperModel.swift in Sources */,
 				0ECEDF0D2A35B2B36C14AF7D /* ListenerService.swift in Sources */,

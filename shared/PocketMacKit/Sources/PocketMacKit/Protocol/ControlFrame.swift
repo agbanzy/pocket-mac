@@ -9,6 +9,22 @@ enum ControlOpcode: UInt8 {
     case pong = 4
     case startVideo = 5
     case stopVideo = 6
+    // AI task control (phone drives an on-Mac Claude agent).
+    case runTask = 7
+    case taskEvent = 8
+    case stopTask = 9
+    case pinResponse = 10
+}
+
+/// Progress events streamed Mac → phone while an AI task runs. Text-only (the payload cap is 64 KB
+/// and the live screen is already available over the video channel), so the phone renders a log.
+public enum TaskEventKind: UInt8, Sendable, Equatable {
+    case started = 0    // the agent accepted the task and began
+    case thinking = 1   // model narration / reasoning summary
+    case action = 2     // an action was executed on the Mac (text describes it)
+    case needsPin = 3   // a sensitive action is paused awaiting the PIN
+    case done = 4       // task complete (text is the final summary)
+    case error = 5      // task failed / aborted (text is the reason)
 }
 
 /// Post-handshake application hello. Advertises peer name, app version, and capability flags
@@ -40,6 +56,15 @@ public enum ControlFrame: Sendable, Equatable {
     case startVideo(fps: UInt8)
     /// Phone → Mac: stop screen streaming.
     case stopVideo
+    /// Phone → Mac: run a natural-language task via the on-Mac Claude agent. `requirePin` gates
+    /// sensitive actions behind the PIN (the Express vs PIN model).
+    case runTask(prompt: String, requirePin: Bool)
+    /// Mac → phone: a progress event while a task runs.
+    case taskEvent(kind: TaskEventKind, text: String)
+    /// Phone → Mac: abort the running task.
+    case stopTask
+    /// Phone → Mac: the PIN the user entered to allow a paused sensitive action (empty = deny).
+    case pinResponse(pin: String)
 
     var opcode: ControlOpcode {
         switch self {
@@ -50,6 +75,10 @@ public enum ControlFrame: Sendable, Equatable {
         case .pong: .pong
         case .startVideo: .startVideo
         case .stopVideo: .stopVideo
+        case .runTask: .runTask
+        case .taskEvent: .taskEvent
+        case .stopTask: .stopTask
+        case .pinResponse: .pinResponse
         }
     }
 }

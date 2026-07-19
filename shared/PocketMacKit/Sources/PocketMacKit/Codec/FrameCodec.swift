@@ -76,6 +76,16 @@ public struct FrameCodec: FrameCoding {
             w.writeUInt8(fps)
         case .stopVideo:
             break
+        case .runTask(let prompt, let requirePin):
+            w.writeString(prompt)
+            w.writeUInt8(requirePin ? 1 : 0)
+        case .taskEvent(let kind, let text):
+            w.writeUInt8(kind.rawValue)
+            w.writeString(text)
+        case .stopTask:
+            break
+        case .pinResponse(let pin):
+            w.writeString(pin)
         }
     }
 
@@ -179,6 +189,18 @@ public struct FrameCodec: FrameCoding {
             return .startVideo(fps: try r.readUInt8())
         case .stopVideo:
             return .stopVideo
+        case .runTask:
+            let prompt = try r.readString()
+            let requirePin = try r.readUInt8() != 0
+            return .runTask(prompt: prompt, requirePin: requirePin)
+        case .taskEvent:
+            let raw = try r.readUInt8()
+            let kind = TaskEventKind(rawValue: raw) ?? .thinking
+            return .taskEvent(kind: kind, text: try r.readString())
+        case .stopTask:
+            return .stopTask
+        case .pinResponse:
+            return .pinResponse(pin: try r.readString())
         }
     }
 

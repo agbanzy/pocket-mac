@@ -16,6 +16,7 @@ struct RemoteView: View {
         case screen = "Screen"
         case trackpad = "Trackpad"
         case deck = "Deck"
+        case ask = "Ask"
         var id: String { rawValue }
     }
 
@@ -111,6 +112,8 @@ struct RemoteView: View {
                     TrackpadPanel(sink: app.connection, connected: isSecured)
                 case .deck:
                     TileDeckView(store: app.deck, sink: app.connection, isConnected: isSecured)
+                case .ask:
+                    AskView()
                 case .screen:
                     EmptyView()
                 }

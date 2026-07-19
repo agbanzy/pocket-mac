@@ -31,6 +31,9 @@ final class ConnectionController: InputSink {
     /// the `.relay` path reports "No relay configured" while unset.
     var relayURL: URL?
 
+    /// Phone-side state for the AI "Ask" agent running on the Mac (progress log, PIN prompt).
+    let agent = AgentSession()
+
     private let identity: IdentityService
 
     private var session: SecureSession?
@@ -189,6 +192,8 @@ final class ConnectionController: InputSink {
             if let frame = reassembler.accept(chunk) {
                 onVideoFrame?(frame.annexB, frame.width, frame.height)
             }
+        case .control(.taskEvent(let kind, let text)):
+            agent.append(kind: kind, text: text)
         default:
             break
         }
@@ -197,6 +202,23 @@ final class ConnectionController: InputSink {
     /// Ask the Mac to start / stop streaming its screen.
     func startVideo(fps: UInt8 = 30) { send(.control(.startVideo(fps: fps))) }
     func stopVideo() { send(.control(.stopVideo)) }
+
+    // MARK: AI task control
+
+    /// Send a natural-language task to the Mac's Claude agent. `requirePin` gates sensitive steps.
+    func runTask(_ prompt: String, requirePin: Bool) {
+        agent.reset()
+        agent.isRunning = true
+        send(.control(.runTask(prompt: prompt, requirePin: requirePin)))
+    }
+
+    func stopTask() { send(.control(.stopTask)) }
+
+    /// Answer a paused sensitive action. An empty string denies it.
+    func sendPin(_ pin: String) {
+        agent.pendingPinReason = nil
+        send(.control(.pinResponse(pin: pin)))
+    }
 
     private func linkFailed(_ error: Error) {
         let reason = Self.describe(error)
