@@ -1,0 +1,106 @@
+name: iOS App Store (release-macOS build)
+
+# Builds Pocket Mac on a GitHub-hosted macOS runner (a RELEASED macOS, not the
+# local macOS 27 beta) so the binary passes Apple's ITMS-90111 no-beta-OS check,
+# then uploads to App Store Connect. Signing is done with the ASC API key
+# (cloud-managed distribution cert via -allowProvisioningUpdates).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'ios/**'
+      - 'shared/**'
+      - '.github/workflows/ios-appstore.yml'
+
+jobs:
+  archive-upload:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show + select toolchain (newest Xcode on runner)
+        run: |
+          sw_vers
+          echo "--- Xcodes on runner ---"; ls -d /Applications/Xcode*.app
+          NEWEST=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          echo "Selecting: $NEWEST"
+          sudo xcode-select -s "$NEWEST/Contents/Developer"
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i iphoneos || true
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: ios
+        run: xcodegen generate
+
+      - name: Write ASC API key
+        env:
+          P8: ${{ secrets.ASC_KEY_P8 }}
+          KID: ${{ secrets.ASC_KEY_ID }}
+        run: |
+          mkdir -p ~/private_keys ~/.appstoreconnect/private_keys
+          echo "$P8" | base64 --decode > ~/private_keys/AuthKey_${KID}.p8
+          cp ~/private_keys/AuthKey_${KID}.p8 ~/.appstoreconnect/private_keys/
+
+      - name: Archive (build number = 1000 + run number, always increasing)
+        working-directory: ios
+        env:
+          KID: ${{ secrets.ASC_KEY_ID }}
+          ISS: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          BUILD_NUM=$((1000 + GITHUB_RUN_NUMBER))
+          echo "CFBundleVersion → $BUILD_NUM"
+          xcodebuild -project PocketMac.xcodeproj -scheme PocketMacApp \
+            -configuration Release -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/PocketMac.xcarchive" \
+            DEVELOPMENT_TEAM=JB94NKM5A6 CURRENT_PROJECT_VERSION=$BUILD_NUM \
+            -authenticationKeyPath ~/private_keys/AuthKey_${KID}.p8 \
+            -authenticationKeyID "$KID" -authenticationKeyIssuerID "$ISS" \
+            -allowProvisioningUpdates archive
+
+      - name: Export App Store IPA
+        env:
+          KID: ${{ secrets.ASC_KEY_ID }}
+          ISS: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>JB94NKM5A6</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>destination</key><string>export</string>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+            <key>uploadSymbols</key><true/>
+          </dict></plist>
+          EOF
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/PocketMac.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -authenticationKeyPath ~/private_keys/AuthKey_${KID}.p8 \
+            -authenticationKeyID "$KID" -authenticationKeyIssuerID "$ISS" \
+            -allowProvisioningUpdates
+
+      - name: Confirm release-OS stamps (the whole point)
+        run: |
+          IPA=$(ls "$RUNNER_TEMP/export/"*.ipa | head -1)
+          unzip -p "$IPA" 'Payload/*.app/Info.plist' > /tmp/i.plist
+          echo "DTXcodeBuild:        $(/usr/libexec/PlistBuddy -c 'Print :DTXcodeBuild' /tmp/i.plist)"
+          echo "DTSDKName:           $(/usr/libexec/PlistBuddy -c 'Print :DTSDKName' /tmp/i.plist)"
+          echo "BuildMachineOSBuild: $(/usr/libexec/PlistBuddy -c 'Print :BuildMachineOSBuild' /tmp/i.plist)"
+          echo "CFBundleVersion:     $(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' /tmp/i.plist)"
+
+      - name: Upload to App Store Connect
+        env:
+          KID: ${{ secrets.ASC_KEY_ID }}
+          ISS: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          IPA=$(ls "$RUNNER_TEMP/export/"*.ipa | head -1)
+          echo "Uploading $IPA"
+          xcrun altool --upload-app -f "$IPA" -t ios --apiKey "$KID" --apiIssuer "$ISS"
