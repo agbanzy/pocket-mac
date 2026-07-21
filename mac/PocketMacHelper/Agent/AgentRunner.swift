@@ -51,9 +51,15 @@ actor AgentRunner {
         // show the checkbox ticked while still denying: a stale TCC record bound to an older code
         // signature. Removing and re-adding the app (or `tccutil reset`) clears it.
         guard AXIsProcessTrusted() else {
-            await emit(.error, "Accessibility isn't granted. System Settings ▸ Privacy & Security ▸ "
-                + "Accessibility → enable Pocket Mac Helper. If it's already ticked, remove it with “−” "
-                + "and re-add it — a stale entry from an older build silently blocks control.")
+            // Unlike Screen Recording, Accessibility never prompts on its own — an unlisted app just
+            // fails silently. Ask for it explicitly so macOS shows the dialog and adds us to the list;
+            // the user then only has to flip the switch instead of hunting for “+” and the binary.
+            let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+            _ = AXIsProcessTrustedWithOptions(opts)
+            await emit(.error, "Accessibility isn't granted — I've asked macOS to show the prompt. "
+                + "Open System Settings ▸ Privacy & Security ▸ Accessibility and switch on Pocket Mac "
+                + "Helper, then send the task again. (If it's listed with a blank icon, remove it with "
+                + "“−” first — that's a stale entry from an older build and it silently blocks control.)")
             return
         }
         guard CGPreflightScreenCaptureAccess() else {
