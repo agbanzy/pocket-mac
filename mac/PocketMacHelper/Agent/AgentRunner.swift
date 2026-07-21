@@ -54,7 +54,9 @@ actor AgentRunner {
             // Unlike Screen Recording, Accessibility never prompts on its own — an unlisted app just
             // fails silently. Ask for it explicitly so macOS shows the dialog and adds us to the list;
             // the user then only has to flip the switch instead of hunting for “+” and the binary.
-            let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+            // The literal key, not `kAXTrustedCheckOptionPrompt` — that global is a mutable var and
+            // Swift 6 strict concurrency rejects touching it from an actor.
+            let opts = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
             _ = AXIsProcessTrustedWithOptions(opts)
             await emit(.error, "Accessibility isn't granted — I've asked macOS to show the prompt. "
                 + "Open System Settings ▸ Privacy & Security ▸ Accessibility and switch on Pocket Mac "
