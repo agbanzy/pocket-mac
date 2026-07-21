@@ -1,5 +1,6 @@
 import Foundation
 import AppKit
+import ApplicationServices
 import CoreGraphics
 import os
 import PocketMacKit
@@ -45,6 +46,23 @@ actor AgentRunner {
             await emit(.error, "No Anthropic API key. Put it in ~/Downloads/medskey.rtf or set ANTHROPIC_API_KEY.")
             return
         }
+
+        // TCC preflight. Without these grants the agent silently does nothing — CGEvents are
+        // dropped and captures come back blank — so fail loudly with the exact fix. Note macOS can
+        // show the checkbox ticked while still denying: a stale TCC record bound to an older code
+        // signature. Removing and re-adding the app (or `tccutil reset`) clears it.
+        guard AXIsProcessTrusted() else {
+            await emit(.error, "Accessibility isn't granted. System Settings ▸ Privacy & Security ▸ "
+                + "Accessibility → enable Pocket Mac Helper. If it's already ticked, remove it with “−” "
+                + "and re-add it — a stale entry from an older build silently blocks control.")
+            return
+        }
+        guard CGPreflightScreenCaptureAccess() else {
+            await emit(.error, "Screen Recording isn't granted. System Settings ▸ Privacy & Security ▸ "
+                + "Screen Recording → enable Pocket Mac Helper, then reopen the app.")
+            return
+        }
+
         await emit(.started, prompt)
 
         // Geometry, measured now (points = logical screen; capture = pixels; model = downscaled).
@@ -106,6 +124,10 @@ actor AgentRunner {
                 if cancelled { await emit(.error, "Stopped."); return }
 
                 execute(action: action, input: input, fx: fx, fy: fy)
+                // Let the UI settle before the verification screenshot. Without this the next
+                // action races the window server — the classic symptom is typed text landing in
+                // whatever app stole focus instead of the one just opened.
+                try? await Task.sleep(nanoseconds: 350_000_000)
                 await emit(.action, describe(action: action, input: input))
 
                 guard let shot = capture() else { results.append(toolResult(id: id, text: "capture failed")); continue }
@@ -125,7 +147,26 @@ actor AgentRunner {
 
     // MARK: Anthropic call (raw HTTP)
 
+    /// Retries transient failures (connection drops, 429, 5xx) so a flaky network — a phone
+    /// hotspot, a dropped Wi-Fi frame — doesn't kill a task mid-run.
     private func callClaude(key: String, tool: [String: Any], system: String, messages: [[String: Any]]) async throws -> [String: Any] {
+        var lastError: Error = NSError(domain: "PocketMac.Agent", code: -1,
+                                       userInfo: [NSLocalizedDescriptionKey: "request failed"])
+        for attempt in 1...3 {
+            do { return try await callClaudeOnce(key: key, tool: tool, system: system, messages: messages) }
+            catch {
+                lastError = error
+                let ns = error as NSError
+                let transient = ns.domain == NSURLErrorDomain || ns.code == 429 || ns.code >= 500
+                guard transient, attempt < 3 else { throw error }
+                await emit(.thinking, "Network hiccup — retrying (\(attempt)/3)…")
+                try? await Task.sleep(nanoseconds: UInt64(attempt) * 1_500_000_000)
+            }
+        }
+        throw lastError
+    }
+
+    private func callClaudeOnce(key: String, tool: [String: Any], system: String, messages: [[String: Any]]) async throws -> [String: Any] {
         var req = URLRequest(url: URL(string: "https://api.anthropic.com/v1/messages")!)
         req.httpMethod = "POST"
         req.setValue(key, forHTTPHeaderField: "x-api-key")
