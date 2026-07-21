@@ -67,7 +67,7 @@ struct AskView: View {
             }
             .buttonStyle(PMPrimaryButtonStyle(tint: PM.color.danger))
         } else {
-            Button { app.connection.runTask(trimmed, requirePin: true) } label: {
+            Button { app.connection.runTask(trimmed, requirePin: false) } label: {
                 Label("Run task", systemImage: "play.fill")
             }
             .buttonStyle(PMPrimaryButtonStyle())

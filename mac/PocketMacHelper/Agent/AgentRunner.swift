@@ -17,26 +17,25 @@ actor AgentRunner {
     private let emit: @Sendable (TaskEventKind, String) async -> Void
 
     private var cancelled = false
-    private var pinContinuation: CheckedContinuation<String, Never>?
 
     private let model = "claude-opus-4-8"
     private let beta = "computer-use-2025-11-24"
-    private let maxIterations = 30
+    /// Autonomy budget. Sending a task IS the consent, so the agent runs the job to completion
+    /// instead of pausing for step-by-step approval — real multi-app work needs the headroom.
+    private let maxIterations = 60
 
     init(emit: @escaping @Sendable (TaskEventKind, String) async -> Void) {
         self.emit = emit
     }
 
+    /// Abort. This is the one interrupt the user keeps: consent starts the task, Stop ends it.
     func stop() {
         cancelled = true
-        pinContinuation?.resume(returning: "")   // unblock any pending PIN wait as "deny"
-        pinContinuation = nil
     }
 
-    func providePin(_ pin: String) {
-        pinContinuation?.resume(returning: pin)
-        pinContinuation = nil
-    }
+    /// Kept for wire compatibility with clients that still send a PIN. The PIN gate was removed in
+    /// favour of single-consent autonomy, so there is nothing to unblock.
+    func providePin(_ pin: String) {}
 
     // MARK: Run loop
 
@@ -113,14 +112,6 @@ actor AgentRunner {
                       let input = block["input"] as? [String: Any] else { continue }
                 let action = input["action"] as? String ?? ""
 
-                if requirePin, let reason = Self.sensitiveReason(action: action, input: input) {
-                    await emit(.needsPin, reason)
-                    let pin = await awaitPin()
-                    if pin.isEmpty {
-                        results.append(toolResult(id: id, text: "Action refused by the user."))
-                        continue
-                    }
-                }
                 if cancelled { await emit(.error, "Stopped."); return }
 
                 execute(action: action, input: input, fx: fx, fy: fy)
@@ -139,10 +130,6 @@ actor AgentRunner {
             _ = iter
         }
         await emit(.error, "Reached the step limit.")
-    }
-
-    private func awaitPin() async -> String {
-        await withCheckedContinuation { c in self.pinContinuation = c }
     }
 
     // MARK: Anthropic call (raw HTTP)
@@ -358,23 +345,6 @@ actor AgentRunner {
             if let c = input["coordinate"] as? [Any] { return "\(action) at \(c)" }
             return action
         }
-    }
-
-    private static func sensitiveReason(action: String, input: [String: Any]) -> String? {
-        let text = (input["text"] as? String ?? "").lowercased()
-        if action == "key" || action == "hold_key" {
-            for k in ["cmd+delete", "cmd+shift+delete", "cmd+q"] where text == k { return "key combo \(text)" }
-        }
-        if action == "type" {
-            for w in ["rm ", "sudo", "delete", "erase", "shutdown", "format"] where text.contains(w) {
-                return "typing “\(w.trimmingCharacters(in: .whitespaces))”"
-            }
-        }
-        if let app = NSWorkspace.shared.frontmostApplication?.localizedName,
-           ["Terminal", "iTerm2", "Keychain Access", "System Settings"].contains(app) {
-            return "acting in \(app)"
-        }
-        return nil
     }
 
     // MARK: Message helpers
