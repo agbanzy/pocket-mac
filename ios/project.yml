@@ -26,7 +26,7 @@ targets:
         PRODUCT_NAME: PocketMac
         PRODUCT_BUNDLE_IDENTIFIER: com.innoedge.pocketmac
         MARKETING_VERSION: "1.0.0"
-        CURRENT_PROJECT_VERSION: "5"
+        CURRENT_PROJECT_VERSION: "6"
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: PocketMac/Resources/Info.plist
         SWIFT_VERSION: "6.0"

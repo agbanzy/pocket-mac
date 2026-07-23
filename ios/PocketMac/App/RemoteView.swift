@@ -1,23 +1,28 @@
 import SwiftUI
 import PocketMacKit
 
-/// The main control surface: a persistent connection chip, a segmented switch between the trackpad
-/// and the tile deck, and an always-available keyboard bar. Trackpad and deck are separated by the
-/// segmented control so pointer touches never collide with tile taps.
+/// The home hub. A connection hero card, a custom mode switcher (Ask / Screen / Trackpad / Deck),
+/// and the selected surface below. Ask — the natural-language agent — is the hero and the default.
+/// Screen takes over full-bleed for landscape remote-desktop use; everything else lives in the hub.
 struct RemoteView: View {
     @Environment(AppModel.self) private var app
     @Binding var showDevices: Bool
-    @State private var surface: Surface = .trackpad
+    @State private var surface: Surface = .ask
     @State private var keyboardActive = false
     @State private var lastScrollY: CGFloat = 0
     @State private var floatExpanded = false
 
     enum Surface: String, CaseIterable, Identifiable {
-        case screen = "Screen"
-        case trackpad = "Trackpad"
-        case deck = "Deck"
-        case ask = "Ask"
+        case ask = "Ask", screen = "Screen", trackpad = "Trackpad", deck = "Deck"
         var id: String { rawValue }
+        var glyph: String {
+            switch self {
+            case .ask: "sparkles"
+            case .screen: "display"
+            case .trackpad: "cursorarrow.rays"
+            case .deck: "square.grid.2x2"
+            }
+        }
     }
 
     private var isSecured: Bool { app.connection.state.isSecured }
@@ -25,19 +30,108 @@ struct RemoteView: View {
     var body: some View {
         Group {
             if app.pairedMac == nil {
-                VStack(spacing: 12) { header; unpairedPrompt }
+                onboarding
             } else if surface == .screen {
-                screenLayout          // full-bleed remote desktop
+                screenLayout
             } else {
-                controlLayout         // trackpad / deck with normal chrome
+                hub
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(surface == .screen && app.pairedMac != nil ? Color.black : Color(.systemGroupedBackground))
+        .background(surface == .screen && app.pairedMac != nil ? Color.black : PM.color.background)
     }
 
-    /// The Screen tab: the Mac fills the whole phone (great in landscape), with an AssistiveTouch-style
-    /// draggable circular control (tap to expand into the switcher + keyboard + status).
+    // MARK: Hub
+
+    private var hub: some View {
+        VStack(spacing: PM.space.lg) {
+            connectionHero
+            modeSwitcher
+            selectedSurface
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if surface == .trackpad || surface == .deck {
+                KeyboardBarView { frame in app.connection.send(frame) }
+                    .disabled(!isSecured)
+                    .opacity(isSecured ? 1 : 0.5)
+            }
+        }
+        .padding(PM.space.lg)
+    }
+
+    @ViewBuilder private var selectedSurface: some View {
+        switch surface {
+        case .ask: AskView()
+        case .trackpad: TrackpadPanel(sink: app.connection, connected: isSecured)
+        case .deck: TileDeckView(store: app.deck, sink: app.connection, isConnected: isSecured)
+        case .screen: EmptyView()
+        }
+    }
+
+    /// The live link, front and center: device, path (Same Wi‑Fi / Anywhere), latency, connect toggle.
+    private var connectionHero: some View {
+        HStack(spacing: PM.space.md) {
+            ZStack {
+                Circle().fill(app.connection.state.tint.opacity(0.18)).frame(width: 46, height: 46)
+                Image(systemName: "laptopcomputer")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(app.connection.state.tint)
+                PMStatusDot(tint: app.connection.state.tint, pulsing: app.connection.state.isBusy)
+                    .offset(x: 16, y: 16)
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(app.pairedMac?.displayName ?? "Mac")
+                    .font(.pmHeadline).foregroundStyle(PM.color.textPrimary)
+                HStack(spacing: 5) {
+                    Image(systemName: isSecured ? app.connection.currentPath.glyph : "bolt.horizontal.circle")
+                        .font(.system(size: 11, weight: .semibold))
+                    Text(isSecured ? app.connection.currentPath.friendly : app.connection.state.label)
+                    if isSecured, let ms = app.connection.latencyMS {
+                        Text("· \(ms) ms").monospacedDigit()
+                    }
+                }
+                .font(.pmCaption).foregroundStyle(PM.color.textSecondary).lineLimit(1)
+            }
+            Spacer(minLength: PM.space.sm)
+            Button(isSecured ? "Disconnect" : "Connect") {
+                if isSecured { app.connection.disconnect() } else { showDevices = true }
+            }
+            .font(.pmCaption.weight(.semibold))
+            .foregroundStyle(isSecured ? PM.color.textSecondary : PM.color.accent)
+            .padding(.horizontal, PM.space.md).padding(.vertical, PM.space.sm)
+            .background(isSecured ? PM.color.surfaceHigh : PM.color.accentSoft, in: Capsule())
+        }
+        .padding(PM.space.md)
+        .background(PM.color.surface, in: RoundedRectangle(cornerRadius: PM.radius.md, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: PM.radius.md, style: .continuous)
+            .strokeBorder(PM.color.hairline, lineWidth: 1))
+        .animation(.snappy, value: app.connection.state)
+    }
+
+    /// Custom mode switcher — four cards, the active one filled with the brand accent.
+    private var modeSwitcher: some View {
+        HStack(spacing: PM.space.sm) {
+            ForEach(Surface.allCases) { mode in
+                Button {
+                    withAnimation(.snappy(duration: 0.2)) { surface = mode }
+                } label: {
+                    VStack(spacing: 5) {
+                        Image(systemName: mode.glyph).font(.system(size: 18, weight: .semibold))
+                        Text(mode.rawValue).font(.caption2.weight(.semibold))
+                    }
+                    .frame(maxWidth: .infinity).padding(.vertical, PM.space.md)
+                    .foregroundStyle(surface == mode ? .white : PM.color.textSecondary)
+                    .background(surface == mode ? PM.color.accent : PM.color.surface,
+                                in: RoundedRectangle(cornerRadius: PM.radius.md, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: PM.radius.md, style: .continuous)
+                        .strokeBorder(surface == mode ? Color.clear : PM.color.hairline, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    // MARK: Screen (full-bleed remote desktop)
+
     private var screenLayout: some View {
         ScreenModeView(connection: app.connection, connected: isSecured)
             .ignoresSafeArea()
@@ -48,28 +142,26 @@ struct RemoteView: View {
             }
             .overlay(alignment: .trailing) { scrollStrip }
             .background(
-                // Hidden field: focusing it pops the iOS keyboard; keystrokes stream to the Mac.
                 HiddenKeyboardField(isActive: $keyboardActive) { app.connection.send($0) }
                     .frame(width: 1, height: 1).opacity(0.01)
             )
             .statusBarHidden()
     }
 
-    /// The contents shown when the floating control is expanded (the FloatingControl supplies the card).
     private var floatPanel: some View {
         VStack(spacing: 12) {
             Picker("Surface", selection: $surface) {
                 ForEach(Surface.allCases) { Text($0.rawValue).tag($0) }
             }
             .pickerStyle(.segmented)
-            .frame(width: 240)
+            .frame(width: 260)
 
             HStack(spacing: 16) {
                 Button { keyboardActive.toggle() } label: {
                     Image(systemName: keyboardActive ? "keyboard.chevron.compact.down.fill" : "keyboard")
                         .foregroundStyle(keyboardActive ? Color.accentColor : .white)
                 }
-                Circle().fill(app.connection.state.tint).frame(width: 9, height: 9)
+                PMStatusDot(tint: app.connection.state.tint, pulsing: app.connection.state.isBusy)
                 if let ms = app.connection.latencyMS {
                     Text("\(ms)ms").font(.caption2.monospacedDigit()).foregroundStyle(.white.opacity(0.75))
                 }
@@ -77,7 +169,6 @@ struct RemoteView: View {
         }
     }
 
-    /// A dedicated scroll rail on the right edge — drag up/down to scroll the focused Mac app.
     private var scrollStrip: some View {
         RoundedRectangle(cornerRadius: 5)
             .fill(.ultraThinMaterial)
@@ -97,77 +188,34 @@ struct RemoteView: View {
             )
     }
 
-    private var controlLayout: some View {
-        VStack(spacing: 12) {
-            header
-            Picker("Surface", selection: $surface) {
-                ForEach(Surface.allCases) { Text($0.rawValue).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
+    // MARK: Onboarding (unpaired)
 
-            Group {
-                switch surface {
-                case .trackpad:
-                    TrackpadPanel(sink: app.connection, connected: isSecured)
-                case .deck:
-                    TileDeckView(store: app.deck, sink: app.connection, isConnected: isSecured)
-                case .ask:
-                    AskView()
-                case .screen:
-                    EmptyView()
-                }
+    private var onboarding: some View {
+        VStack(spacing: PM.space.xl) {
+            Spacer()
+            ZStack {
+                RoundedRectangle(cornerRadius: 30, style: .continuous)
+                    .fill(PM.color.accentSoft)
+                    .frame(width: 112, height: 112)
+                Image(systemName: "laptopcomputer.and.iphone")
+                    .font(.system(size: 50, weight: .medium))
+                    .foregroundStyle(PM.color.accent)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            KeyboardBarView { frame in app.connection.send(frame) }
-                .padding(.horizontal)
-                .padding(.bottom, 6)
-                .disabled(!isSecured)
-                .opacity(isSecured ? 1 : 0.5)
+            VStack(spacing: PM.space.sm) {
+                Text("Pocket Mac").font(.pmDisplay).foregroundStyle(PM.color.textPrimary)
+                Text("Your Mac, in your pocket — see it, touch it, or just ask it to do things.")
+                    .font(.pmBody).foregroundStyle(PM.color.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, PM.space.xl)
+            }
+            Spacer()
+            Button { app.showPairingSheet = true } label: {
+                Label("Pair your Mac", systemImage: "qrcode.viewfinder")
+            }
+            .buttonStyle(PMPrimaryButtonStyle())
+            .padding(.horizontal, PM.space.xl)
+            .padding(.bottom, PM.space.xl)
         }
-    }
-
-    // MARK: Header
-
-    private var header: some View {
-        HStack(spacing: 10) {
-            ConnectionChip(state: app.connection.state,
-                           latencyMS: app.connection.latencyMS,
-                           deviceName: app.pairedMac?.displayName,
-                           path: app.connection.currentPath)
-            Spacer(minLength: 6)
-            if app.pairedMac != nil {
-                if isSecured {
-                    Button("Disconnect") { app.connection.disconnect() }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-                } else {
-                    Button("Connect") { showDevices = true }
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.small)
-                }
-            }
-        }
-        .padding(.horizontal)
-        .padding(.top, 4)
-    }
-
-    // MARK: Unpaired empty state
-
-    private var unpairedPrompt: some View {
-        ContentUnavailableView {
-            Label("No Mac paired", systemImage: "laptopcomputer.slash")
-        } description: {
-            Text("Open Pocket Mac on your Mac and scan its QR code — or tap the pair button — to get started.")
-        } actions: {
-            Button {
-                app.showPairingSheet = true
-            } label: {
-                Label("Pair a Mac", systemImage: "qrcode.viewfinder")
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        .frame(maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
