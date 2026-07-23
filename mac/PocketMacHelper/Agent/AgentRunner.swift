@@ -24,6 +24,10 @@ actor AgentRunner {
     /// instead of pausing for step-by-step approval — real multi-app work needs the headroom.
     private let maxIterations = 60
 
+    /// XGA target for screenshots: small enough for fast upload + few image tokens, large enough
+    /// for accurate clicks. Sent as JPEG (roughly a third the bytes of PNG at this size).
+    private static let imageTarget = CGSize(width: 1024, height: 768)
+
     init(emit: @escaping @Sendable (TaskEventKind, String) async -> Void) {
         self.emit = emit
     }
@@ -75,7 +79,7 @@ actor AgentRunner {
         // Geometry, measured now (points = logical screen; capture = pixels; model = downscaled).
         guard let firstShot = capture() else { await emit(.error, "Screen capture failed."); return }
         let pt = NSScreen.main?.frame.size ?? CGSize(width: firstShot.px.width, height: firstShot.px.height)
-        let model = Self.modelDims(cap: firstShot.px, target: CGSize(width: 1280, height: 800))
+        let model = Self.modelDims(cap: firstShot.px, target: Self.imageTarget)
         let fx = pt.width / model.width, fy = pt.height / model.height
 
         let tool: [String: Any] = ["type": "computer_20251124", "name": "computer",
@@ -87,17 +91,25 @@ actor AgentRunner {
             + "Work in small steps; after each action take a screenshot and verify. When the task is complete, "
             + "stop and give a one-line summary. If unsure or the task is risky, say so instead of guessing."
 
+        // Cache the fixed base (task + first frame) so every later turn only pays for the new frame.
+        var firstImage = imageBlock(firstShot.b64)
+        firstImage["cache_control"] = ["type": "ephemeral"]
         var messages: [[String: Any]] = [[
             "role": "user",
-            "content": [["type": "text", "text": prompt],
-                        imageBlock(firstShot.pngBase64)],
+            "content": [["type": "text", "text": prompt], firstImage],
         ]]
 
         for iter in 1...maxIterations {
             if cancelled { await emit(.error, "Stopped."); return }
+            let t0 = Date()
             let resp: [String: Any]
             do { resp = try await callClaude(key: key, tool: tool, system: system, messages: messages) }
             catch { await emit(.error, "Claude request failed: \(error.localizedDescription)"); return }
+
+            // Prove the flow: round-trip time + how much of the prompt was served from cache.
+            if let u = resp["usage"] as? [String: Any] {
+                log.info("turn \(iter): \(String(format: "%.1f", Date().timeIntervalSince(t0)))s · cache_read=\(u["cache_read_input_tokens"] as? Int ?? 0) input=\(u["input_tokens"] as? Int ?? 0)")
+            }
 
             let content = resp["content"] as? [[String: Any]] ?? []
             let stop = resp["stop_reason"] as? String ?? ""
@@ -123,15 +135,17 @@ actor AgentRunner {
                 if cancelled { await emit(.error, "Stopped."); return }
 
                 execute(action: action, input: input, fx: fx, fy: fy)
-                // Let the UI settle before the verification screenshot. Without this the next
-                // action races the window server — the classic symptom is typed text landing in
-                // whatever app stole focus instead of the one just opened.
-                try? await Task.sleep(nanoseconds: 350_000_000)
+                // Only focus-changing actions need to settle before the verification shot (otherwise
+                // typed text can land in whatever app stole focus). Reads/moves add no such race, so
+                // skip the wait — most of the per-step latency the user feels was this fixed sleep.
+                if ["key", "type", "left_click", "double_click", "triple_click", "left_click_drag"].contains(action) {
+                    try? await Task.sleep(nanoseconds: 220_000_000)
+                }
                 await emit(.action, describe(action: action, input: input))
 
                 guard let shot = capture() else { results.append(toolResult(id: id, text: "capture failed")); continue }
                 results.append(["type": "tool_result", "tool_use_id": id,
-                                "content": [["type": "text", "text": "screenshot after \(action)"], imageBlock(shot.pngBase64)]])
+                                "content": [["type": "text", "text": "screenshot after \(action)"], imageBlock(shot.b64)]])
             }
             messages.append(["role": "user", "content": results])
             pruneImages(&messages, keep: 3)
@@ -169,8 +183,18 @@ actor AgentRunner {
         req.setValue(beta, forHTTPHeaderField: "anthropic-beta")
         req.setValue("application/json", forHTTPHeaderField: "content-type")
         req.timeoutInterval = 120
-        let body: [String: Any] = ["model": model, "max_tokens": 4096, "system": system,
-                                   "tools": [tool], "messages": messages]
+        // Prompt caching (GA, no beta header): the system prompt and the tool schema never change,
+        // so cache them once and read from cache every subsequent turn — 30–70% faster TTFT on the
+        // growing history, plus the first-frame breakpoint set in run(). Breakpoint order is
+        // tools → system → messages.
+        let cache: [String: Any] = ["type": "ephemeral"]
+        var cachedTool = tool
+        cachedTool["cache_control"] = cache
+        let body: [String: Any] = [
+            "model": model, "max_tokens": 4096,
+            "system": [["type": "text", "text": system, "cache_control": cache]],
+            "tools": [cachedTool], "messages": messages,
+        ]
         req.httpBody = try JSONSerialization.data(withJSONObject: body)
         let (data, resp) = try await URLSession.shared.data(for: req)
         guard let http = resp as? HTTPURLResponse, http.statusCode == 200 else {
@@ -183,7 +207,7 @@ actor AgentRunner {
 
     // MARK: Screen capture
 
-    private struct Shot { let px: CGSize; let pngBase64: String }
+    private struct Shot { let px: CGSize; let b64: String }
 
     private func capture() -> Shot? {
         let tmp = NSTemporaryDirectory() + "pmagent-\(UUID().uuidString).png"
@@ -195,9 +219,9 @@ actor AgentRunner {
         guard let img = NSImage(contentsOfFile: tmp),
               let full = img.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
         let cap = CGSize(width: full.width, height: full.height)
-        let target = Self.modelDims(cap: cap, target: CGSize(width: 1280, height: 800))
-        guard let scaled = resize(full, to: target), let b64 = pngBase64(scaled) else { return nil }
-        return Shot(px: cap, pngBase64: b64)
+        let target = Self.modelDims(cap: cap, target: Self.imageTarget)
+        guard let scaled = resize(full, to: target), let b64 = jpegBase64(scaled) else { return nil }
+        return Shot(px: cap, b64: b64)
     }
 
     private func resize(_ image: CGImage, to size: CGSize) -> CGImage? {
@@ -210,9 +234,9 @@ actor AgentRunner {
         return ctx.makeImage()
     }
 
-    private func pngBase64(_ image: CGImage) -> String? {
+    private func jpegBase64(_ image: CGImage) -> String? {
         let rep = NSBitmapImageRep(cgImage: image)
-        guard let data = rep.representation(using: .png, properties: [:]) else { return nil }
+        guard let data = rep.representation(using: .jpeg, properties: [.compressionFactor: 0.5]) else { return nil }
         return data.base64EncodedString()
     }
 
@@ -358,7 +382,7 @@ actor AgentRunner {
     // MARK: Message helpers
 
     private func imageBlock(_ b64: String) -> [String: Any] {
-        ["type": "image", "source": ["type": "base64", "media_type": "image/png", "data": b64]]
+        ["type": "image", "source": ["type": "base64", "media_type": "image/jpeg", "data": b64]]
     }
 
     private func toolResult(id: String, text: String) -> [String: Any] {
