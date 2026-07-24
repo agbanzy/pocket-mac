@@ -1,0 +1,12 @@
+[package]
+name = "agent-mcp-stdio"
+version = "0.1.0"
+edition = "2021"
+description = "MCP stdio transport (JSON-RPC 2.0) implementing agent-core::McpClient."
+license = "MIT"
+
+[dependencies]
+agent-core = { path = "../agent-core" }
+async-trait = "0.1"
+serde_json = "1"
+tokio = { version = "1", features = ["process", "io-util", "sync", "rt", "macros"] }
