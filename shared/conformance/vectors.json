@@ -1,0 +1,73 @@
+{
+  "$comment": "Canonical Pocket Mac wire-protocol tables. Language-neutral source of truth: every port (Swift, TypeScript, Kotlin, C#, Rust) MUST assert its enums against this file. Adding a case here without updating a port makes that port's conformance test fail — which is the point. See docs/PROTOCOL.md.",
+  "version": 1,
+  "enums": {
+    "FrameDomain": {
+      "control": 0,
+      "input": 1,
+      "action": 2,
+      "video": 3
+    },
+    "ControlOpcode": {
+      "hello": 0,
+      "ack": 1,
+      "error": 2,
+      "ping": 3,
+      "pong": 4,
+      "startVideo": 5,
+      "stopVideo": 6,
+      "runTask": 7,
+      "taskEvent": 8,
+      "stopTask": 9,
+      "pinResponse": 10
+    },
+    "InputOpcode": {
+      "mouseMove": 0,
+      "mouseDown": 1,
+      "mouseUp": 2,
+      "mouseClick": 3,
+      "scroll": 4,
+      "keyDown": 5,
+      "keyUp": 6,
+      "unicodeText": 7,
+      "setModifiers": 8,
+      "mouseMoveAbsolute": 9
+    },
+    "TaskEventKind": {
+      "started": 0,
+      "thinking": 1,
+      "action": 2,
+      "needsPin": 3,
+      "done": 4,
+      "error": 5
+    },
+    "MouseButton": {
+      "left": 0,
+      "right": 1,
+      "middle": 2
+    },
+    "ErrorCode": {
+      "unknown": 0,
+      "unsupportedVersion": 1,
+      "notPaired": 2,
+      "rateLimited": 3,
+      "malformedFrame": 4,
+      "replayRejected": 5,
+      "internalError": 6
+    }
+  },
+  "payloads": {
+    "$comment": "Field order per control opcode, after the domain+opcode header. 'string' is the codec's length-prefixed UTF-8; 'u8'/'u32' are big-endian unsigned ints.",
+    "hello": ["string:deviceName", "string:appVersion", "u32:capabilities"],
+    "ack": ["u32:seq"],
+    "error": ["u8:code", "string:message"],
+    "ping": ["u32:nonce"],
+    "pong": ["u32:nonce"],
+    "startVideo": ["u8:fps"],
+    "stopVideo": [],
+    "runTask": ["string:prompt", "u8:requirePin"],
+    "taskEvent": ["u8:kind", "string:text"],
+    "stopTask": [],
+    "pinResponse": ["string:pin"]
+  }
+}

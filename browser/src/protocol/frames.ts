@@ -30,6 +30,21 @@ export enum ControlOpcode {
   Pong = 4,
   StartVideo = 5,
   StopVideo = 6,
+  // AI task control (client drives the on-Mac Claude agent).
+  RunTask = 7,
+  TaskEvent = 8,
+  StopTask = 9,
+  PinResponse = 10,
+}
+
+// Progress events streamed Mac -> client while an AI task runs (ControlFrame.swift TaskEventKind).
+export enum TaskEventKind {
+  Started = 0,
+  Thinking = 1,
+  Action = 2,
+  NeedsPin = 3,
+  Done = 4,
+  Error = 5,
 }
 
 // Input-domain opcodes (InputFrame.swift).
@@ -72,7 +87,11 @@ export type ControlFrame =
   | { t: 'ping'; nonce: number }
   | { t: 'pong'; nonce: number }
   | { t: 'startVideo'; fps: number }
-  | { t: 'stopVideo' };
+  | { t: 'stopVideo' }
+  | { t: 'runTask'; prompt: string; requirePin: boolean }
+  | { t: 'taskEvent'; kind: TaskEventKind; text: string }
+  | { t: 'stopTask' }
+  | { t: 'pinResponse'; pin: string };
 
 export type InputFrame =
   | { t: 'mouseMove'; dx: number; dy: number }
@@ -166,6 +185,19 @@ function encodeControl(c: ControlFrame, w: BinaryWriter): number {
       return ControlOpcode.StartVideo;
     case 'stopVideo':
       return ControlOpcode.StopVideo;
+    case 'runTask':
+      w.writeString(c.prompt);
+      w.writeUInt8(c.requirePin ? 1 : 0);
+      return ControlOpcode.RunTask;
+    case 'taskEvent':
+      w.writeUInt8(c.kind);
+      w.writeString(c.text);
+      return ControlOpcode.TaskEvent;
+    case 'stopTask':
+      return ControlOpcode.StopTask;
+    case 'pinResponse':
+      w.writeString(c.pin);
+      return ControlOpcode.PinResponse;
   }
 }
 
@@ -270,6 +302,19 @@ function decodeControl(opcode: number, r: BinaryReader): ControlFrame {
       return { t: 'startVideo', fps: r.readUInt8() };
     case ControlOpcode.StopVideo:
       return { t: 'stopVideo' };
+    case ControlOpcode.RunTask:
+      return { t: 'runTask', prompt: r.readString(), requirePin: r.readUInt8() !== 0 };
+    case ControlOpcode.TaskEvent: {
+      // Unknown kinds degrade to Thinking rather than throwing — a newer Mac must not kill an
+      // older client's session (matches PocketMacKit's `?? .thinking`).
+      const raw = r.readUInt8();
+      const kind = raw in TaskEventKind ? (raw as TaskEventKind) : TaskEventKind.Thinking;
+      return { t: 'taskEvent', kind, text: r.readString() };
+    }
+    case ControlOpcode.StopTask:
+      return { t: 'stopTask' };
+    case ControlOpcode.PinResponse:
+      return { t: 'pinResponse', pin: r.readString() };
     default:
       throw new CodecError(`unsupported control opcode ${opcode}`);
   }
