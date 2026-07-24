@@ -1,0 +1,15 @@
+[package]
+name = "agent-backend-desktop"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+agent-core = { version = "0.1.0", path = "../agent-core" }
+async-trait = "0.1.91"
+base64 = "0.23.0"
+enigo = "0.6.1"
+image = { version = "0.25.10", default-features = false, features = ["jpeg"] }
+xcap = "0.9.7"
+
+[dev-dependencies]
+pollster = "0.3"
