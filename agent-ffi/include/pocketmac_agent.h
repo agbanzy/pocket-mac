@@ -56,3 +56,13 @@ const char *pm_agent_last_error(void);
 //
 // Swift: add the .a to the target, set the bridging header to this file, link the same
 // frameworks, and call pm_agent_run off the main queue (it blocks).
+//
+// ── MCP tools ────────────────────────────────────────────────────────────────
+// Drop an mcp.json beside the task-store directory (on macOS:
+// ~/Library/Application Support/PocketMac/mcp.json) to give the agent tools beyond the screen:
+//
+//   { "servers": [ { "id": "fs", "command": "npx",
+//                    "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path"] } ] }
+//
+// Each server's tools are registered as "<id>__<tool>" alongside the built-in computer tool. A
+// server that fails to start is skipped, never fatal to the task.

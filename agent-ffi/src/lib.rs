@@ -16,15 +16,17 @@
 
 use agent_backend_desktop::DesktopBackend;
 use agent_core::{
-    run, AgentConfig, ComputerBackend, Emitter, EventKind, LlmClient, TaskEvent, TaskStore,
-    ToolRegistry,
+    register_mcp_server, run, AgentConfig, ComputerBackend, Emitter, EventKind, LlmClient, McpClient,
+    TaskEvent, TaskStore, ToolRegistry,
 };
 use agent_llm_anthropic::AnthropicClient;
+use agent_mcp_stdio::McpStdioClient;
 use agent_store_fs::FsTaskStore;
 use async_trait::async_trait;
 use std::ffi::{c_char, c_void, CStr, CString};
+use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Mutex, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
 
 /// `void (*)(const char *kind, const char *text, void *ctx)`
 pub type EventCallback = extern "C" fn(*const c_char, *const c_char, *mut c_void);
@@ -73,6 +75,58 @@ impl Emitter for CallbackEmitter {
         let text = CString::new(event.text.replace('\0', " ")).unwrap_or_default();
         (self.cb)(kind.as_ptr(), text.as_ptr(), self.ctx as *mut c_void);
     }
+}
+
+/// Spawn the MCP servers listed in `mcp.json` (a sibling of the task-store directory) and register
+/// their tools, so the agent can do more than drive the screen — read files, query APIs, whatever a
+/// server exposes. Shape:
+///
+/// ```json
+/// { "servers": [ { "id": "fs", "command": "npx",
+///                  "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path"] } ] }
+/// ```
+///
+/// A server that fails to start is skipped with a log line rather than failing the task: a broken
+/// optional tool must not stop the user's work. Returns how many tools were registered.
+async fn register_configured_mcp_servers(registry: &mut ToolRegistry, store_dir: &str) -> usize {
+    let config_path = Path::new(store_dir)
+        .parent()
+        .unwrap_or(Path::new(store_dir))
+        .join("mcp.json");
+    let Ok(bytes) = std::fs::read(&config_path) else { return 0 };
+    let Ok(cfg) = serde_json::from_slice::<serde_json::Value>(&bytes) else {
+        eprintln!("pocketmac: {} is not valid JSON; ignoring", config_path.display());
+        return 0;
+    };
+    let Some(servers) = cfg.get("servers").and_then(|s| s.as_array()) else { return 0 };
+
+    let mut total = 0;
+    for server in servers {
+        let (Some(id), Some(command)) = (
+            server.get("id").and_then(|v| v.as_str()),
+            server.get("command").and_then(|v| v.as_str()),
+        ) else {
+            continue;
+        };
+        let args: Vec<String> = server
+            .get("args")
+            .and_then(|a| a.as_array())
+            .map(|a| a.iter().filter_map(|v| v.as_str().map(str::to_string)).collect())
+            .unwrap_or_default();
+        let arg_refs: Vec<&str> = args.iter().map(String::as_str).collect();
+
+        match McpStdioClient::spawn(id, command, &arg_refs).await {
+            Ok(client) => match register_mcp_server(registry, Arc::new(client) as Arc<dyn McpClient>).await {
+                Ok(n) => {
+                    total += n;
+                    eprintln!("pocketmac: mcp '{id}' registered {n} tool(s)");
+                }
+                Err(e) => eprintln!("pocketmac: mcp '{id}' listed no tools: {e}"),
+            },
+            Err(e) => eprintln!("pocketmac: mcp '{id}' failed to start: {e}"),
+        }
+    }
+    total
 }
 
 /// Borrow a C string as `&str`; `None` for null or invalid UTF-8.
@@ -132,7 +186,7 @@ pub unsafe extern "C" fn pm_agent_run(
     };
     let llm = AnthropicClient::new(api_key);
     let emitter = CallbackEmitter { cb, ctx: ctx as usize };
-    let registry = ToolRegistry::new();
+    let registry = ToolRegistry::new();   // MCP servers are added inside the runtime below
     let cfg = AgentConfig { persona, ..AgentConfig::default() };
 
     let rt = match tokio::runtime::Builder::new_multi_thread().enable_all().build() {
@@ -144,6 +198,8 @@ pub unsafe extern "C" fn pm_agent_run(
     };
 
     let outcome = rt.block_on(async {
+        let mut registry = registry;
+        register_configured_mcp_servers(&mut registry, &store_dir).await;
         run(
             &cfg,
             &backend as &dyn ComputerBackend,

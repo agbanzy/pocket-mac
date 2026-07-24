@@ -10,3 +10,6 @@ agent-core = { path = "../agent-core" }
 async-trait = "0.1"
 serde_json = "1"
 tokio = { version = "1", features = ["process", "io-util", "sync", "rt", "macros"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
