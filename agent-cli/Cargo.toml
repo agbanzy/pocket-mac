@@ -1,0 +1,18 @@
+[package]
+name = "agent-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+agent-backend-desktop = { version = "0.1.0", path = "../agent-backend-desktop" }
+agent-core = { version = "0.1.0", path = "../agent-core" }
+agent-llm-anthropic = { version = "0.1.0", path = "../agent-llm-anthropic" }
+agent-mcp-stdio = { version = "0.1.0", path = "../agent-mcp-stdio" }
+agent-store-fs = { version = "0.1.0", path = "../agent-store-fs" }
+async-trait = "0.1.91"
+serde_json = "1.0.151"
+tokio = { version = "1.53.1", features = ["rt-multi-thread", "macros"] }
+
+[[bin]]
+name = "pocketmac-agent"
+path = "src/main.rs"

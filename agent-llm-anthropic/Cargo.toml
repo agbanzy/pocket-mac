@@ -9,4 +9,13 @@ license = "MIT"
 agent-core = { path = "../agent-core" }
 async-trait = "0.1"
 serde_json = "1"
+
+# TLS per platform. Windows uses SChannel via native-tls: it needs no bundled C crypto (which does
+# not cross-compile without the target toolchain) and trusts the OS certificate store. macOS keeps
+# rustls, the configuration already shipping in the signed helper — no reason to churn a proven
+# link. Android will follow Windows once the NDK is wired up.
+[target.'cfg(windows)'.dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["json", "native-tls"] }
+
+[target.'cfg(not(windows))'.dependencies]
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
