@@ -16,6 +16,16 @@ targets:
       - path: PocketMacHelper
     dependencies:
       - package: PocketMacKit
+    # Compile the shared Rust agent (agent-core + Claude client + desktop backend + task store)
+    # before Swift, so the static library the bridging header links against is always current.
+    preBuildScripts:
+      - name: Build Rust agent
+        basedOnDependencyAnalysis: false
+        script: |
+          set -euo pipefail
+          export PATH="$HOME/.cargo/bin:/opt/homebrew/bin:$PATH"
+          cd "$SRCROOT/../agent-ffi"
+          cargo build --release
     info:
       path: PocketMacHelper/Resources/Info.plist
       properties:
@@ -32,6 +42,18 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
+        # Link the shared Rust agent. The frameworks are the ones its capture (xcap) and input
+        # (enigo) crates need; see agent-ffi/include/pocketmac_agent.h for the canonical recipe.
+        SWIFT_OBJC_BRIDGING_HEADER: PocketMacHelper/Agent/PocketMacHelper-Bridging-Header.h
+        HEADER_SEARCH_PATHS: $(SRCROOT)/../agent-ffi/include
+        # Reference the static archive by full path, NOT -lpocketmac_agent: with both a .a and a
+        # .dylib in that directory the linker picks the dylib and bakes in an absolute build path,
+        # which breaks the moment the app leaves this machine.
+        OTHER_LDFLAGS: >-
+          $(SRCROOT)/../agent-ffi/target/release/libpocketmac_agent.a
+          -framework CoreGraphics -framework CoreMedia -framework CoreVideo
+          -framework Carbon -framework ScreenCaptureKit -framework AVFoundation
+          -framework IOKit
         CODE_SIGN_ENTITLEMENTS: PocketMacHelper/Resources/PocketMacHelper.entitlements
         ENABLE_HARDENED_RUNTIME: YES
         ENABLE_APP_SANDBOX: NO

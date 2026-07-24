@@ -416,7 +416,7 @@ actor AgentRunner {
 
     // MARK: API key
 
-    private static func loadAPIKey() -> String? {
+    static func loadAPIKey() -> String? {
         if let env = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"], env.hasPrefix("sk-ant-") { return env }
         let path = (NSHomeDirectory() as NSString).appendingPathComponent("Downloads/medskey.rtf")
         if let raw = try? String(contentsOfFile: path, encoding: .utf8),

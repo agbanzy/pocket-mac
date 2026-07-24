@@ -201,13 +201,28 @@ private actor SessionRunner {
     private func runTask(prompt: String, requirePin: Bool) async {
         agentTask?.cancel()
         await agent?.stop()
+        RustAgentBridge.cancel()   // signal a previous Rust run; the next one resets the flag
         let session = self.session
-        let runner = AgentRunner(emit: { kind, text in
+        let emit: @Sendable (TaskEventKind, String) async -> Void = { kind, text in
             try? await session.send(.control(.taskEvent(kind: kind, text: text)))
-        })
-        agent = runner
-        agentTask = Task { await runner.run(prompt: prompt, requirePin: requirePin) }
+        }
+        agentTask = Task { [weak self] in
+            // Prefer the shared Rust core — the same brain Windows and Android will run, and the
+            // only path with MCP tools and durable task history. If it can't start (missing
+            // capture permission, unwritable store), fall back to the in-process Swift loop so a
+            // task never dies on plumbing.
+            if let key = AgentRunner.loadAPIKey() {
+                let rc = await RustAgentBridge.run(prompt: prompt, apiKey: key, persona: nil, emit: emit)
+                guard RustAgentBridge.isStartupFailure(rc) else { return }
+            }
+            let runner = AgentRunner(emit: emit)
+            await self?.adopt(runner)
+            await runner.run(prompt: prompt, requirePin: requirePin)
+        }
     }
+
+    /// Retain the fallback runner so `stop()` can reach it.
+    private func adopt(_ runner: AgentRunner) { agent = runner }
 }
 
 /// Monotonic video frame id, incremented from the capture queue.
