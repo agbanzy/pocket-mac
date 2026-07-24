@@ -1,0 +1,19 @@
+[package]
+name = "agent-core"
+version = "0.1.0"
+edition = "2021"
+description = "Portable computer-use agent core for Pocket Mac — one loop for macOS, Windows, and Android."
+license = "MIT"
+
+# Dependency-inverted on purpose: the core is pure logic + traits. Platform crates provide the
+# LlmClient (HTTP), the ComputerBackend (OS input/capture), the McpClient (transport), and the
+# TaskStore (persistence). That keeps this crate tiny and portable — the whole point of the seam.
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+async-trait = "0.1"
+thiserror = "1"
+uuid = { version = "1", features = ["v4"] }
+
+[dev-dependencies]
+pollster = "0.3"   # tiny block_on for the sync smoke test; no async runtime pulled into the lib
