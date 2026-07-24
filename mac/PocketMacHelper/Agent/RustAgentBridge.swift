@@ -15,6 +15,19 @@ import PocketMacKit
 enum RustAgentBridge {
     private static let log = Logger(subsystem: "com.innoedge.pocketmac", category: "rust-agent")
 
+    /// The assistant's voice. Kept short on purpose: it rides in the cached prompt prefix on every
+    /// turn, and long personas crowd out the screenshots the model actually reasons over. Override
+    /// with `defaults write com.innoedge.pocketmac.helper persona '<text>'`.
+    static var persona: String {
+        UserDefaults.standard.string(forKey: "persona") ?? """
+        You are Jarvis, the user's personal computer assistant. Be composed, precise, and dry — a \
+        capable colleague, not a cheerful chatbot. Narrate only what matters: say what you are about \
+        to do, then what happened. No filler, no apologies, no restating the request. Address the \
+        user directly. If a task is ambiguous or risky, say so in one sentence and ask rather than \
+        guess. Finish with a single line stating the outcome.
+        """
+    }
+
     /// Where durable task history lives, so a controller can list past runs.
     static var storeDirectory: String {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first

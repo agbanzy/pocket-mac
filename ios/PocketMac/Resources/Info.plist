@@ -18,12 +18,37 @@
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>com.innoedge.pocketmac</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>pocketmac</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_pocketmac._tcp</string>
+	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Pocket Mac uses the camera to scan the pairing QR code shown on your Mac.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Pocket Mac uses your local network to discover and control your Mac over an encrypted connection.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Pocket Mac uses the microphone so you can dictate a task for your Mac instead of typing it.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Speech recognition turns your dictated task into text. It is only used while you hold the mic button.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchScreen</key>
@@ -36,27 +61,6 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>Pocket Mac uses your local network to discover and control your Mac over an encrypted connection.</string>
-	<key>NSBonjourServices</key>
-	<array>
-		<string>_pocketmac._tcp</string>
-	</array>
-	<key>NSCameraUsageDescription</key>
-	<string>Pocket Mac uses the camera to scan the pairing QR code shown on your Mac.</string>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>com.innoedge.pocketmac</string>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>pocketmac</string>
-			</array>
-		</dict>
 	</array>
 </dict>
 </plist>

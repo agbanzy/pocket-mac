@@ -17,6 +17,7 @@
 		475A9C29E24CEA887DD5DC0D /* FloatingControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D914FFF7C006992F043F0C71 /* FloatingControl.swift */; };
 		4CDAC2743406CA7BEA584FC9 /* DiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F980FA9EB2DB69E6B81A41F /* DiscoveryView.swift */; };
 		542A0C067612DC06E50C4523 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BD77BF02746744738C2A56 /* RootView.swift */; };
+		5571542DF45112654E1DD6F6 /* VoiceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3318F757335F9EF9F29D3 /* VoiceController.swift */; };
 		6919947C9553F5DD6252CA4D /* ScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 775257A500399D8CE25AD3DD /* ScreenView.swift */; };
 		7FE9C2D47D46AB394EB2D79C /* TrackpadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D77DDEAFFAF80151742F320 /* TrackpadView.swift */; };
 		89AC945D6789437BC50243C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A96A0DEA25E646502214759 /* Assets.xcassets */; };
@@ -70,6 +71,7 @@
 		93D05453C2094CB5F2DF7EE1 /* AgentSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSession.swift; sourceTree = "<group>"; };
 		9635B689A95B7FD18E9CE39C /* PocketMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PocketMacApp.swift; sourceTree = "<group>"; };
 		9990E9C32D4200FF6487FDB1 /* TileDeckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileDeckView.swift; sourceTree = "<group>"; };
+		9EC3318F757335F9EF9F29D3 /* VoiceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceController.swift; sourceTree = "<group>"; };
 		A4B8DB14DEFEAAD0930226E2 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		B8BBECE0B127B85F5C9FB9B2 /* PocketMacApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PocketMacApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB072B97E6357838EE10A1F1 /* HapticsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsEngine.swift; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 			children = (
 				93D05453C2094CB5F2DF7EE1 /* AgentSession.swift */,
 				FF584E281A1945F157AB8002 /* AskView.swift */,
+				9EC3318F757335F9EF9F29D3 /* VoiceController.swift */,
 			);
 			path = Agent;
 			sourceTree = "<group>";
@@ -380,6 +383,7 @@
 				EE5C4B292AFB868E0A4CBF33 /* TrackpadSurface.swift in Sources */,
 				7FE9C2D47D46AB394EB2D79C /* TrackpadView.swift in Sources */,
 				920E6A9970187345681DDD7D /* Typography.swift in Sources */,
+				5571542DF45112654E1DD6F6 /* VoiceController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -393,7 +397,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 7T7BJT2AU7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -420,7 +424,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 7T7BJT2AU7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;

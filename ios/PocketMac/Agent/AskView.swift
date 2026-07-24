@@ -7,6 +7,7 @@ struct AskView: View {
     @Environment(AppModel.self) private var app
     @State private var prompt = ""
     @State private var pin = ""
+    @State private var voice = VoiceController()
 
     private var agent: AgentSession { app.connection.agent }
     private var connected: Bool { app.connection.state.isSecured }
@@ -26,12 +27,34 @@ struct AskView: View {
         }
         .padding(PM.space.lg)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .onChange(of: agent.events.count) { _, _ in
+            // Speak only the outcome — narrating every step would talk over you mid-task.
+            guard let last = agent.events.last, last.kind == .done || last.kind == .error else { return }
+            voice.speak(last.text)
+        }
+        .onDisappear { voice.stopDictation() }
     }
 
     private var promptCard: some View {
         PMCard {
             VStack(alignment: .leading, spacing: PM.space.md) {
-                Text("Ask your Mac").font(.pmHeadline).foregroundStyle(PM.color.textPrimary)
+                HStack {
+                    Text("Ask your Mac").font(.pmHeadline).foregroundStyle(PM.color.textPrimary)
+                    Spacer()
+                    Button {
+                        voice.speaksResults.toggle()
+                    } label: {
+                        Image(systemName: voice.speaksResults ? "speaker.wave.2.fill" : "speaker.slash")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(voice.speaksResults ? PM.color.accent : PM.color.textTertiary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(voice.speaksResults ? "Speaking results on" : "Speaking results off")
+                    micButton
+                }
+                if let problem = voice.problem {
+                    Text(problem).font(.pmCaption).foregroundStyle(PM.color.warning)
+                }
                 ZStack(alignment: .topLeading) {
                     if prompt.isEmpty {
                         Text("Tell your Mac what to do…")
@@ -58,6 +81,23 @@ struct AskView: View {
                 }
             }
         }
+    }
+
+    /// Dictation. The transcript lands in the prompt field rather than running straight away — you
+    /// read what it heard before anything touches your Mac.
+    private var micButton: some View {
+        Button {
+            voice.toggleDictation { text in prompt = text }
+        } label: {
+            Image(systemName: voice.isListening ? "mic.fill" : "mic")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(voice.isListening ? .white : PM.color.accent)
+                .frame(width: 30, height: 30)
+                .background(voice.isListening ? PM.color.danger : PM.color.accentSoft, in: Circle())
+                .symbolEffect(.pulse, isActive: voice.isListening)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(voice.isListening ? "Stop dictation" : "Dictate a task")
     }
 
     @ViewBuilder private var runButton: some View {

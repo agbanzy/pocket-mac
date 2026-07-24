@@ -212,7 +212,8 @@ private actor SessionRunner {
             // capture permission, unwritable store), fall back to the in-process Swift loop so a
             // task never dies on plumbing.
             if let key = AgentRunner.loadAPIKey() {
-                let rc = await RustAgentBridge.run(prompt: prompt, apiKey: key, persona: nil, emit: emit)
+                let rc = await RustAgentBridge.run(prompt: prompt, apiKey: key,
+                                                   persona: RustAgentBridge.persona, emit: emit)
                 guard RustAgentBridge.isStartupFailure(rc) else { return }
             }
             let runner = AgentRunner(emit: emit)
