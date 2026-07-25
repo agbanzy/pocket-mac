@@ -43,6 +43,11 @@ struct ConformanceTests {
             "setProvider": Int(ControlOpcode.setProvider.rawValue),
             "getProviders": Int(ControlOpcode.getProviders.rawValue),
             "providerList": Int(ControlOpcode.providerList.rawValue),
+            "getMemory": Int(ControlOpcode.getMemory.rawValue),
+            "memoryList": Int(ControlOpcode.memoryList.rawValue),
+            "forgetMemory": Int(ControlOpcode.forgetMemory.rawValue),
+            "getHistory": Int(ControlOpcode.getHistory.rawValue),
+            "historyList": Int(ControlOpcode.historyList.rawValue),
         ]
         #expect(actual == expected)
     }

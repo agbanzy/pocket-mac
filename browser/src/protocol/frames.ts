@@ -39,6 +39,12 @@ export enum ControlOpcode {
   SetProvider = 11,
   GetProviders = 12,
   ProviderList = 13,
+  // What the agent remembers, and what it has done.
+  GetMemory = 14,
+  MemoryList = 15,
+  ForgetMemory = 16,
+  GetHistory = 17,
+  HistoryList = 18,
 }
 
 // Progress events streamed Mac -> client while an AI task runs (ControlFrame.swift TaskEventKind).
@@ -98,7 +104,12 @@ export type ControlFrame =
   | { t: 'pinResponse'; pin: string }
   | { t: 'setProvider'; providerId: string; model: string }
   | { t: 'getProviders' }
-  | { t: 'providerList'; activeId: string; availableJson: string };
+  | { t: 'providerList'; activeId: string; availableJson: string }
+  | { t: 'getMemory' }
+  | { t: 'memoryList'; entriesJson: string }
+  | { t: 'forgetMemory'; key: string }
+  | { t: 'getHistory' }
+  | { t: 'historyList'; tasksJson: string };
 
 export type InputFrame =
   | { t: 'mouseMove'; dx: number; dy: number }
@@ -215,6 +226,19 @@ function encodeControl(c: ControlFrame, w: BinaryWriter): number {
       w.writeString(c.activeId);
       w.writeString(c.availableJson);
       return ControlOpcode.ProviderList;
+    case 'getMemory':
+      return ControlOpcode.GetMemory;
+    case 'memoryList':
+      w.writeString(c.entriesJson);
+      return ControlOpcode.MemoryList;
+    case 'forgetMemory':
+      w.writeString(c.key);
+      return ControlOpcode.ForgetMemory;
+    case 'getHistory':
+      return ControlOpcode.GetHistory;
+    case 'historyList':
+      w.writeString(c.tasksJson);
+      return ControlOpcode.HistoryList;
   }
 }
 
@@ -338,6 +362,16 @@ function decodeControl(opcode: number, r: BinaryReader): ControlFrame {
       return { t: 'getProviders' };
     case ControlOpcode.ProviderList:
       return { t: 'providerList', activeId: r.readString(), availableJson: r.readString() };
+    case ControlOpcode.GetMemory:
+      return { t: 'getMemory' };
+    case ControlOpcode.MemoryList:
+      return { t: 'memoryList', entriesJson: r.readString() };
+    case ControlOpcode.ForgetMemory:
+      return { t: 'forgetMemory', key: r.readString() };
+    case ControlOpcode.GetHistory:
+      return { t: 'getHistory' };
+    case ControlOpcode.HistoryList:
+      return { t: 'historyList', tasksJson: r.readString() };
     default:
       throw new CodecError(`unsupported control opcode ${opcode}`);
   }

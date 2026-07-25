@@ -14,6 +14,7 @@
 		368E0376030EEF7F41AB75AE /* AgentRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB1CFCEC57EE54580DF6E643 /* AgentRunner.swift */; };
 		3BFA822DE0139DA4CA70B44E /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9B9B9FFBEF98E9329142170 /* QRCodeView.swift */; };
 		3CEAFEF461CF35165FADE39C /* MediaKeySender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FAC1CF7696B7ED9248DE6C9 /* MediaKeySender.swift */; };
+		3DF13D85B22331CCA4DEA3CA /* AgentDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03272E51DBBC574031608063 /* AgentDataStore.swift */; };
 		46F42185B8AD0C3C0FEC638A /* HelperModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 594B34EEB5427FFA35C1647A /* HelperModel.swift */; };
 		5D11909EF737EA7C17277011 /* CGEventTranslator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4F3BDCC6E004820C64E980 /* CGEventTranslator.swift */; };
 		62FA845AAA7F3B8A5CA55F8D /* MacPeerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5774EAD892247301FDD1E3C /* MacPeerStore.swift */; };
@@ -28,6 +29,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		03272E51DBBC574031608063 /* AgentDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDataStore.swift; sourceTree = "<group>"; };
 		0FAC1CF7696B7ED9248DE6C9 /* MediaKeySender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaKeySender.swift; sourceTree = "<group>"; };
 		2C4FA1707C55107E167DF665 /* SessionAccepter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionAccepter.swift; sourceTree = "<group>"; };
 		2CE319641B884B5B56C8CF1E /* ActionExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionExecutor.swift; sourceTree = "<group>"; };
@@ -179,6 +181,7 @@
 		8E4F220186F69F352FB58902 /* Agent */ = {
 			isa = PBXGroup;
 			children = (
+				03272E51DBBC574031608063 /* AgentDataStore.swift */,
 				CB1CFCEC57EE54580DF6E643 /* AgentRunner.swift */,
 				F3FE103EE0BC024E9688A8F0 /* PocketMacHelper-Bridging-Header.h */,
 				5D711F91C5DFDB72255D147C /* ProviderStore.swift */,
@@ -301,6 +304,7 @@
 			files = (
 				FEBB34A2DC9671205F4B9B36 /* AccessibilityAuthorizer.swift in Sources */,
 				FED2BF3FF179B4E27401A8C9 /* ActionExecutor.swift in Sources */,
+				3DF13D85B22331CCA4DEA3CA /* AgentDataStore.swift in Sources */,
 				368E0376030EEF7F41AB75AE /* AgentRunner.swift in Sources */,
 				5D11909EF737EA7C17277011 /* CGEventTranslator.swift in Sources */,
 				46F42185B8AD0C3C0FEC638A /* HelperModel.swift in Sources */,

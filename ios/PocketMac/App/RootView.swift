@@ -6,6 +6,7 @@ struct RootView: View {
     @State private var showDevices = false
     @State private var showPairing = false
     @State private var showSettings = false
+    @State private var showAgent = false
 
     var body: some View {
         @Bindable var app = app
@@ -32,6 +33,14 @@ struct RootView: View {
                     }
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
+                            showAgent = true
+                        } label: {
+                            Image(systemName: "brain")
+                        }
+                        .accessibilityLabel("What the agent knows")
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
                             showSettings = true
                         } label: {
                             Image(systemName: "gearshape")
@@ -43,6 +52,7 @@ struct RootView: View {
         .sheet(isPresented: $showDevices) { DiscoveryView() }
         .sheet(isPresented: $showPairing) { PairingView() }
         .sheet(isPresented: $showSettings) { SettingsView() }
+        .sheet(isPresented: $showAgent) { MemoryHistoryView() }
         .sheet(isPresented: $app.showPairingSheet) { PairingView() }
         .sheet(isPresented: $app.showCoffeeSheet) { CoffeeSheetView() }
         .tint(.accentColor)

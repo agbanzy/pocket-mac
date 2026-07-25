@@ -192,6 +192,12 @@ final class ConnectionController: InputSink {
             if let frame = reassembler.accept(chunk) {
                 onVideoFrame?(frame.annexB, frame.width, frame.height)
             }
+        case .control(.memoryList(let entriesJson)):
+            memory = (try? JSONDecoder().decode([MemoryFact].self,
+                                                from: Data(entriesJson.utf8))) ?? []
+        case .control(.historyList(let tasksJson)):
+            history = (try? JSONDecoder().decode([TaskSummary].self,
+                                                 from: Data(tasksJson.utf8))) ?? []
         case .control(.providerList(let activeId, let availableJson)):
             activeProvider = activeId
             providers = (try? JSONDecoder().decode([ProviderOption].self,
@@ -232,6 +238,19 @@ final class ConnectionController: InputSink {
     func setProvider(_ id: String, model: String = "") {
         send(.control(.setProvider(providerId: id, model: model)))
     }
+
+    // MARK: Memory & history
+
+    /// What the agent remembers, and what it has done. Both live on the Mac — the phone is a view.
+    private(set) var memory: [MemoryFact] = []
+    private(set) var history: [TaskSummary] = []
+
+    func requestMemory() { send(.control(.getMemory)) }
+    func requestHistory() { send(.control(.getHistory)) }
+
+    /// Make the agent forget one fact. The Mac replies with the updated list, so the UI shows what
+    /// actually happened rather than removing the row optimistically.
+    func forgetMemory(_ key: String) { send(.control(.forgetMemory(key: key))) }
 
     /// Answer a paused sensitive action. An empty string denies it.
     func sendPin(_ pin: String) {

@@ -18,6 +18,12 @@ enum ControlOpcode: UInt8 {
     case setProvider = 11
     case getProviders = 12
     case providerList = 13
+    // What the agent remembers, and what it has done.
+    case getMemory = 14
+    case memoryList = 15
+    case forgetMemory = 16
+    case getHistory = 17
+    case historyList = 18
 }
 
 /// Progress events streamed Mac → phone while an AI task runs. Text-only (the payload cap is 64 KB
@@ -80,6 +86,18 @@ public enum ControlFrame: Sendable, Equatable {
     /// the payload one field wide, so adding a provider attribute needs no protocol change.
     case providerList(activeId: String, availableJson: String)
 
+    /// Phone → Mac: what do you remember about me and this machine?
+    case getMemory
+    /// Mac → phone: remembered facts, as JSON.
+    case memoryList(entriesJson: String)
+    /// Phone → Mac: drop one remembered fact by key.
+    case forgetMemory(key: String)
+
+    /// Phone → Mac: recent tasks and how they ended.
+    case getHistory
+    /// Mac → phone: task history, as JSON.
+    case historyList(tasksJson: String)
+
     var opcode: ControlOpcode {
         switch self {
         case .hello: .hello
@@ -96,6 +114,11 @@ public enum ControlFrame: Sendable, Equatable {
         case .setProvider: .setProvider
         case .getProviders: .getProviders
         case .providerList: .providerList
+        case .getMemory: .getMemory
+        case .memoryList: .memoryList
+        case .forgetMemory: .forgetMemory
+        case .getHistory: .getHistory
+        case .historyList: .historyList
         }
     }
 }

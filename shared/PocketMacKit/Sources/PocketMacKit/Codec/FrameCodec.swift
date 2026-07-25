@@ -94,6 +94,16 @@ public struct FrameCodec: FrameCoding {
         case .providerList(let activeId, let availableJson):
             w.writeString(activeId)
             w.writeString(availableJson)
+        case .getMemory:
+            break
+        case .memoryList(let entriesJson):
+            w.writeString(entriesJson)
+        case .forgetMemory(let key):
+            w.writeString(key)
+        case .getHistory:
+            break
+        case .historyList(let tasksJson):
+            w.writeString(tasksJson)
         }
     }
 
@@ -217,6 +227,16 @@ public struct FrameCodec: FrameCoding {
         case .providerList:
             let active = try r.readString()
             return .providerList(activeId: active, availableJson: try r.readString())
+        case .getMemory:
+            return .getMemory
+        case .memoryList:
+            return .memoryList(entriesJson: try r.readString())
+        case .forgetMemory:
+            return .forgetMemory(key: try r.readString())
+        case .getHistory:
+            return .getHistory
+        case .historyList:
+            return .historyList(tasksJson: try r.readString())
         }
     }
 

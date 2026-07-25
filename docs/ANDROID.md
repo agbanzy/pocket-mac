@@ -50,17 +50,70 @@ The Android app plays **both** roles, selectable at runtime:
    wire protocol; see the conformance-vector requirement below.
 2. **Target** — the phone *is* the machine being driven (Accessibility + MediaProjection above).
 
-## Prerequisite: protocol conformance vectors
+## Prerequisite: protocol conformance vectors — done
 
-`shared/PocketMacKit` (Swift) is the de-facto protocol spec and the `browser/` TypeScript port has
-already drifted (its `ControlOpcode` stops at `StopVideo = 6`). Before a Kotlin port is written, the
-frame codec + Noise handshake need a language-neutral spec plus **test vectors** every port must
-reproduce byte-for-byte, so drift is caught by tests rather than by a failed pairing on a user's
-phone.
+This was a blocker and is now cleared. `shared/conformance/vectors.json` is the language-neutral
+contract, and Swift and TypeScript both assert against it in their own test suites (`docs/PROTOCOL.md`).
+Writing the Kotlin controller means implementing those tables and adding the same conformance test —
+drift then fails CI instead of a user's pairing screen.
 
-## Build prerequisites (not present on this Mac)
+The drift that motivated it was real: the TypeScript port's `ControlOpcode` had stopped at
+`StopVideo = 6`, so the browser client could not run an AI task at all and *threw* on a `taskEvent`
+frame. The vectors caught it; it is fixed.
 
-- Android SDK + NDK, `cargo-ndk`, Rust targets `aarch64-linux-android`, `armv7-linux-androideabi`
-- The Rust core cross-compiles to a `.so` per ABI, bundled in the APK and loaded via `System.loadLibrary`
+## What exists now
 
-Nothing here changes `agent-core`; Android is an additional `ComputerBackend` plus the JNI bridge.
+| Piece | State |
+|---|---|
+| `agent-core` compiles for `aarch64-linux-android` | ✅ verified |
+| `agent-jni` — JNI exports, JVM callbacks, action marshalling | ✅ written, compiles and tested |
+| Building the `.so` for Android | ⛔ needs the NDK |
+| Kotlin `AgentHost` implementation | ⛔ not written |
+
+`agent-jni` implements `ComputerBackend` *upwards*: it holds a `JavaVM` and a global ref (not the
+borrowed `JNIEnv`, which is only valid on the thread that produced it) and attaches the current
+thread per call, because the loop runs on tokio workers. Actions cross as the same JSON the desktop
+backend uses, so adding one needs no JNI signature change.
+
+```kotlin
+object PocketMacAgent {
+    init { System.loadLibrary("pocketmac_agent_jni") }
+    external fun runTask(prompt: String, apiKey: String, storeDir: String,
+                         persona: String?, host: AgentHost): Int
+    external fun cancel()
+}
+
+/** Rust calls these on a worker thread — never Android's main thread. */
+interface AgentHost {
+    fun capture(): ByteArray        // JPEG of the screen, already downscaled
+    fun screenWidth(): Int          // the coordinate space those bytes are in
+    fun screenHeight(): Int
+    fun execute(actionJson: String)
+    fun onEvent(kind: String, text: String)  // started | thinking | action | done | error
+}
+```
+
+`runTask` blocks — call it from `Dispatchers.IO`.
+
+**Report `screenWidth`/`screenHeight` as the size of the image you return from `capture()`, not the
+raw display size.** The model answers in that space and the loop passes the numbers straight back; if
+the two disagree, every tap lands in the wrong place.
+
+## Building the native library
+
+```bash
+export ANDROID_NDK_HOME=$HOME/Library/Android/sdk/ndk/<version>
+cargo install cargo-ndk
+rustup target add aarch64-linux-android armv7-linux-androideabi
+
+cargo ndk -t arm64-v8a -t armeabi-v7a \
+  -o android/app/src/main/jniLibs build --release -p agent-jni
+```
+
+**The remaining blocker is the NDK, not the code.** The HTTP client's TLS pulls a C dependency that
+cannot cross-compile without the NDK's toolchain, which is why `cargo check --target
+aarch64-linux-android` passes for the pure-Rust crates and fails at that one. Nothing here has run on
+a device.
+
+Nothing above changes `agent-core`; Android is a `ComputerBackend` implemented in Kotlin plus this
+JNI bridge.

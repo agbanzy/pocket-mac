@@ -22,7 +22,12 @@
       "pinResponse": 10,
       "setProvider": 11,
       "getProviders": 12,
-      "providerList": 13
+      "providerList": 13,
+      "getMemory": 14,
+      "memoryList": 15,
+      "forgetMemory": 16,
+      "getHistory": 17,
+      "historyList": 18
     },
     "InputOpcode": {
       "mouseMove": 0,
@@ -103,6 +108,17 @@
     "providerList": [
       "string:activeId",
       "string:availableJson"
+    ],
+    "getMemory": [],
+    "memoryList": [
+      "string:entriesJson"
+    ],
+    "forgetMemory": [
+      "string:key"
+    ],
+    "getHistory": [],
+    "historyList": [
+      "string:tasksJson"
     ]
   }
 }

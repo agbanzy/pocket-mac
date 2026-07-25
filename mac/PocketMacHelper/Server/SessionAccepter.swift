@@ -169,6 +169,17 @@ private actor SessionRunner {
                 try? await session.send(.control(.providerList(
                     activeId: ProviderStore.activeId(),
                     availableJson: ProviderStore.availableJSON())))
+            case .getMemory:
+                try? await session.send(.control(.memoryList(
+                    entriesJson: AgentDataStore.memoryJSON())))
+            case .forgetMemory(let key):
+                AgentDataStore.forget(key: key)
+                // Reply with the new list so the phone reflects the Mac, not an optimistic removal.
+                try? await session.send(.control(.memoryList(
+                    entriesJson: AgentDataStore.memoryJSON())))
+            case .getHistory:
+                try? await session.send(.control(.historyList(
+                    tasksJson: AgentDataStore.historyJSON())))
             default:
                 break
             }
