@@ -125,17 +125,29 @@ struct MemoryHistoryView: View {
                 if app.connection.history.isEmpty {
                     empty("No tasks yet", "Every task you run is kept here with how it ended.")
                 } else {
-                    PMSection(title: "Recent tasks") {
+                    PMSection(title: "Recent tasks",
+                              footer: "Tap a task to run it again.") {
                         ForEach(Array(app.connection.history.enumerated()), id: \.element.id) { i, task in
-                            PMRow(icon: statusIcon(task.status),
-                                  iconTint: statusTint(task.status),
-                                  title: task.prompt,
-                                  subtitle: task.outcome.isEmpty
-                                      ? "\(task.steps) steps" : "\(task.steps) steps · \(task.outcome)",
-                                  showsDivider: i < app.connection.history.count - 1) {
-                                Text(relative(task.createdAt))
-                                    .font(.pmCaption).foregroundStyle(PM.color.textTertiary)
+                            // Re-running is the most common thing you want from history — the same
+                            // briefing, the same check — and retyping it from memory was the only
+                            // way. The prompt is already here; putting it back in the composer
+                            // rather than firing immediately keeps the "read before it touches your
+                            // Mac" rule that the dictation path follows.
+                            Button {
+                                app.connection.agent.draft = task.prompt
+                                dismiss()
+                            } label: {
+                                PMRow(icon: statusIcon(task.status),
+                                      iconTint: statusTint(task.status),
+                                      title: task.prompt,
+                                      subtitle: task.outcome.isEmpty
+                                          ? "\(task.steps) steps" : "\(task.steps) steps · \(task.outcome)",
+                                      showsDivider: i < app.connection.history.count - 1) {
+                                    Text(relative(task.createdAt))
+                                        .font(.pmCaption).foregroundStyle(PM.color.textTertiary)
+                                }
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                 }

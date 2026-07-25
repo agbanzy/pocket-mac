@@ -174,7 +174,7 @@ private actor SessionRunner {
             case .runTask(let prompt, let requirePin):
                 await runTask(prompt: prompt, requirePin: requirePin)
             case .stopTask:
-                await agent?.stop()
+                await cancelAllTasks()
             case .pinResponse(let pin):
                 await agent?.providePin(pin)
             case .setProvider(let providerId, let model):
@@ -248,11 +248,32 @@ private actor SessionRunner {
         videoPump?.cancel(); videoPump = nil
     }
 
-    /// Starts (or replaces) the on-Mac Claude agent for a phone-issued task, streaming its progress
-    /// back as `.taskEvent` control frames.
+    /// Tasks waiting for the one in flight to finish.
+    ///
+    /// A second task used to cancel the first outright: the agent could be halfway through a
+    /// multi-step job on your Mac and a new prompt would kill it silently, with the phone showing
+    /// only the new one. Since the agent drives the real cursor, that lost work is real work. They
+    /// queue now, and `stopTask` remains the way to actually abandon something.
+    private var queued: [(prompt: String, requirePin: Bool)] = []
+    private var isRunningTask = false
+
+    /// Accept a phone-issued task: run it now if nothing is in flight, otherwise queue it.
     private func runTask(prompt: String, requirePin: Bool) async {
-        agentTask?.cancel()
-        await agent?.stop()
+        guard !isRunningTask else {
+            queued.append((prompt, requirePin))
+            let position = queued.count
+            try? await session.send(.control(.taskEvent(
+                kind: .started,
+                text: "Queued (\(position) ahead of it) — starts when the current task finishes.")))
+            return
+        }
+        await start(prompt: prompt, requirePin: requirePin)
+    }
+
+    /// Starts the on-Mac Claude agent, streaming its progress back as `.taskEvent` control frames,
+    /// then drains whatever queued behind it.
+    private func start(prompt: String, requirePin: Bool) async {
+        isRunningTask = true
         RustAgentBridge.cancel()   // signal a previous Rust run; the next one resets the flag
         let session = self.session
         let emit: @Sendable (TaskEventKind, String) async -> Void = { kind, text in
@@ -266,12 +287,35 @@ private actor SessionRunner {
             if let key = AgentRunner.loadAPIKey() {
                 let rc = await RustAgentBridge.run(prompt: prompt, apiKey: key,
                                                    persona: RustAgentBridge.persona, emit: emit)
-                guard RustAgentBridge.isStartupFailure(rc) else { return }
+                if !RustAgentBridge.isStartupFailure(rc) {
+                    await self?.finishAndDrain()
+                    return
+                }
             }
             let runner = AgentRunner(emit: emit)
             await self?.adopt(runner)
             await runner.run(prompt: prompt, requirePin: requirePin)
+            await self?.finishAndDrain()
         }
+    }
+
+    /// One task ended; start the next if the phone queued one.
+    private func finishAndDrain() async {
+        isRunningTask = false
+        agent = nil
+        guard !queued.isEmpty else { return }
+        let next = queued.removeFirst()
+        await start(prompt: next.prompt, requirePin: next.requirePin)
+    }
+
+    /// Abandon everything: the running task and anything waiting behind it. Cancelling one task
+    /// should not silently promote the next one the user has since forgotten about.
+    private func cancelAllTasks() async {
+        queued.removeAll()
+        isRunningTask = false
+        agentTask?.cancel()
+        await agent?.stop()
+        RustAgentBridge.cancel()
     }
 
     /// Retain the fallback runner so `stop()` can reach it.

@@ -50,9 +50,18 @@ enum AgentDataStore {
 
     /// Recent tasks, newest first. Event lists are dropped — the phone shows a summary, and a full
     /// history with every event would blow past the 64 KB frame payload cap.
+    /// How many task files to keep on disk.
+    ///
+    /// `tasks/` was the only unbounded store here — memory is capped and schedules are however many
+    /// the user made, but a file was written per task and never removed. Every history request then
+    /// read and parsed the entire directory to show the newest 30, so opening History got slower for
+    /// the life of the install. 200 is comfortably more than the 30 shown and still a bounded read.
+    private static let maxTaskFiles = 200
+
     static func historyJSON(limit: Int = 30) -> String {
         guard let files = try? FileManager.default.contentsOfDirectory(
             at: tasksDir, includingPropertiesForKeys: nil) else { return "[]" }
+        pruneTaskFiles(files)
 
         var records: [[String: Any]] = []
         for file in files where file.pathExtension == "json" {
@@ -73,6 +82,24 @@ enum AgentDataStore {
         }
         records.sort { ($0["createdAt"] as? Int ?? 0) > ($1["createdAt"] as? Int ?? 0) }
         return encode(Array(records.prefix(limit)))
+    }
+
+    /// Drop the oldest task files once there are more than ``maxTaskFiles``.
+    ///
+    /// Ordered by modification date rather than by parsing each file: the point of pruning is to
+    /// avoid reading everything, so deciding what to delete must not read everything either.
+    private static func pruneTaskFiles(_ files: [URL]) {
+        let jsons = files.filter { $0.pathExtension == "json" }
+        guard jsons.count > maxTaskFiles else { return }
+        let dated = jsons.map { url -> (URL, Date) in
+            let date = (try? url.resourceValues(forKeys: [.contentModificationDateKey]))?
+                .contentModificationDate ?? .distantPast
+            return (url, date)
+        }.sorted { $0.1 > $1.1 }
+        for (url, _) in dated.dropFirst(maxTaskFiles) {
+            try? FileManager.default.removeItem(at: url)
+        }
+        log.info("pruned \(dated.count - maxTaskFiles, privacy: .public) old task files")
     }
 
     private static func encode(_ value: Any) -> String {

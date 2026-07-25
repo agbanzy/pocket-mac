@@ -132,6 +132,15 @@ final class ConnectionController: InputSink {
         pendingPings.removeAll()
         latencyMS = nil
         currentPath = nil
+        // Progress arrives as taskEvent frames, so losing the session means losing the only signal
+        // that a task ever ended. Left as-is the phone showed "running" forever — Stop the only
+        // button, no outcome, while the Mac carried on driving the cursor. The task may well still
+        // be running over there; what is certainly false is that this phone knows anything about it.
+        if agent.isRunning {
+            agent.append(kind: .error, text: "Lost the connection while the task was running. "
+                       + "It may still be going on your Mac — check History.")
+        }
+        agent.pendingPinReason = nil
         if closing != nil { Task { await closing?.close() } }
         if state.isSecured || state == .connecting { state = .idle }
     }

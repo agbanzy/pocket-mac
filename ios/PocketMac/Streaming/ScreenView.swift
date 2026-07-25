@@ -142,6 +142,10 @@ struct ScreenModeView: View {
     let connection: ConnectionController
     let connected: Bool
 
+    /// Which appearance this instance is. See the note on `onDisappear`.
+    @State private var generation = 0
+    @MainActor private static var generation = 0
+
     var body: some View {
         ZStack {
             Color.black
@@ -152,8 +156,18 @@ struct ScreenModeView: View {
                     .foregroundStyle(.white)
             }
         }
-        .onAppear { if connected { connection.startVideo(fps: 30) } }
+        // SwiftUI does not guarantee that the old view's onDisappear runs before the new one's
+        // onAppear. Switching Screen → Ask → Screen quickly could therefore stop the stream and nil
+        // the frame handler *after* the replacement had already installed its own, leaving a live
+        // Screen surface permanently black with nothing to recover it. The generation token makes
+        // teardown idempotent: only the instance that is still current is allowed to tear down.
+        .onAppear {
+            Self.generation += 1
+            generation = Self.generation
+            if connected { connection.startVideo(fps: 30) }
+        }
         .onDisappear {
+            guard generation == Self.generation else { return }  // superseded — not ours to stop
             connection.stopVideo()
             connection.onVideoFrame = nil
         }

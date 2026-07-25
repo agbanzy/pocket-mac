@@ -83,6 +83,14 @@ final class VoiceController {
         Self.requestAuthorizations { _, _ in }
     }
 
+    /// Prime once per launch. `primePermissions` is cheap to call but not free — two XPC round-trips
+    /// to TCC — and it was being called on every return to the Ask tab for an answer the system
+    /// already had. Once both answers are known there is nothing left to ask.
+    func primePermissionsIfNeeded() {
+        guard !(speechAuthorized && micAuthorized) else { return }
+        primePermissions()
+    }
+
     /// Request speech + microphone access, reporting `(granted, problem)` on an arbitrary queue.
     /// Static and `@Sendable` so no isolated `self` is captured.
     private nonisolated static func requestAuthorizations(

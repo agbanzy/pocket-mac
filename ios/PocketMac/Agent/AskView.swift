@@ -6,7 +6,6 @@ import PocketMacKit
 struct AskView: View {
     @Environment(AppModel.self) private var app
     @State private var pin = ""
-    @State private var voice = VoiceController()
     /// Which field, if any, holds the keyboard.
     ///
     /// One enum rather than two independent booleans, because the two fields must never both think
@@ -21,6 +20,8 @@ struct AskView: View {
     private static let pinID = "pin"
 
     private var agent: AgentSession { app.connection.agent }
+    /// Shared with the rest of the app so results are still spoken from another tab.
+    private var voice: VoiceController { app.voice }
     private var connected: Bool { app.connection.state.isSecured }
     private var trimmed: String { agent.draft.trimmingCharacters(in: .whitespacesAndNewlines) }
 
@@ -91,10 +92,6 @@ struct AskView: View {
                 if let last = agent.events.last {
                     withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
                 }
-                // Speak only the outcome — narrating every step would talk over you mid-task.
-                guard let last = agent.events.last,
-                      last.kind == .done || last.kind == .error else { return }
-                voice.speak(last.text)
             }
         }
         .toolbar {
@@ -105,12 +102,18 @@ struct AskView: View {
             }
         }
         .onAppear {
-            // Ask once on arrival so the first mic tap isn't stalled behind two system dialogs.
-            voice.primePermissions()
+            // Ask once per launch, not once per visit. This fires on every return from Screen or
+            // Deck, and each call is two XPC round-trips to TCC for an answer the system already
+            // has. Once the answer is known, stop asking for it.
+            voice.primePermissionsIfNeeded()
         }
         .onDisappear {
-            voice.stopDictation()
-            voice.stopSpeaking()
+            // Only tear down what was actually started. Unconditionally deactivating the audio
+            // session posts an interruption-ended notification to every other audio app on the
+            // phone, so leaving this tab could restart the user's music even though the mic was
+            // never touched. And stopping speech mid-sentence discards the one result they were
+            // listening for — the outcome should finish being spoken.
+            if voice.isListening { voice.stopDictation() }
         }
     }
 

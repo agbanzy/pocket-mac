@@ -39,6 +39,24 @@ struct RemoteView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(surface == .screen && app.pairedMac != nil ? Color.black : PM.color.background)
+        // Announce the outcome from here rather than from AskView. This view outlives the tab
+        // switch, so a task you start on Ask and then leave to watch on Screen still gets spoken —
+        // which is precisely when you are not reading the transcript and most want to be told.
+        .onChange(of: app.connection.agent.events.count) { _, _ in
+            guard let last = app.connection.agent.events.last,
+                  last.kind == .done || last.kind == .error else { return }
+            app.voice.speak(last.text)
+        }
+        // The Mac's screen should not sleep out from under you while you are watching it, and the
+        // flag must be owned by whoever knows which surface is showing — not by each surface, where
+        // one view's teardown could clear it after another has set it.
+        .onChange(of: surface, initial: true) { _, now in
+            UIApplication.shared.isIdleTimerDisabled = (now == .screen && isSecured)
+        }
+        .onChange(of: isSecured) { _, secured in
+            UIApplication.shared.isIdleTimerDisabled = (surface == .screen && secured)
+        }
+        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
     }
 
     // MARK: Hub

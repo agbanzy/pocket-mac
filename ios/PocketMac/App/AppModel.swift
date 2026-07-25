@@ -30,6 +30,15 @@ final class AppModel {
     /// Set when a `pocketmac://pair?…` deep link arrives, to raise the pairing sheet.
     var showPairingSheet = false
 
+    /// Voice for the whole app, not just the Ask tab.
+    ///
+    /// It used to be `@State` inside `AskView`, which meant it was destroyed the moment you switched
+    /// tabs — so a task you started and then left to watch on Screen finished in silence, and an
+    /// outcome being read aloud was cut off mid-sentence by the switch. Speaking the result is
+    /// exactly the feature you want when you are *not* looking at the transcript, so it has to
+    /// outlive the tab that starts it.
+    let voice = VoiceController()
+
     /// Raised once, after the 5th successful session, to invite an open-source coffee tip.
     var showCoffeeSheet = false
     private static let useCountKey = "com.innoedge.pocketmac.useCount"
