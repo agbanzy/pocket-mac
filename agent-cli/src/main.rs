@@ -17,6 +17,7 @@ use agent_core::{
     Memory, TaskEvent, TaskStore, ToolRegistry,
 };
 use agent_llm_anthropic::AnthropicClient;
+use agent_llm_openai::{provider, OpenAiCompatClient};
 use agent_mcp_stdio::McpStdioClient;
 use agent_store_fs::{FsMemory, FsTaskStore};
 use async_trait::async_trait;
@@ -105,9 +106,10 @@ fn usage() -> ! {
     eprintln!(
         "pocketmac-agent — run a task on this computer\n\n\
          USAGE:\n  \
-           pocketmac-agent [--key <KEY>] [--persona <TEXT>] <TASK>\n  \
+           pocketmac-agent [--provider <NAME>] [--model <ID>] [--key <KEY>] <TASK>\n  \
            pocketmac-agent --history\n\n\
-         The API key is read from ANTHROPIC_API_KEY unless --key is given."
+         PROVIDERS: claude (default), grok, openai, ollama, lm-studio, llama.cpp\n\
+         Keys come from ANTHROPIC_API_KEY / XAI_API_KEY / OPENAI_API_KEY, or --key."
     );
     std::process::exit(2)
 }
@@ -120,6 +122,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args().skip(1);
     let mut key = std::env::var("ANTHROPIC_API_KEY").ok();
     let mut persona = None;
+    // Claude by default; --provider swaps in any OpenAI-compatible one (grok, openai, ollama…).
+    let mut provider_id: Option<String> = std::env::var("POCKETMAC_PROVIDER").ok();
+    let mut model_override: Option<String> = None;
     let mut prompt_parts: Vec<String> = Vec::new();
 
     while let Some(arg) = args.next() {
@@ -128,6 +133,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "--help" | "-h" => usage(),
             "--key" => key = args.next(),
             "--persona" => persona = args.next(),
+            "--provider" => provider_id = args.next(),
+            "--model" => model_override = args.next(),
             other => prompt_parts.push(other.to_string()),
         }
     }
@@ -136,11 +143,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if prompt.trim().is_empty() {
         usage();
     }
-    let Some(key) = key.filter(|k| k.starts_with("sk-ant-")) else {
-        eprintln!("No Anthropic API key. Set ANTHROPIC_API_KEY or pass --key.");
-        std::process::exit(2);
-    };
-
     let backend = DesktopBackend::new()?;
     let (w, h) = backend.model_size();
     eprintln!("screen {w}x{h} (model space) · history in {}", dir.join("tasks").display());
@@ -151,7 +153,31 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let memory: Option<Arc<dyn Memory>> =
         FsMemory::new(dir.join("memory.json")).ok().map(|m| Arc::new(m) as Arc<dyn Memory>);
 
-    let llm = AnthropicClient::new(key);
+    // One seam, two providers: Claude speaks the Messages API, everything else the OpenAI shape.
+    let llm: Box<dyn LlmClient> = match provider_id.as_deref() {
+        None | Some("claude") | Some("anthropic") => {
+            let Some(k) = key.filter(|k| k.starts_with("sk-ant-")) else {
+                eprintln!("No Anthropic API key. Set ANTHROPIC_API_KEY, pass --key, \
+                           or choose another provider with --provider grok.");
+                std::process::exit(2);
+            };
+            Box::new(AnthropicClient::new(k))
+        }
+        Some(id) => {
+            let Some(p) = provider(id) else {
+                eprintln!("Unknown provider '{id}'. Try: grok, openai, ollama, lm-studio, llama.cpp.");
+                std::process::exit(2);
+            };
+            match OpenAiCompatClient::from_provider(p, model_override.as_deref(), key.as_deref()) {
+                Ok(c) => {
+                    eprintln!("provider: {} · model {}", p.id,
+                              model_override.as_deref().unwrap_or(p.default_model));
+                    Box::new(c)
+                }
+                Err(e) => { eprintln!("{e}"); std::process::exit(2); }
+            }
+        }
+    };
     let cfg = AgentConfig { persona, ..AgentConfig::default() };
     let cancel = AtomicBool::new(false);
 
@@ -159,7 +185,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &cfg,
         &backend as &dyn ComputerBackend,
         &registry,
-        &llm as &dyn LlmClient,
+        llm.as_ref(),
         &store as &dyn TaskStore,
         &ConsoleEmitter,
         memory.as_ref(),

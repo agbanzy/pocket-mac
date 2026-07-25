@@ -1,16 +1,14 @@
-//! Run the agent against a **local** model — Ollama, LM Studio, llama.cpp, or anything else serving
-//! the OpenAI chat-completions shape. Nothing leaves the machine.
+//! Run the agent against any provider that speaks the OpenAI chat-completions shape — **xAI's Grok**
+//! (`https://api.x.ai/v1`, vision + tool calling), OpenAI itself, or a local server such as Ollama,
+//! LM Studio, or llama.cpp.
 //!
-//! This is the same [`agent_core::LlmClient`] seam the Anthropic client implements, so the phone,
-//! the Mac helper, and the Windows CLI all gain local inference for free: only the client changes.
+//! This is the same [`agent_core::LlmClient`] seam the Anthropic client implements, so Claude and
+//! Grok are interchangeable: the phone, the Mac helper, and the Windows CLI each pick a provider and
+//! nothing else in the stack changes.
 //!
-//! Two caveats, surfaced rather than hidden:
-//!
-//! * **The model must handle images.** Computer use is a vision task — a text-only local model will
-//!   connect happily and then flounder. [`discover`] reports what it found and leaves the choice to
-//!   the caller instead of silently picking something that cannot see.
-//! * **Tool-calling quality varies.** The OpenAI `tools` shape is translated faithfully, but small
-//!   local models follow it far less reliably than Claude does.
+//! One caveat, surfaced rather than hidden: **the model must handle images.** Computer use is a
+//! vision task, so a text-only model will connect happily and then flounder. Grok 4.5 and the
+//! vision-capable local models are fine; a small text-only local model is not.
 
 use agent_core::{
     AgentError, ContentBlock, ImageSource, LlmClient, LlmRequest, LlmResponse, Result, Usage,
@@ -18,11 +16,71 @@ use agent_core::{
 use async_trait::async_trait;
 use serde_json::{json, Value};
 
-/// Endpoints we probe, in rough order of how likely each is to be what someone is running.
+/// A known provider: where it lives, a sensible default model, and whether it needs a key.
+#[derive(Clone, Copy, Debug)]
+pub struct Provider {
+    pub id: &'static str,
+    pub base_url: &'static str,
+    pub default_model: &'static str,
+    /// Remote providers need an API key; local servers ignore it.
+    pub needs_key: bool,
+    /// Environment variable checked for the key when none is passed explicitly.
+    pub key_env: &'static str,
+}
+
+/// Grok 4.5 — vision and tool calling, which is what computer use needs.
+pub const GROK: Provider = Provider {
+    id: "grok",
+    base_url: "https://api.x.ai/v1",
+    default_model: "grok-4.5",
+    needs_key: true,
+    key_env: "XAI_API_KEY",
+};
+
+pub const OPENAI: Provider = Provider {
+    id: "openai",
+    base_url: "https://api.openai.com/v1",
+    default_model: "gpt-4o",
+    needs_key: true,
+    key_env: "OPENAI_API_KEY",
+};
+
+pub const OLLAMA: Provider = Provider {
+    id: "ollama",
+    base_url: "http://127.0.0.1:11434/v1",
+    default_model: "llama3.2-vision",
+    needs_key: false,
+    key_env: "",
+};
+
+pub const LM_STUDIO: Provider = Provider {
+    id: "lm-studio",
+    base_url: "http://127.0.0.1:1234/v1",
+    default_model: "local-model",
+    needs_key: false,
+    key_env: "",
+};
+
+pub const LLAMA_CPP: Provider = Provider {
+    id: "llama.cpp",
+    base_url: "http://127.0.0.1:8080/v1",
+    default_model: "local-model",
+    needs_key: false,
+    key_env: "",
+};
+
+pub const PROVIDERS: &[Provider] = &[GROK, OPENAI, OLLAMA, LM_STUDIO, LLAMA_CPP];
+
+/// Look a provider up by id, e.g. "grok".
+pub fn provider(id: &str) -> Option<Provider> {
+    PROVIDERS.iter().copied().find(|p| p.id.eq_ignore_ascii_case(id))
+}
+
+/// The local-only subset, for discovery.
 pub const WELL_KNOWN: &[(&str, &str)] = &[
-    ("ollama", "http://127.0.0.1:11434/v1"),
-    ("lm-studio", "http://127.0.0.1:1234/v1"),
-    ("llama.cpp", "http://127.0.0.1:8080/v1"),
+    ("ollama", OLLAMA.base_url),
+    ("lm-studio", LM_STUDIO.base_url),
+    ("llama.cpp", LLAMA_CPP.base_url),
 ];
 
 /// A local server that answered, and the models it offers.
@@ -63,23 +121,53 @@ pub async fn discover() -> Vec<LocalServer> {
     found
 }
 
-pub struct LocalClient {
+pub struct OpenAiCompatClient {
     base_url: String,
     model: String,
+    api_key: Option<String>,
     http: reqwest::Client,
 }
 
-impl LocalClient {
+/// Kept for callers that only ever wanted a local server.
+pub type LocalClient = OpenAiCompatClient;
+
+impl OpenAiCompatClient {
     pub fn new(base_url: impl Into<String>, model: impl Into<String>) -> Self {
         Self {
             base_url: base_url.into(),
             model: model.into(),
-            // Local models on modest hardware are slow; a short timeout would look like a crash.
+            api_key: None,
+            // Local models on modest hardware are slow, and Grok reasons for a while; a short
+            // timeout would look like a crash.
             http: reqwest::Client::builder()
                 .timeout(std::time::Duration::from_secs(300))
                 .build()
                 .unwrap_or_default(),
         }
+    }
+
+    pub fn with_key(mut self, key: impl Into<String>) -> Self {
+        let key = key.into();
+        if !key.is_empty() {
+            self.api_key = Some(key);
+        }
+        self
+    }
+
+    /// Build from a preset, falling back to the provider's key environment variable. `model` of
+    /// `None` uses the provider's default.
+    pub fn from_provider(p: Provider, model: Option<&str>, key: Option<&str>) -> Result<Self> {
+        let key = key
+            .map(str::to_string)
+            .or_else(|| if p.key_env.is_empty() { None } else { std::env::var(p.key_env).ok() })
+            .unwrap_or_default();
+        if p.needs_key && key.is_empty() {
+            return Err(AgentError::Llm(format!(
+                "{} needs an API key — set {} or pass one explicitly",
+                p.id, p.key_env
+            )));
+        }
+        Ok(Self::new(p.base_url, model.unwrap_or(p.default_model)).with_key(key))
     }
 }
 
@@ -201,7 +289,7 @@ fn to_openai_tools(tools: &[Value]) -> Vec<Value> {
 }
 
 #[async_trait]
-impl LlmClient for LocalClient {
+impl LlmClient for OpenAiCompatClient {
     async fn complete(&self, req: &LlmRequest) -> Result<LlmResponse> {
         let body = json!({
             "model": self.model,
@@ -210,9 +298,11 @@ impl LlmClient for LocalClient {
             "tools": to_openai_tools(&req.tools),
         });
 
-        let resp = self
-            .http
-            .post(format!("{}/chat/completions", self.base_url))
+        let mut rb = self.http.post(format!("{}/chat/completions", self.base_url));
+        if let Some(key) = &self.api_key {
+            rb = rb.bearer_auth(key);
+        }
+        let resp = rb
             .json(&body)
             .send()
             .await
@@ -332,6 +422,29 @@ mod tests {
         assert_eq!(out[2]["tool_calls"][0]["function"]["name"], "computer");
         assert_eq!(out[3]["role"], "tool");
         assert_eq!(out[3]["tool_call_id"], "c1");
+    }
+
+    #[test]
+    fn grok_preset_points_at_xai_and_needs_a_key() {
+        let g = provider("grok").expect("grok preset");
+        assert_eq!(g.base_url, "https://api.x.ai/v1");
+        assert_eq!(g.default_model, "grok-4.5");
+        assert!(g.needs_key);
+        // Without a key we must fail loudly rather than fire an unauthenticated request.
+        // (No `unwrap_err` — the client deliberately has no Debug impl, because deriving one on a
+        // struct holding an API key is exactly how keys end up in logs.)
+        match OpenAiCompatClient::from_provider(g, None, Some("")) {
+            Err(e) => assert!(e.to_string().contains("XAI_API_KEY"), "unexpected: {e}"),
+            Ok(_) => panic!("a keyless Grok client should not be constructible"),
+        }
+        assert!(matches!(OpenAiCompatClient::from_provider(g, None, Some("xai-test")), Ok(_)));
+    }
+
+    #[test]
+    fn local_providers_need_no_key() {
+        let o = provider("ollama").expect("ollama preset");
+        assert!(!o.needs_key);
+        assert!(matches!(OpenAiCompatClient::from_provider(o, Some("llava"), None), Ok(_)));
     }
 
     #[test]
