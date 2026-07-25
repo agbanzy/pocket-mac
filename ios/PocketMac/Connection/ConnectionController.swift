@@ -192,6 +192,10 @@ final class ConnectionController: InputSink {
             if let frame = reassembler.accept(chunk) {
                 onVideoFrame?(frame.annexB, frame.width, frame.height)
             }
+        case .control(.providerList(let activeId, let availableJson)):
+            activeProvider = activeId
+            providers = (try? JSONDecoder().decode([ProviderOption].self,
+                                                   from: Data(availableJson.utf8))) ?? []
         case .control(.taskEvent(let kind, let text)):
             agent.append(kind: kind, text: text)
         default:
@@ -213,6 +217,21 @@ final class ConnectionController: InputSink {
     }
 
     func stopTask() { send(.control(.stopTask)) }
+
+    // MARK: Model provider
+
+    /// Which providers this Mac can actually run, and which is active. Populated by the Mac's reply.
+    private(set) var providers: [ProviderOption] = []
+    private(set) var activeProvider: String = "claude"
+
+    /// Ask the Mac what it can run. Answered with a `providerList` frame.
+    func requestProviders() { send(.control(.getProviders)) }
+
+    /// Choose the provider for future tasks. The Mac echoes the stored state back, so the UI shows
+    /// what actually took effect rather than an optimistic guess.
+    func setProvider(_ id: String, model: String = "") {
+        send(.control(.setProvider(providerId: id, model: model)))
+    }
 
     /// Answer a paused sensitive action. An empty string denies it.
     func sendPin(_ pin: String) {

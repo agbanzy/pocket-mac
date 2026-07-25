@@ -158,6 +158,17 @@ private actor SessionRunner {
                 await agent?.stop()
             case .pinResponse(let pin):
                 await agent?.providePin(pin)
+            case .setProvider(let providerId, let model):
+                ProviderStore.setActive(id: providerId, model: model)
+                // Echo the new state back so the phone reflects what the Mac actually stored,
+                // rather than optimistically showing a choice that may not have applied.
+                try? await session.send(.control(.providerList(
+                    activeId: ProviderStore.activeId(),
+                    availableJson: ProviderStore.availableJSON())))
+            case .getProviders:
+                try? await session.send(.control(.providerList(
+                    activeId: ProviderStore.activeId(),
+                    availableJson: ProviderStore.availableJSON())))
             default:
                 break
             }

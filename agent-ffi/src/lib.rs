@@ -20,6 +20,8 @@ use agent_core::{
     Memory, TaskEvent, TaskStore, ToolRegistry,
 };
 use agent_llm_anthropic::AnthropicClient;
+use agent_llm_claude_code::ClaudeCodeClient;
+use agent_llm_openai::{provider as openai_provider, OpenAiCompatClient};
 use agent_mcp_stdio::McpStdioClient;
 use agent_store_fs::{FsMemory, FsTaskStore};
 use async_trait::async_trait;
@@ -129,6 +131,49 @@ async fn register_configured_mcp_servers(registry: &mut ToolRegistry, store_dir:
     total
 }
 
+/// Which model backs the agent. Written by the controller (the phone) to `provider.json` beside
+/// the task store, so the choice survives restarts and needs no ABI change to add a provider.
+///
+/// ```json
+/// { "provider": "claude-code" }                       // your subscription, no key
+/// { "provider": "grok", "key": "xai-…" }              // or set XAI_API_KEY
+/// { "provider": "ollama", "model": "llama3.2-vision" } // local, no key
+/// ```
+fn build_llm(store_dir: &str, api_key: &str) -> std::result::Result<Box<dyn LlmClient>, String> {
+    let cfg: serde_json::Value = Path::new(store_dir)
+        .parent()
+        .map(|d| d.join("provider.json"))
+        .and_then(|p| std::fs::read(p).ok())
+        .and_then(|b| serde_json::from_slice(&b).ok())
+        .unwrap_or_else(|| serde_json::json!({}));
+
+    let id = cfg.get("provider").and_then(|v| v.as_str()).unwrap_or("claude");
+    let model = cfg.get("model").and_then(|v| v.as_str());
+    let key = cfg.get("key").and_then(|v| v.as_str()).filter(|k| !k.is_empty());
+
+    match id {
+        // The default stays the Messages API: it has native tool use and is the fastest path.
+        "claude" | "anthropic" => Ok(Box::new(AnthropicClient::new(api_key))),
+        "claude-code" | "subscription" => {
+            if !agent_llm_claude_code::available() {
+                return Err("Claude Code is not installed on this Mac".into());
+            }
+            let mut c = ClaudeCodeClient::new();
+            if let Some(m) = model {
+                c = c.with_model(m);
+            }
+            Ok(Box::new(c))
+        }
+        other => {
+            let p = openai_provider(other)
+                .ok_or_else(|| format!("unknown provider '{other}'"))?;
+            OpenAiCompatClient::from_provider(p, model, key)
+                .map(|c| Box::new(c) as Box<dyn LlmClient>)
+                .map_err(|e| e.to_string())
+        }
+    }
+}
+
 /// Borrow a C string as `&str`; `None` for null or invalid UTF-8.
 ///
 /// # Safety
@@ -184,7 +229,13 @@ pub unsafe extern "C" fn pm_agent_run(
             return 4;
         }
     };
-    let llm = AnthropicClient::new(api_key);
+    let llm = match build_llm(&store_dir, api_key) {
+        Ok(c) => c,
+        Err(e) => {
+            set_last_error(format!("provider: {e}"));
+            return 6;
+        }
+    };
     let emitter = CallbackEmitter { cb, ctx: ctx as usize };
     let registry = ToolRegistry::new();   // MCP servers are added inside the runtime below
     let cfg = AgentConfig { persona, ..AgentConfig::default() };
@@ -211,7 +262,7 @@ pub unsafe extern "C" fn pm_agent_run(
             &cfg,
             &backend as &dyn ComputerBackend,
             &registry,
-            &llm as &dyn LlmClient,
+            llm.as_ref(),
             &store as &dyn TaskStore,
             &emitter as &dyn Emitter,
             memory.as_ref(),

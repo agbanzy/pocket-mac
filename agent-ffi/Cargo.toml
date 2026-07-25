@@ -7,6 +7,8 @@ edition = "2021"
 agent-backend-desktop = { version = "0.1.0", path = "../agent-backend-desktop" }
 agent-core = { version = "0.1.0", path = "../agent-core" }
 agent-llm-anthropic = { version = "0.1.0", path = "../agent-llm-anthropic" }
+agent-llm-claude-code = { version = "0.1.0", path = "../agent-llm-claude-code" }
+agent-llm-openai = { version = "0.1.0", path = "../agent-llm-openai" }
 agent-mcp-stdio = { version = "0.1.0", path = "../agent-mcp-stdio" }
 agent-store-fs = { version = "0.1.0", path = "../agent-store-fs" }
 async-trait = "0.1.91"

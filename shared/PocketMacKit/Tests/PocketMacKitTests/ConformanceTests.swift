@@ -40,6 +40,9 @@ struct ConformanceTests {
             "taskEvent": Int(ControlOpcode.taskEvent.rawValue),
             "stopTask": Int(ControlOpcode.stopTask.rawValue),
             "pinResponse": Int(ControlOpcode.pinResponse.rawValue),
+            "setProvider": Int(ControlOpcode.setProvider.rawValue),
+            "getProviders": Int(ControlOpcode.getProviders.rawValue),
+            "providerList": Int(ControlOpcode.providerList.rawValue),
         ]
         #expect(actual == expected)
     }

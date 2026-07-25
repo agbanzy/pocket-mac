@@ -19,6 +19,8 @@
 		62FA845AAA7F3B8A5CA55F8D /* MacPeerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5774EAD892247301FDD1E3C /* MacPeerStore.swift */; };
 		631006AD2EAD807B043DD8EC /* PocketMacKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6C3327AD3F666CD2FE7AC414 /* PocketMacKit */; };
 		73C574D310CA0E4F24CB9C6D /* LoginItemManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E232B57AD4BDC9B9A142329 /* LoginItemManager.swift */; };
+		8AA8667854B539CB1909DA05 /* ProviderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D711F91C5DFDB72255D147C /* ProviderStore.swift */; };
+		8E9B22BEB71499D4E10D32E8 /* RustAgentBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77D464A90B08D17F563600E /* RustAgentBridge.swift */; };
 		9AAE312D3ADC47552FA4BAD7 /* ScreenStreamer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE3393753244087DB6C40CC5 /* ScreenStreamer.swift */; };
 		AA7B5A02DE059511DFA69D6E /* SessionAccepter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4FA1707C55107E167DF665 /* SessionAccepter.swift */; };
 		FEBB34A2DC9671205F4B9B36 /* AccessibilityAuthorizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A91A981FD1C08C4D3516405 /* AccessibilityAuthorizer.swift */; };
@@ -33,6 +35,7 @@
 		406E10C12645C876707C6302 /* PocketMacHelperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PocketMacHelperApp.swift; sourceTree = "<group>"; };
 		594B34EEB5427FFA35C1647A /* HelperModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperModel.swift; sourceTree = "<group>"; };
 		5A91A981FD1C08C4D3516405 /* AccessibilityAuthorizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityAuthorizer.swift; sourceTree = "<group>"; };
+		5D711F91C5DFDB72255D147C /* ProviderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderStore.swift; sourceTree = "<group>"; };
 		62AC749EBD45E727D8E1DC57 /* RelayReachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayReachability.swift; sourceTree = "<group>"; };
 		6B4F3BDCC6E004820C64E980 /* CGEventTranslator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGEventTranslator.swift; sourceTree = "<group>"; };
 		6E232B57AD4BDC9B9A142329 /* LoginItemManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemManager.swift; sourceTree = "<group>"; };
@@ -45,6 +48,8 @@
 		CB1CFCEC57EE54580DF6E643 /* AgentRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentRunner.swift; sourceTree = "<group>"; };
 		D42E07D09C4D19C7641024A7 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
 		D9B9B9FFBEF98E9329142170 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
+		E77D464A90B08D17F563600E /* RustAgentBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RustAgentBridge.swift; sourceTree = "<group>"; };
+		F3FE103EE0BC024E9688A8F0 /* PocketMacHelper-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PocketMacHelper-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -175,6 +180,9 @@
 			isa = PBXGroup;
 			children = (
 				CB1CFCEC57EE54580DF6E643 /* AgentRunner.swift */,
+				F3FE103EE0BC024E9688A8F0 /* PocketMacHelper-Bridging-Header.h */,
+				5D711F91C5DFDB72255D147C /* ProviderStore.swift */,
+				E77D464A90B08D17F563600E /* RustAgentBridge.swift */,
 			);
 			path = Agent;
 			sourceTree = "<group>";
@@ -211,6 +219,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = F26D8024E2BA6BC7E0606B14 /* Build configuration list for PBXNativeTarget "PocketMacHelper" */;
 			buildPhases = (
+				0FEBA6865E9A086115DB6ABB /* Build Rust agent */,
 				CCA9F2D0C14CB499868D8487 /* Sources */,
 				956BF874CC42DE0CEB020824 /* Frameworks */,
 			);
@@ -263,6 +272,28 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		0FEBA6865E9A086115DB6ABB /* Build Rust agent */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Build Rust agent";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\nexport PATH=\"$HOME/.cargo/bin:/opt/homebrew/bin:$PATH\"\ncd \"$SRCROOT/..\"\ncargo build --release -p agent-ffi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		CCA9F2D0C14CB499868D8487 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -279,8 +310,10 @@
 				3CEAFEF461CF35165FADE39C /* MediaKeySender.swift in Sources */,
 				0398F66BD9A7E42EE1002F48 /* MenuBarContentView.swift in Sources */,
 				164605038C8125627A929A27 /* PocketMacHelperApp.swift in Sources */,
+				8AA8667854B539CB1909DA05 /* ProviderStore.swift in Sources */,
 				3BFA822DE0139DA4CA70B44E /* QRCodeView.swift in Sources */,
 				32ABCE42C60C3C71982F0C26 /* RelayReachability.swift in Sources */,
+				8E9B22BEB71499D4E10D32E8 /* RustAgentBridge.swift in Sources */,
 				9AAE312D3ADC47552FA4BAD7 /* ScreenStreamer.swift in Sources */,
 				AA7B5A02DE059511DFA69D6E /* SessionAccepter.swift in Sources */,
 			);
@@ -364,6 +397,7 @@
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../agent-ffi/include";
 				INFOPLIST_FILE = PocketMacHelper/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -371,9 +405,11 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0.0;
+				OTHER_LDFLAGS = "$(SRCROOT)/../target/release/libpocketmac_agent.a -framework CoreGraphics -framework CoreMedia -framework CoreVideo -framework Carbon -framework ScreenCaptureKit -framework AVFoundation -framework IOKit";
 				PRODUCT_BUNDLE_IDENTIFIER = com.innoedge.pocketmac.helper;
 				PRODUCT_NAME = PocketMacHelper;
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "PocketMacHelper/Agent/PocketMacHelper-Bridging-Header.h";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 			};
@@ -391,6 +427,7 @@
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../agent-ffi/include";
 				INFOPLIST_FILE = PocketMacHelper/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -398,9 +435,11 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0.0;
+				OTHER_LDFLAGS = "$(SRCROOT)/../target/release/libpocketmac_agent.a -framework CoreGraphics -framework CoreMedia -framework CoreVideo -framework Carbon -framework ScreenCaptureKit -framework AVFoundation -framework IOKit";
 				PRODUCT_BUNDLE_IDENTIFIER = com.innoedge.pocketmac.helper;
 				PRODUCT_NAME = PocketMacHelper;
 				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "PocketMacHelper/Agent/PocketMacHelper-Bridging-Header.h";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 			};

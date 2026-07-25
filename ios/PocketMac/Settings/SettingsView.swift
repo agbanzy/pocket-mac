@@ -33,6 +33,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(spacing: PM.space.xl) {
                     connectionSection
+                    ProviderPicker()
                     controlSection
                     if app.pairedMac != nil { pairedSection }
                     aboutSection

@@ -35,6 +35,10 @@ export enum ControlOpcode {
   TaskEvent = 8,
   StopTask = 9,
   PinResponse = 10,
+  // Model provider selection (the controller chooses which brain runs the task).
+  SetProvider = 11,
+  GetProviders = 12,
+  ProviderList = 13,
 }
 
 // Progress events streamed Mac -> client while an AI task runs (ControlFrame.swift TaskEventKind).
@@ -91,7 +95,10 @@ export type ControlFrame =
   | { t: 'runTask'; prompt: string; requirePin: boolean }
   | { t: 'taskEvent'; kind: TaskEventKind; text: string }
   | { t: 'stopTask' }
-  | { t: 'pinResponse'; pin: string };
+  | { t: 'pinResponse'; pin: string }
+  | { t: 'setProvider'; providerId: string; model: string }
+  | { t: 'getProviders' }
+  | { t: 'providerList'; activeId: string; availableJson: string };
 
 export type InputFrame =
   | { t: 'mouseMove'; dx: number; dy: number }
@@ -198,6 +205,16 @@ function encodeControl(c: ControlFrame, w: BinaryWriter): number {
     case 'pinResponse':
       w.writeString(c.pin);
       return ControlOpcode.PinResponse;
+    case 'setProvider':
+      w.writeString(c.providerId);
+      w.writeString(c.model);
+      return ControlOpcode.SetProvider;
+    case 'getProviders':
+      return ControlOpcode.GetProviders;
+    case 'providerList':
+      w.writeString(c.activeId);
+      w.writeString(c.availableJson);
+      return ControlOpcode.ProviderList;
   }
 }
 
@@ -315,6 +332,12 @@ function decodeControl(opcode: number, r: BinaryReader): ControlFrame {
       return { t: 'stopTask' };
     case ControlOpcode.PinResponse:
       return { t: 'pinResponse', pin: r.readString() };
+    case ControlOpcode.SetProvider:
+      return { t: 'setProvider', providerId: r.readString(), model: r.readString() };
+    case ControlOpcode.GetProviders:
+      return { t: 'getProviders' };
+    case ControlOpcode.ProviderList:
+      return { t: 'providerList', activeId: r.readString(), availableJson: r.readString() };
     default:
       throw new CodecError(`unsupported control opcode ${opcode}`);
   }

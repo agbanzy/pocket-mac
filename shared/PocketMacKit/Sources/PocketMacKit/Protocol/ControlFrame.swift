@@ -14,6 +14,10 @@ enum ControlOpcode: UInt8 {
     case taskEvent = 8
     case stopTask = 9
     case pinResponse = 10
+    // Model provider selection (phone chooses which brain runs the task).
+    case setProvider = 11
+    case getProviders = 12
+    case providerList = 13
 }
 
 /// Progress events streamed Mac → phone while an AI task runs. Text-only (the payload cap is 64 KB
@@ -66,6 +70,16 @@ public enum ControlFrame: Sendable, Equatable {
     /// Phone → Mac: the PIN the user entered to allow a paused sensitive action (empty = deny).
     case pinResponse(pin: String)
 
+    /// Phone → Mac: run future tasks on this provider. `model` may be empty for the default.
+    case setProvider(providerId: String, model: String)
+
+    /// Phone → Mac: which providers can this Mac actually use right now?
+    case getProviders
+
+    /// Mac → phone: the active provider plus a JSON array describing what is available. JSON keeps
+    /// the payload one field wide, so adding a provider attribute needs no protocol change.
+    case providerList(activeId: String, availableJson: String)
+
     var opcode: ControlOpcode {
         switch self {
         case .hello: .hello
@@ -79,6 +93,9 @@ public enum ControlFrame: Sendable, Equatable {
         case .taskEvent: .taskEvent
         case .stopTask: .stopTask
         case .pinResponse: .pinResponse
+        case .setProvider: .setProvider
+        case .getProviders: .getProviders
+        case .providerList: .providerList
         }
     }
 }

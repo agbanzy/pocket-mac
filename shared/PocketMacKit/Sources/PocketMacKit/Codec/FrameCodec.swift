@@ -86,6 +86,14 @@ public struct FrameCodec: FrameCoding {
             break
         case .pinResponse(let pin):
             w.writeString(pin)
+        case .setProvider(let providerId, let model):
+            w.writeString(providerId)
+            w.writeString(model)
+        case .getProviders:
+            break
+        case .providerList(let activeId, let availableJson):
+            w.writeString(activeId)
+            w.writeString(availableJson)
         }
     }
 
@@ -201,6 +209,14 @@ public struct FrameCodec: FrameCoding {
             return .stopTask
         case .pinResponse:
             return .pinResponse(pin: try r.readString())
+        case .setProvider:
+            let id = try r.readString()
+            return .setProvider(providerId: id, model: try r.readString())
+        case .getProviders:
+            return .getProviders
+        case .providerList:
+            let active = try r.readString()
+            return .providerList(activeId: active, availableJson: try r.readString())
         }
     }
 
