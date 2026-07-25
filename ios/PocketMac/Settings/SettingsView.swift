@@ -34,6 +34,7 @@ struct SettingsView: View {
                 VStack(spacing: PM.space.xl) {
                     connectionSection
                     ProviderPicker()
+                    TrustView()
                     controlSection
                     if app.pairedMac != nil { pairedSection }
                     aboutSection

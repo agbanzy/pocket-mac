@@ -24,6 +24,11 @@ enum ControlOpcode: UInt8 {
     case forgetMemory = 16
     case getHistory = 17
     case historyList = 18
+    // Scheduled tasks — the assistant acting without being asked.
+    case getSchedules = 19
+    case scheduleList = 20
+    case setSchedule = 21
+    case removeSchedule = 22
 }
 
 /// Progress events streamed Mac → phone while an AI task runs. Text-only (the payload cap is 64 KB
@@ -98,6 +103,15 @@ public enum ControlFrame: Sendable, Equatable {
     /// Mac → phone: task history, as JSON.
     case historyList(tasksJson: String)
 
+    /// Phone → Mac: what runs on a schedule?
+    case getSchedules
+    /// Mac → phone: the schedule, as JSON.
+    case scheduleList(schedulesJson: String)
+    /// Phone → Mac: add or update one scheduled task (JSON, keyed by id).
+    case setSchedule(scheduleJson: String)
+    /// Phone → Mac: drop a scheduled task.
+    case removeSchedule(id: String)
+
     var opcode: ControlOpcode {
         switch self {
         case .hello: .hello
@@ -119,6 +133,10 @@ public enum ControlFrame: Sendable, Equatable {
         case .forgetMemory: .forgetMemory
         case .getHistory: .getHistory
         case .historyList: .historyList
+        case .getSchedules: .getSchedules
+        case .scheduleList: .scheduleList
+        case .setSchedule: .setSchedule
+        case .removeSchedule: .removeSchedule
         }
     }
 }

@@ -45,6 +45,11 @@ export enum ControlOpcode {
   ForgetMemory = 16,
   GetHistory = 17,
   HistoryList = 18,
+  // Scheduled tasks — the assistant acting without being asked.
+  GetSchedules = 19,
+  ScheduleList = 20,
+  SetSchedule = 21,
+  RemoveSchedule = 22,
 }
 
 // Progress events streamed Mac -> client while an AI task runs (ControlFrame.swift TaskEventKind).
@@ -109,7 +114,11 @@ export type ControlFrame =
   | { t: 'memoryList'; entriesJson: string }
   | { t: 'forgetMemory'; key: string }
   | { t: 'getHistory' }
-  | { t: 'historyList'; tasksJson: string };
+  | { t: 'historyList'; tasksJson: string }
+  | { t: 'getSchedules' }
+  | { t: 'scheduleList'; schedulesJson: string }
+  | { t: 'setSchedule'; scheduleJson: string }
+  | { t: 'removeSchedule'; id: string };
 
 export type InputFrame =
   | { t: 'mouseMove'; dx: number; dy: number }
@@ -239,6 +248,17 @@ function encodeControl(c: ControlFrame, w: BinaryWriter): number {
     case 'historyList':
       w.writeString(c.tasksJson);
       return ControlOpcode.HistoryList;
+    case 'getSchedules':
+      return ControlOpcode.GetSchedules;
+    case 'scheduleList':
+      w.writeString(c.schedulesJson);
+      return ControlOpcode.ScheduleList;
+    case 'setSchedule':
+      w.writeString(c.scheduleJson);
+      return ControlOpcode.SetSchedule;
+    case 'removeSchedule':
+      w.writeString(c.id);
+      return ControlOpcode.RemoveSchedule;
   }
 }
 
@@ -372,6 +392,14 @@ function decodeControl(opcode: number, r: BinaryReader): ControlFrame {
       return { t: 'getHistory' };
     case ControlOpcode.HistoryList:
       return { t: 'historyList', tasksJson: r.readString() };
+    case ControlOpcode.GetSchedules:
+      return { t: 'getSchedules' };
+    case ControlOpcode.ScheduleList:
+      return { t: 'scheduleList', schedulesJson: r.readString() };
+    case ControlOpcode.SetSchedule:
+      return { t: 'setSchedule', scheduleJson: r.readString() };
+    case ControlOpcode.RemoveSchedule:
+      return { t: 'removeSchedule', id: r.readString() };
     default:
       throw new CodecError(`unsupported control opcode ${opcode}`);
   }

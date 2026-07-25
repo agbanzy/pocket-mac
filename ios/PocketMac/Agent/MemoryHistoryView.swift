@@ -34,7 +34,7 @@ struct MemoryHistoryView: View {
     @State private var tab: Tab = .memory
 
     enum Tab: String, CaseIterable, Identifiable {
-        case memory = "Memory", history = "History"
+        case memory = "Memory", history = "History", schedule = "Schedule"
         var id: String { rawValue }
     }
 
@@ -51,10 +51,12 @@ struct MemoryHistoryView: View {
 
                 if !connected {
                     empty("Connect to your Mac", "This lives on the Mac, not the phone.")
-                } else if tab == .memory {
-                    memoryList
                 } else {
-                    historyList
+                    switch tab {
+                    case .memory: memoryList
+                    case .history: historyList
+                    case .schedule: ScheduleView()
+                    }
                 }
                 Spacer(minLength: 0)
             }
@@ -76,7 +78,11 @@ struct MemoryHistoryView: View {
 
     private func refresh() {
         guard connected else { return }
-        tab == .memory ? app.connection.requestMemory() : app.connection.requestHistory()
+        switch tab {
+        case .memory: app.connection.requestMemory()
+        case .history: app.connection.requestHistory()
+        case .schedule: app.connection.requestSchedules()
+        }
     }
 
     // MARK: Memory

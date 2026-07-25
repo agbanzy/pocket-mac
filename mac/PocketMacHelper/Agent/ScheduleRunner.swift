@@ -160,6 +160,33 @@ actor ScheduleRunner {
         (try? String(contentsOf: scheduleURL, encoding: .utf8)) ?? "[]"
     }
 
+    /// Add or replace one entry, keyed by id. The phone sends a whole entry so adding a field later
+    /// needs no protocol change; the next run time is computed here because only the Mac knows its
+    /// own timezone.
+    static func upsert(json: String) {
+        guard var entry = try? JSONDecoder().decode(Entry.self, from: Data(json.utf8)) else { return }
+        let now = UInt64(Date().timeIntervalSince1970)
+        if entry.next_run_unix <= now { entry.next_run_unix = nextRun(entry.cadence, after: now) }
+        var all = loadStatic()
+        if let i = all.firstIndex(where: { $0.id == entry.id }) { all[i] = entry } else { all.append(entry) }
+        saveStatic(all)
+    }
+
+    static func remove(id: String) {
+        saveStatic(loadStatic().filter { $0.id != id })
+    }
+
+    private static func loadStatic() -> [Entry] {
+        guard let data = try? Data(contentsOf: scheduleURL),
+              let entries = try? JSONDecoder().decode([Entry].self, from: data) else { return [] }
+        return entries
+    }
+
+    private static func saveStatic(_ entries: [Entry]) {
+        guard let data = try? JSONEncoder().encode(entries) else { return }
+        try? data.write(to: scheduleURL, options: .atomic)
+    }
+
     // MARK: Notifications
 
     private func requestNotificationPermission() {

@@ -104,6 +104,14 @@ public struct FrameCodec: FrameCoding {
             break
         case .historyList(let tasksJson):
             w.writeString(tasksJson)
+        case .getSchedules:
+            break
+        case .scheduleList(let schedulesJson):
+            w.writeString(schedulesJson)
+        case .setSchedule(let scheduleJson):
+            w.writeString(scheduleJson)
+        case .removeSchedule(let id):
+            w.writeString(id)
         }
     }
 
@@ -237,6 +245,14 @@ public struct FrameCodec: FrameCoding {
             return .getHistory
         case .historyList:
             return .historyList(tasksJson: try r.readString())
+        case .getSchedules:
+            return .getSchedules
+        case .scheduleList:
+            return .scheduleList(schedulesJson: try r.readString())
+        case .setSchedule:
+            return .setSchedule(scheduleJson: try r.readString())
+        case .removeSchedule:
+            return .removeSchedule(id: try r.readString())
         }
     }
 

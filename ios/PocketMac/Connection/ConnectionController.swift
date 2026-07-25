@@ -192,6 +192,9 @@ final class ConnectionController: InputSink {
             if let frame = reassembler.accept(chunk) {
                 onVideoFrame?(frame.annexB, frame.width, frame.height)
             }
+        case .control(.scheduleList(let schedulesJson)):
+            schedules = (try? JSONDecoder().decode([Schedule].self,
+                                                   from: Data(schedulesJson.utf8))) ?? []
         case .control(.memoryList(let entriesJson)):
             memory = (try? JSONDecoder().decode([MemoryFact].self,
                                                 from: Data(entriesJson.utf8))) ?? []
@@ -251,6 +254,23 @@ final class ConnectionController: InputSink {
     /// Make the agent forget one fact. The Mac replies with the updated list, so the UI shows what
     /// actually happened rather than removing the row optimistically.
     func forgetMemory(_ key: String) { send(.control(.forgetMemory(key: key))) }
+
+    // MARK: Schedules
+
+    /// What the Mac runs on its own. The Mac owns the schedule; the phone is a view and an editor.
+    private(set) var schedules: [Schedule] = []
+
+    func requestSchedules() { send(.control(.getSchedules)) }
+
+    /// Add or update. `next_run_unix == 0` asks the Mac to compute the first run in *its* timezone —
+    /// the phone may be somewhere else, and a morning briefing should follow the machine.
+    func setSchedule(_ s: Schedule) {
+        guard let data = try? JSONEncoder().encode(s),
+              let json = String(data: data, encoding: .utf8) else { return }
+        send(.control(.setSchedule(scheduleJson: json)))
+    }
+
+    func removeSchedule(_ id: String) { send(.control(.removeSchedule(id: id))) }
 
     /// Answer a paused sensitive action. An empty string denies it.
     func sendPin(_ pin: String) {

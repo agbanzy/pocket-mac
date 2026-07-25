@@ -180,6 +180,17 @@ private actor SessionRunner {
             case .getHistory:
                 try? await session.send(.control(.historyList(
                     tasksJson: AgentDataStore.historyJSON())))
+            case .getSchedules:
+                try? await session.send(.control(.scheduleList(
+                    schedulesJson: ScheduleRunner.listJSON())))
+            case .setSchedule(let json):
+                ScheduleRunner.upsert(json: json)
+                try? await session.send(.control(.scheduleList(
+                    schedulesJson: ScheduleRunner.listJSON())))
+            case .removeSchedule(let id):
+                ScheduleRunner.remove(id: id)
+                try? await session.send(.control(.scheduleList(
+                    schedulesJson: ScheduleRunner.listJSON())))
             default:
                 break
             }

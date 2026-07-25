@@ -20,8 +20,11 @@
 		542A0C067612DC06E50C4523 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BD77BF02746744738C2A56 /* RootView.swift */; };
 		5571542DF45112654E1DD6F6 /* VoiceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC3318F757335F9EF9F29D3 /* VoiceController.swift */; };
 		6919947C9553F5DD6252CA4D /* ScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 775257A500399D8CE25AD3DD /* ScreenView.swift */; };
+		6BFA0B93E8037E66F8237C4A /* PresenceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D19BFAA6185C503CAE5CD6B /* PresenceView.swift */; };
+		6C465A42FF41F8103D1C5C65 /* ScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FBDD6D69FB600C365A604E6 /* ScheduleView.swift */; };
 		71E4CFBC4304DD48FCAF1825 /* ProviderPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D75E1B21719AD01B17AC53 /* ProviderPicker.swift */; };
 		7FE9C2D47D46AB394EB2D79C /* TrackpadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D77DDEAFFAF80151742F320 /* TrackpadView.swift */; };
+		81DA8F9D75C82C84BB36DC32 /* TrustView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8FF4A8796126BF4F1925CB7 /* TrustView.swift */; };
 		89AC945D6789437BC50243C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5A96A0DEA25E646502214759 /* Assets.xcassets */; };
 		8C9F71C215D556F71E23FA63 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DEED855216805B6A5B97418E /* PrivacyInfo.xcprivacy */; };
 		8D6E0B42CC8A4DB6D0C96718 /* ScreenControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD18E4B291D81B6EAA320B7E /* ScreenControlView.swift */; };
@@ -60,7 +63,9 @@
 		4E3ADD8FB0975161B28BB6A7 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		56693A542CF8CBCB8423E4FE /* PocketMacKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PocketMacKit; path = ../shared/PocketMacKit; sourceTree = SOURCE_ROOT; };
 		5A96A0DEA25E646502214759 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5D19BFAA6185C503CAE5CD6B /* PresenceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresenceView.swift; sourceTree = "<group>"; };
 		5D87C3B2DAE59397DC624539 /* ConnectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionState.swift; sourceTree = "<group>"; };
+		5FBDD6D69FB600C365A604E6 /* ScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleView.swift; sourceTree = "<group>"; };
 		67315C798F9966398EC0A54C /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		73674E7E710E3AE54AC1D8E9 /* CoffeeSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoffeeSheetView.swift; sourceTree = "<group>"; };
 		76A668B6F886B281AA354327 /* ConnectionChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionChip.swift; sourceTree = "<group>"; };
@@ -76,6 +81,7 @@
 		9EC3318F757335F9EF9F29D3 /* VoiceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceController.swift; sourceTree = "<group>"; };
 		A4B8DB14DEFEAAD0930226E2 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		A5D75E1B21719AD01B17AC53 /* ProviderPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderPicker.swift; sourceTree = "<group>"; };
+		A8FF4A8796126BF4F1925CB7 /* TrustView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustView.swift; sourceTree = "<group>"; };
 		B8BBECE0B127B85F5C9FB9B2 /* PocketMacApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PocketMacApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB072B97E6357838EE10A1F1 /* HapticsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsEngine.swift; sourceTree = "<group>"; };
 		C15038AA3068151AF20DFA86 /* TileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileModel.swift; sourceTree = "<group>"; };
@@ -193,6 +199,8 @@
 				93D05453C2094CB5F2DF7EE1 /* AgentSession.swift */,
 				FF584E281A1945F157AB8002 /* AskView.swift */,
 				E7BFAF3F975BC3C413AB4DD0 /* MemoryHistoryView.swift */,
+				5D19BFAA6185C503CAE5CD6B /* PresenceView.swift */,
+				5FBDD6D69FB600C365A604E6 /* ScheduleView.swift */,
 				9EC3318F757335F9EF9F29D3 /* VoiceController.swift */,
 			);
 			path = Agent;
@@ -275,6 +283,7 @@
 			children = (
 				A5D75E1B21719AD01B17AC53 /* ProviderPicker.swift */,
 				E237E409CEDA62A800BFF456 /* SettingsView.swift */,
+				A8FF4A8796126BF4F1925CB7 /* TrustView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -378,10 +387,12 @@
 				BC1B271E2C709BC971731586 /* PathSelector.swift in Sources */,
 				F4D866C8A6BA55B65FD9131D /* PeerVault.swift in Sources */,
 				AFE5D5CFB3CB431F24A9084E /* PocketMacApp.swift in Sources */,
+				6BFA0B93E8037E66F8237C4A /* PresenceView.swift in Sources */,
 				71E4CFBC4304DD48FCAF1825 /* ProviderPicker.swift in Sources */,
 				AFD9884C69663356C05F445F /* QRScannerView.swift in Sources */,
 				B37511E288B9F39E5A07880E /* RemoteView.swift in Sources */,
 				542A0C067612DC06E50C4523 /* RootView.swift in Sources */,
+				6C465A42FF41F8103D1C5C65 /* ScheduleView.swift in Sources */,
 				8D6E0B42CC8A4DB6D0C96718 /* ScreenControlView.swift in Sources */,
 				6919947C9553F5DD6252CA4D /* ScreenView.swift in Sources */,
 				DDB1748D2F62553A1395DBDC /* SettingsView.swift in Sources */,
@@ -390,6 +401,7 @@
 				ECD786265C6896D31BFC3191 /* TileModel.swift in Sources */,
 				EE5C4B292AFB868E0A4CBF33 /* TrackpadSurface.swift in Sources */,
 				7FE9C2D47D46AB394EB2D79C /* TrackpadView.swift in Sources */,
+				81DA8F9D75C82C84BB36DC32 /* TrustView.swift in Sources */,
 				920E6A9970187345681DDD7D /* Typography.swift in Sources */,
 				5571542DF45112654E1DD6F6 /* VoiceController.swift in Sources */,
 			);
@@ -405,7 +417,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 7T7BJT2AU7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -432,7 +444,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 7T7BJT2AU7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;

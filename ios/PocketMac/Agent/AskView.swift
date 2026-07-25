@@ -20,6 +20,10 @@ struct AskView: View {
 
     var body: some View {
         VStack(spacing: PM.space.lg) {
+            PresenceView(
+                phase: .from(agent: agent, listening: voice.isListening,
+                             speaking: voice.phase == .speaking),
+                caption: agent.events.last?.text ?? "")
             promptCard
             runButton
             if let reason = agent.pendingPinReason { pinCard(reason) }

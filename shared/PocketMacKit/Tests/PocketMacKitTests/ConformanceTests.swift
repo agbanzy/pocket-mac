@@ -48,6 +48,10 @@ struct ConformanceTests {
             "forgetMemory": Int(ControlOpcode.forgetMemory.rawValue),
             "getHistory": Int(ControlOpcode.getHistory.rawValue),
             "historyList": Int(ControlOpcode.historyList.rawValue),
+            "getSchedules": Int(ControlOpcode.getSchedules.rawValue),
+            "scheduleList": Int(ControlOpcode.scheduleList.rawValue),
+            "setSchedule": Int(ControlOpcode.setSchedule.rawValue),
+            "removeSchedule": Int(ControlOpcode.removeSchedule.rawValue),
         ]
         #expect(actual == expected)
     }
