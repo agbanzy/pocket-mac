@@ -1,0 +1,8 @@
+# Cross-linking Windows binaries from macOS/Linux. `cargo build --target x86_64-pc-windows-gnu`
+# then produces a real .exe without a Windows machine — the MSVC target can only be *checked*
+# here, because its linker ships with Visual Studio.
+#
+# Requires: brew install mingw-w64   (or the distro's mingw-w64 package)
+[target.x86_64-pc-windows-gnu]
+linker = "x86_64-w64-mingw32-gcc"
+ar = "x86_64-w64-mingw32-ar"
