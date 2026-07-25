@@ -30,3 +30,6 @@ proof-*.png
 
 # Build proof screenshots
 ios-*.png
+
+# Rust workspace build output
+/target/

@@ -24,8 +24,8 @@ targets:
         script: |
           set -euo pipefail
           export PATH="$HOME/.cargo/bin:/opt/homebrew/bin:$PATH"
-          cd "$SRCROOT/../agent-ffi"
-          cargo build --release
+          cd "$SRCROOT/.."
+          cargo build --release -p agent-ffi
     info:
       path: PocketMacHelper/Resources/Info.plist
       properties:
@@ -50,7 +50,7 @@ targets:
         # .dylib in that directory the linker picks the dylib and bakes in an absolute build path,
         # which breaks the moment the app leaves this machine.
         OTHER_LDFLAGS: >-
-          $(SRCROOT)/../agent-ffi/target/release/libpocketmac_agent.a
+          $(SRCROOT)/../target/release/libpocketmac_agent.a
           -framework CoreGraphics -framework CoreMedia -framework CoreVideo
           -framework Carbon -framework ScreenCaptureKit -framework AVFoundation
           -framework IOKit

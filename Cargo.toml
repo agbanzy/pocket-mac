@@ -1,0 +1,37 @@
+# The shared agent brain. One workspace so every crate resolves the same dependency versions and
+# shares a single target directory — seven independent crates were rebuilding (and storing) the
+# same dependency tree seven times over.
+[workspace]
+resolver = "2"
+members = [
+    "agent-core",              # the portable agent loop + seams
+    "agent-llm-anthropic",     # LlmClient: Claude Messages API + prompt caching
+    "agent-backend-desktop",   # ComputerBackend: Windows / macOS / Linux capture + input
+    "agent-mcp-stdio",         # McpClient: MCP servers over JSON-RPC/stdio
+    "agent-store-fs",          # TaskStore: durable task history
+    "agent-ffi",               # C ABI for native hosts (Swift, C#, Kotlin/JNI)
+    "agent-cli",               # standalone `pocketmac-agent` binary (the Windows/Linux host)
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[workspace.dependencies]
+agent-core = { path = "agent-core" }
+agent-llm-anthropic = { path = "agent-llm-anthropic" }
+agent-backend-desktop = { path = "agent-backend-desktop" }
+agent-mcp-stdio = { path = "agent-mcp-stdio" }
+agent-store-fs = { path = "agent-store-fs" }
+async-trait = "0.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = "1"
+
+# Optimised release builds for the shipped library: the agent is latency-sensitive and the binary
+# is embedded in a signed app, so size and speed both matter.
+[profile.release]
+opt-level = 3
+lto = "thin"
+strip = "debuginfo"
