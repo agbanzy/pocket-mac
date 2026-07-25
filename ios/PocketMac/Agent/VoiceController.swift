@@ -19,6 +19,19 @@ import SwiftUI
 ///
 /// Playback and recording also cannot share one session configuration: speaking while listening
 /// reconfigures the route underneath a running engine. Speech is therefore deferred while dictating.
+///
+/// ## The isolation rule (this has crashed three shipped builds)
+///
+/// Every closure handed to AVFoundation, Speech, or TCC **must** be created from a `nonisolated`
+/// context. Written inline in a method of this `@MainActor` type, a closure silently inherits main
+/// actor isolation; Swift 6 then asserts the executor when the framework runs it, and since these
+/// frameworks call back on background queues — or, for the audio tap, on the realtime render thread
+/// — the assertion trips and takes the process down with `dispatch_assert_queue_fail`.
+///
+/// `SWIFT_STRICT_CONCURRENCY: complete` does **not** catch this. `AVAudioNodeTapBlock` and friends
+/// are unannotated Objective-C typealiases, so the compiler sees a synchronous call in the same
+/// isolation domain and stays silent. The `nonisolated static` helpers below are the whole defence.
+/// If you add another framework callback, add another helper — do not write the closure inline.
 @MainActor
 @Observable
 final class VoiceController {
@@ -102,6 +115,23 @@ final class VoiceController {
         }
     }
 
+    /// Install the microphone tap that feeds the recogniser.
+    ///
+    /// **`nonisolated` is load-bearing.** AVFAudio invokes this block on its realtime audio render
+    /// thread, once per buffer. Written inline in a `@MainActor` method it inherits main actor
+    /// isolation and traps on the very first buffer — which is precisely what killed build 12 the
+    /// moment the mic button was tapped. Nothing here touches isolated state; it only forwards the
+    /// buffer to the request, which is safe to feed from the audio thread.
+    private nonisolated static func installTap(
+        on input: AVAudioInputNode,
+        format: AVAudioFormat,
+        feeding request: SFSpeechAudioBufferRecognitionRequest
+    ) {
+        input.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
+            request.append(buffer)
+        }
+    }
+
     private var speechAuthorized: Bool {
         SFSpeechRecognizer.authorizationStatus() == .authorized
     }
@@ -149,6 +179,26 @@ final class VoiceController {
             try session.setCategory(.record, mode: .measurement, options: .duckOthers)
             try session.setActive(true, options: .notifyOthersOnDeactivation)
 
+            // Everything past this point initialises the remote IO audio unit, and when no input
+            // hardware answers the RPC, AudioToolbox calls `abort()` inside `AURemoteIO::Initialize`
+            // — a process kill Swift cannot catch. So the checks have to happen *before* the engine
+            // is touched, and they have to be checks that are actually true.
+            //
+            // The Simulator is excluded outright. It reports `isInputAvailable == true` and then
+            // aborts anyway on `engine.inputNode`, so no session-level property can be trusted to
+            // predict it; only the build environment can. Dictation is device-only by nature.
+            #if targetEnvironment(simulator)
+            try? session.setActive(false, options: .notifyOthersOnDeactivation)
+            problem = "Dictation needs a real device — the Simulator has no microphone."
+            return
+            #else
+            // On device, an empty input route means nothing is there to record from.
+            guard session.isInputAvailable, !session.currentRoute.inputs.isEmpty else {
+                try? session.setActive(false, options: .notifyOthersOnDeactivation)
+                problem = "No microphone is available right now."
+                return
+            }
+
             // Built AFTER the session is active, so the input node reports the real hardware format.
             let engine = AVAudioEngine()
             let input = engine.inputNode
@@ -165,9 +215,7 @@ final class VoiceController {
             let request = SFSpeechAudioBufferRecognitionRequest()
             request.shouldReportPartialResults = true
 
-            input.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
-                request.append(buffer)
-            }
+            Self.installTap(on: input, format: format, feeding: request)
             engine.prepare()
             try engine.start()
 
@@ -188,6 +236,7 @@ final class VoiceController {
                     if finished { self.stopDictation() }
                 }
             }
+            #endif
         } catch {
             problem = "Couldn’t start the microphone: \(error.localizedDescription)"
             teardown()

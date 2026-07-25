@@ -8,6 +8,10 @@ struct AskView: View {
     @State private var prompt = ""
     @State private var pin = ""
     @State private var voice = VoiceController()
+    @FocusState private var promptFocused: Bool
+
+    /// Scroll anchor for the composer, so focusing the field brings it above the keyboard.
+    private static let composerID = "composer"
 
     private var agent: AgentSession { app.connection.agent }
     private var connected: Bool { app.connection.state.isSecured }
@@ -18,23 +22,65 @@ struct AskView: View {
                                "Take a screenshot and describe it",
                                "Open Notes and start a new note"]
 
+    /// One scroll container for the whole surface.
+    ///
+    /// The transcript deliberately does **not** get its own `ScrollView`. With the keyboard up, the
+    /// visible height roughly halves; if the page itself can't scroll, the Run button and the newest
+    /// events sit under the keyboard with no way to reach them. A single scroll view also means one
+    /// unambiguous target for the drag-to-dismiss gesture, instead of two nested ones fighting.
     var body: some View {
-        VStack(spacing: PM.space.lg) {
-            PresenceView(
-                phase: .from(agent: agent, listening: voice.isListening,
-                             speaking: voice.phase == .speaking),
-                caption: agent.events.last?.text ?? "")
-            promptCard
-            runButton
-            if let reason = agent.pendingPinReason { pinCard(reason) }
-            activityLog
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: PM.space.lg) {
+                    // The orb is status, and status is not what you need while you are writing —
+                    // it costs ~300pt that the keyboard has just taken away. Collapsing it while
+                    // the field has focus is what actually keeps the composer and Run button on
+                    // screen; scrolling alone races the keyboard animation and loses.
+                    if !promptFocused {
+                        PresenceView(
+                            phase: .from(agent: agent, listening: voice.isListening,
+                                         speaking: voice.phase == .speaking),
+                            caption: agent.events.last?.text ?? "")
+                            .transition(.opacity.combined(with: .scale(scale: 0.92)))
+                    }
+                    promptCard
+                        .id(Self.composerID)
+                    runButton
+                    if let reason = agent.pendingPinReason { pinCard(reason) }
+                    activityLog
+                }
+                .padding(PM.space.lg)
+                .frame(maxWidth: .infinity, alignment: .top)
+                .animation(.snappy, value: promptFocused)
+            }
+            // Drag down anywhere to put the keyboard away — the gesture people already know from
+            // Messages and Mail, and the only one that works when the Done button is off screen.
+            .scrollDismissesKeyboard(.interactively)
+            .onChange(of: promptFocused) { _, focused in
+                guard focused else { return }
+                // After the keyboard's safe-area inset lands, not before — otherwise this scrolls
+                // against the old, taller viewport and does nothing.
+                Task {
+                    try? await Task.sleep(for: .milliseconds(350))
+                    withAnimation { proxy.scrollTo(Self.composerID, anchor: .top) }
+                }
+            }
+            .onChange(of: agent.events.count) { _, _ in
+                if let last = agent.events.last {
+                    withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
+                }
+                // Speak only the outcome — narrating every step would talk over you mid-task.
+                guard let last = agent.events.last,
+                      last.kind == .done || last.kind == .error else { return }
+                voice.speak(last.text)
+            }
         }
-        .padding(PM.space.lg)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .onChange(of: agent.events.count) { _, _ in
-            // Speak only the outcome — narrating every step would talk over you mid-task.
-            guard let last = agent.events.last, last.kind == .done || last.kind == .error else { return }
-            voice.speak(last.text)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { promptFocused = false }
+                    .font(.pmHeadline)
+            }
         }
         .onAppear {
             // Ask once on arrival so the first mic tap isn't stalled behind two system dialogs.
@@ -67,18 +113,20 @@ struct AskView: View {
                 if let problem = voice.problem {
                     Text(problem).font(.pmCaption).foregroundStyle(PM.color.warning)
                 }
-                ZStack(alignment: .topLeading) {
-                    if prompt.isEmpty {
-                        Text("Tell your Mac what to do…")
-                            .font(.pmBody).foregroundStyle(PM.color.textTertiary)
-                            .padding(.top, 8).padding(.leading, 5)
-                    }
-                    TextEditor(text: $prompt)
-                        .font(.pmBody).foregroundStyle(PM.color.textPrimary)
-                        .scrollContentBackground(.hidden)
-                        .frame(minHeight: 72)
-                }
-                .background(PM.color.surfaceHigh, in: RoundedRectangle(cornerRadius: PM.radius.sm))
+                // A growing TextField rather than a TextEditor: inside a ScrollView, a TextEditor
+                // brings its own scroll view, so a long prompt scrolls within a 72pt window while
+                // the page stays put — you end up typing into a slot you can't see out of. This
+                // grows with the text up to eight lines, then the page scrolls, which is one
+                // scroll surface instead of two.
+                TextField("Tell your Mac what to do…", text: $prompt, axis: .vertical)
+                    .font(.pmBody)
+                    .foregroundStyle(PM.color.textPrimary)
+                    .lineLimit(3...8)
+                    .focused($promptFocused)
+                    .submitLabel(.return)
+                    .padding(PM.space.sm)
+                    .background(PM.color.surfaceHigh,
+                                in: RoundedRectangle(cornerRadius: PM.radius.sm))
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: PM.space.sm) {
                         ForEach(suggestions, id: \.self) { s in
@@ -146,33 +194,26 @@ struct AskView: View {
         }
     }
 
+    /// Plain content, not a scroll view — the page scrolls it. See the note on `body`.
     private var activityLog: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                VStack(alignment: .leading, spacing: PM.space.sm) {
-                    if agent.events.isEmpty {
-                        Text(connected ? "Ready — describe a task and tap Run."
-                                       : "Connect to your Mac to run a task.")
-                            .font(.pmCaption).foregroundStyle(PM.color.textTertiary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    ForEach(agent.events) { event in
-                        HStack(alignment: .top, spacing: PM.space.sm) {
-                            Image(systemName: icon(event.kind)).font(.caption)
-                                .foregroundStyle(tint(event.kind)).frame(width: 18)
-                            Text(event.text).font(.pmCaption).foregroundStyle(PM.color.textSecondary)
-                            Spacer(minLength: 0)
-                        }
-                        .id(event.id)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+        VStack(alignment: .leading, spacing: PM.space.sm) {
+            if agent.events.isEmpty {
+                Text(connected ? "Ready — describe a task and tap Run."
+                               : "Connect to your Mac to run a task.")
+                    .font(.pmCaption).foregroundStyle(PM.color.textTertiary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .onChange(of: agent.events.count) { _, _ in
-                if let last = agent.events.last { withAnimation { proxy.scrollTo(last.id, anchor: .bottom) } }
+            ForEach(agent.events) { event in
+                HStack(alignment: .top, spacing: PM.space.sm) {
+                    Image(systemName: icon(event.kind)).font(.caption)
+                        .foregroundStyle(tint(event.kind)).frame(width: 18)
+                    Text(event.text).font(.pmCaption).foregroundStyle(PM.color.textSecondary)
+                    Spacer(minLength: 0)
+                }
+                .id(event.id)
             }
         }
-        .frame(maxHeight: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func icon(_ kind: TaskEventKind) -> String {
