@@ -33,3 +33,6 @@ ios-*.png
 
 # Rust workspace build output
 /target/
+
+# Built release artifacts
+/dist/

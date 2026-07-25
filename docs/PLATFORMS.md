@@ -32,10 +32,22 @@ From macOS, `cargo check --target x86_64-pc-windows-msvc` passes for **all seven
 the Win32 input path in `enigo` and the whole FFI + CLI stack. `agent-core` also checks against
 `aarch64-linux-android`.
 
+A real `pocketmac-agent.exe` is also **cross-built from macOS** via the GNU ABI and mingw-w64
+(`brew install mingw-w64`; `.cargo/config.toml` wires the linker):
+
+```bash
+cargo build --release -p agent-cli --target x86_64-pc-windows-gnu
+```
+
+The result is a PE32+ console x86-64 binary importing only Windows system DLLs — `user32`
+(`SendInput`, `GetCursorPos`) for input, `gdi32` for capture, `secur32`/`crypt32` for SChannel TLS,
+`ws2_32` for networking. No third-party runtime to install.
+
 Two limits worth stating plainly:
 
-- **`cargo check` is not a link.** It proves the code compiles for the target; producing a running
-  `.exe` still needs a Windows machine (or a cross-linker). Nothing here has executed on Windows.
+- **Cross-built is not the same as run.** The binary is verifiably a correct Windows executable with
+  the right imports, but it has not been *executed* on Windows — only a Windows machine can prove
+  the agent actually drives that desktop.
 - **C dependencies need the target's toolchain.** This bit us: `rustls` pulls `ring`, which compiles
   C, and cross-compiling that from macOS fails on missing target headers (`assert.h`). The fix was
   also the better design — see below.
