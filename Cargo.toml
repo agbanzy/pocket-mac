@@ -12,6 +12,7 @@ members = [
     "agent-ffi",               # C ABI for native hosts (Swift, C#, Kotlin/JNI)
     "agent-cli",               # standalone `pocketmac-agent` binary (the Windows/Linux host)
     "agent-llm-openai",        # LlmClient: any OpenAI-compatible provider (Grok, Ollama, LM Studio)
+    "agent-llm-claude-code",   # LlmClient: your Claude subscription, via the Claude Code CLI
 ]
 
 [workspace.package]

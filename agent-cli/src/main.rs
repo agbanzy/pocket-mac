@@ -17,6 +17,7 @@ use agent_core::{
     Memory, TaskEvent, TaskStore, ToolRegistry,
 };
 use agent_llm_anthropic::AnthropicClient;
+use agent_llm_claude_code::ClaudeCodeClient;
 use agent_llm_openai::{provider, OpenAiCompatClient};
 use agent_mcp_stdio::McpStdioClient;
 use agent_store_fs::{FsMemory, FsTaskStore};
@@ -108,7 +109,8 @@ fn usage() -> ! {
          USAGE:\n  \
            pocketmac-agent [--provider <NAME>] [--model <ID>] [--key <KEY>] <TASK>\n  \
            pocketmac-agent --history\n\n\
-         PROVIDERS: claude (default), grok, openai, ollama, lm-studio, llama.cpp\n\
+         PROVIDERS: claude-code (your subscription, no key), claude, grok, openai,\n  \
+                    ollama, lm-studio, llama.cpp\n\
          Keys come from ANTHROPIC_API_KEY / XAI_API_KEY / OPENAI_API_KEY, or --key."
     );
     std::process::exit(2)
@@ -163,9 +165,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             };
             Box::new(AnthropicClient::new(k))
         }
+        // Your Claude subscription, via the Claude Code CLI — no API key, no per-token charge.
+        Some("claude-code") | Some("subscription") => {
+            if !agent_llm_claude_code::available() {
+                eprintln!("Claude Code isn't on PATH. Install it, or use --provider claude with a key.");
+                std::process::exit(2);
+            }
+            eprintln!("provider: claude-code (your subscription){}",
+                      model_override.as_deref().map(|m| format!(" · model {m}")).unwrap_or_default());
+            let mut c = ClaudeCodeClient::new();
+            if let Some(m) = model_override.as_deref() { c = c.with_model(m); }
+            Box::new(c)
+        }
         Some(id) => {
             let Some(p) = provider(id) else {
-                eprintln!("Unknown provider '{id}'. Try: grok, openai, ollama, lm-studio, llama.cpp.");
+                eprintln!("Unknown provider '{id}'. Try: claude-code, grok, openai, ollama, lm-studio, llama.cpp.");
                 std::process::exit(2);
             };
             match OpenAiCompatClient::from_provider(p, model_override.as_deref(), key.as_deref()) {
