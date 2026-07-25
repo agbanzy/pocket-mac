@@ -6,7 +6,12 @@ set -euo pipefail
 export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-IDENTITY="${POCKETMAC_SIGN_IDENTITY:-Apple Development: GODWIN AGBANE (7T7BJT2AU7)}"
+# Default to Developer ID, because that is what the *installed* helper is signed with. macOS keys the
+# Accessibility and Screen Recording grants to the code signature, so replacing /Applications with a
+# bundle signed by a different identity silently revokes both — and re-granting them needs the user's
+# password in System Settings, which no script can do. Matching the installed identity keeps the
+# grants. Override only if you know the installed copy was signed the same way.
+IDENTITY="${POCKETMAC_SIGN_IDENTITY:-Developer ID Application: INNOEDGE TECHNOLOGIES LIMITED (JB94NKM5A6)}"
 DERIVED="$ROOT/build/mac"
 APP="$DERIVED/Build/Products/Debug/PocketMacHelper.app"
 
@@ -30,3 +35,26 @@ codesign --force --sign "$IDENTITY" --options runtime \
 
 codesign --verify --strict "$APP"
 echo "✓ Signed helper: $APP"
+
+# Warn before this build can silently cost the user their TCC grants. macOS keys Accessibility and
+# Screen Recording to the *designated requirement*, so copying a bundle signed differently from the
+# installed one revokes both, and only the user can restore them (System Settings, password).
+INSTALLED="/Applications/PocketMacHelper.app"
+if [ -d "$INSTALLED" ]; then
+  dr_of() { codesign -dr - "$1" 2>&1 | sed -n 's/^designated => //p'; }
+  if [ "$(dr_of "$INSTALLED")" != "$(dr_of "$APP")" ]; then
+    cat >&2 <<EOF
+
+⚠️  This build's code signature does NOT match the installed helper.
+
+    installed: $(dr_of "$INSTALLED")
+    this build: $(dr_of "$APP")
+
+    Replacing /Applications/PocketMacHelper.app with this build will RESET its Accessibility and
+    Screen Recording permissions, and re-granting them requires your password in System Settings.
+
+    To keep the grants, rebuild with the identity the installed copy uses:
+      POCKETMAC_SIGN_IDENTITY="<that identity>" scripts/build-mac.sh
+EOF
+  fi
+fi

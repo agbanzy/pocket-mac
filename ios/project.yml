@@ -36,11 +36,20 @@ targets:
         ENABLE_PREVIEWS: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
-        # Automatic development signing (personal team). Simulator builds ignore it; device builds
-        # get a real signature. Override CODE_SIGNING_ALLOWED=NO on the command line for sim-only CI.
+        # The app ships under the Innoedge team (JB94NKM5A6) — that is the team that owns
+        # com.innoedge.pocketmac on App Store Connect and holds the distribution certificate. It was
+        # previously pointed at the personal team 7T7BJT2AU7, which archives could only resolve while
+        # an Xcode account happened to be signed in; when that lapsed, every archive failed with
+        # "No Account for Team". Releases now go through scripts/ship-ios.sh, which archives unsigned
+        # and signs offline, so shipping does not depend on Xcode's account state at all.
         CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: 7T7BJT2AU7
+        DEVELOPMENT_TEAM: JB94NKM5A6
         CODE_SIGN_IDENTITY: "Apple Development"
+      configs:
+        Release:
+          CODE_SIGNING_ALLOWED: NO
+          CODE_SIGNING_REQUIRED: NO
+          CODE_SIGN_IDENTITY: ""
 
 schemes:
   PocketMacApp:
