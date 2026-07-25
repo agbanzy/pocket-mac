@@ -14,11 +14,11 @@
 use agent_backend_desktop::DesktopBackend;
 use agent_core::{
     register_mcp_server, run, AgentConfig, ComputerBackend, Emitter, EventKind, LlmClient, McpClient,
-    TaskEvent, TaskStore, ToolRegistry,
+    Memory, TaskEvent, TaskStore, ToolRegistry,
 };
 use agent_llm_anthropic::AnthropicClient;
 use agent_mcp_stdio::McpStdioClient;
-use agent_store_fs::FsTaskStore;
+use agent_store_fs::{FsMemory, FsTaskStore};
 use async_trait::async_trait;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::AtomicBool;
@@ -148,6 +148,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut registry = ToolRegistry::new();
     load_mcp(&mut registry, &dir).await;
 
+    let memory: Option<Arc<dyn Memory>> =
+        FsMemory::new(dir.join("memory.json")).ok().map(|m| Arc::new(m) as Arc<dyn Memory>);
+
     let llm = AnthropicClient::new(key);
     let cfg = AgentConfig { persona, ..AgentConfig::default() };
     let cancel = AtomicBool::new(false);
@@ -159,6 +162,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &llm as &dyn LlmClient,
         &store as &dyn TaskStore,
         &ConsoleEmitter,
+        memory.as_ref(),
         &prompt,
         &cancel,
     )

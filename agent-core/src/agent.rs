@@ -4,11 +4,13 @@
 
 use crate::backend::{computer_tool_schema, ComputerBackend};
 use crate::llm::{ContentBlock, LlmClient, LlmRequest, Message};
+use crate::memory::{describe_recall, Environment, Memory, RememberTool, RECALL_LIMIT};
 use crate::task::{TaskStatus, TaskStore};
 use crate::tool::ToolRegistry;
 use crate::types::{Action, AgentError, EventKind, Result, TaskEvent};
 use async_trait::async_trait;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 /// Streams progress to the controller (phone/web). A platform impl forwards these over the wire.
 #[async_trait]
@@ -26,6 +28,9 @@ pub struct AgentConfig {
     pub keep_images: usize,
     /// Persona/instructions prepended to the system prompt (the "JARVIS" layer plugs in here).
     pub persona: Option<String>,
+    /// Facts about this machine. `None` lets the core detect what it can; a host that knows more
+    /// (real OS version, display name) should supply it.
+    pub environment: Option<Environment>,
 }
 
 impl Default for AgentConfig {
@@ -37,6 +42,7 @@ impl Default for AgentConfig {
             beta: "computer-use-2025-11-24".into(),
             keep_images: 3,
             persona: None,
+            environment: None,
         }
     }
 }
@@ -49,7 +55,7 @@ fn truncate(s: &str, n: usize) -> String {
     }
 }
 
-fn system_prompt(cfg: &AgentConfig, w: u32, h: u32) -> String {
+fn system_prompt(cfg: &AgentConfig, w: u32, h: u32, env: &str, recall: &str) -> String {
     let mut s = String::new();
     if let Some(p) = &cfg.persona {
         s.push_str(p);
@@ -62,6 +68,17 @@ fn system_prompt(cfg: &AgentConfig, w: u32, h: u32) -> String {
          task is complete, stop and give a one-line summary. If unsure or the task is risky, say so \
          instead of guessing."
     ));
+    if !env.is_empty() {
+        s.push_str("\n\nThis machine:\n");
+        s.push_str(env);
+    }
+    if !recall.is_empty() {
+        s.push_str(
+            "\n\nWhat you already know (from earlier sessions — trust it, but prefer what you can \
+             see on screen if they disagree):\n",
+        );
+        s.push_str(recall);
+    }
     s
 }
 
@@ -136,6 +153,7 @@ pub async fn run(
     llm: &dyn LlmClient,
     store: &dyn TaskStore,
     emitter: &dyn Emitter,
+    memory: Option<&Arc<dyn Memory>>,
     prompt: &str,
     cancel: &AtomicBool,
 ) -> Result<String> {
@@ -145,7 +163,23 @@ pub async fn run(
     ctx.emit(EventKind::Started, prompt.to_string()).await;
 
     let (w, h) = backend.model_size();
-    let system = system_prompt(cfg, w, h);
+
+    // Self-awareness: what machine this is, and what earlier sessions established. Both go in the
+    // cached prefix, so they cost nothing after the first turn.
+    let env = cfg.environment.clone().unwrap_or_else(|| Environment::detect((w, h)));
+    let recalled = match memory {
+        Some(m) => m.recall(RECALL_LIMIT).await.unwrap_or_default(),
+        None => Vec::new(),
+    };
+    let system = system_prompt(cfg, w, h, &env.describe(), &describe_recall(&recalled));
+
+    // The model can write to memory itself; without that it only ever knows what a human typed in.
+    let mut registry = registry.clone();
+    if let Some(m) = memory {
+        registry.register(Arc::new(RememberTool::new(m.clone())));
+    }
+    let registry = &registry;
+
     let mut tools = vec![computer_tool_schema(w, h, true)];
     tools.extend(registry.schemas());
 

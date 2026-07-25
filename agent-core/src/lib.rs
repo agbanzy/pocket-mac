@@ -18,6 +18,7 @@
 pub mod agent;
 pub mod backend;
 pub mod llm;
+pub mod memory;
 pub mod mcp;
 pub mod task;
 pub mod tool;
@@ -25,6 +26,7 @@ pub mod types;
 
 pub use agent::{run, AgentConfig, Emitter};
 pub use backend::{computer_tool_schema, ComputerBackend};
+pub use memory::{describe_recall, Environment, InMemoryMemory, Memory, MemoryEntry, RememberTool, RECALL_LIMIT};
 pub use llm::{ContentBlock, ImageSource, LlmClient, LlmRequest, LlmResponse, Message, Usage};
 pub use mcp::{register_mcp_server, McpClient, McpTool, McpToolDef};
 pub use task::{InMemoryTaskStore, TaskRecord, TaskStatus, TaskStore};
@@ -107,7 +109,7 @@ mod tests {
         let cfg = AgentConfig::default();
 
         let out = pollster::block_on(run(
-            &cfg, &backend, &registry, &llm, &store, &emitter, "click something", &cancel,
+            &cfg, &backend, &registry, &llm, &store, &emitter, None, "click something", &cancel,
         ))
         .unwrap();
 

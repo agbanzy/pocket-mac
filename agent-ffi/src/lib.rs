@@ -17,11 +17,11 @@
 use agent_backend_desktop::DesktopBackend;
 use agent_core::{
     register_mcp_server, run, AgentConfig, ComputerBackend, Emitter, EventKind, LlmClient, McpClient,
-    TaskEvent, TaskStore, ToolRegistry,
+    Memory, TaskEvent, TaskStore, ToolRegistry,
 };
 use agent_llm_anthropic::AnthropicClient;
 use agent_mcp_stdio::McpStdioClient;
-use agent_store_fs::FsTaskStore;
+use agent_store_fs::{FsMemory, FsTaskStore};
 use async_trait::async_trait;
 use std::ffi::{c_char, c_void, CStr, CString};
 use std::path::Path;
@@ -197,6 +197,13 @@ pub unsafe extern "C" fn pm_agent_run(
         }
     };
 
+    // Memory lives beside the task store, so history and knowledge move together.
+    let memory: Option<Arc<dyn Memory>> = Path::new(&store_dir)
+        .parent()
+        .map(|d| d.join("memory.json"))
+        .and_then(|p| FsMemory::new(p).ok())
+        .map(|m| Arc::new(m) as Arc<dyn Memory>);
+
     let outcome = rt.block_on(async {
         let mut registry = registry;
         register_configured_mcp_servers(&mut registry, &store_dir).await;
@@ -207,6 +214,7 @@ pub unsafe extern "C" fn pm_agent_run(
             &llm as &dyn LlmClient,
             &store as &dyn TaskStore,
             &emitter as &dyn Emitter,
+            memory.as_ref(),
             prompt,
             &CANCEL,
         )

@@ -2,6 +2,9 @@
 //! browse history, resume, or retry across restarts. Writes are serialized under a mutex and the
 //! whole (short) record is rewritten on change; events are the common mutation. std-only.
 
+pub mod memory;
+pub use memory::FsMemory;
+
 use agent_core::{AgentError, Result, TaskEvent, TaskRecord, TaskStatus, TaskStore};
 use async_trait::async_trait;
 use std::path::{Path, PathBuf};
