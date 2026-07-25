@@ -3,6 +3,9 @@
 //! `agent_core::register_mcp_server`, every one of the server's tools becomes callable by the agent
 //! alongside the built-in computer tool — files, browsers, calendars, arbitrary APIs.
 
+pub mod discover;
+pub use discover::{discover_servers, ServerSpec};
+
 use agent_core::{AgentError, McpClient, McpToolDef, Result};
 use async_trait::async_trait;
 use serde_json::{json, Value};

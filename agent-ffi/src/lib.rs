@@ -22,7 +22,7 @@ use agent_core::{
 use agent_llm_anthropic::AnthropicClient;
 use agent_llm_claude_code::ClaudeCodeClient;
 use agent_llm_openai::{provider as openai_provider, OpenAiCompatClient};
-use agent_mcp_stdio::McpStdioClient;
+use agent_mcp_stdio::{discover_servers, McpStdioClient};
 use agent_store_fs::{FsMemory, FsTaskStore};
 use async_trait::async_trait;
 use std::ffi::{c_char, c_void, CStr, CString};
@@ -79,53 +79,30 @@ impl Emitter for CallbackEmitter {
     }
 }
 
-/// Spawn the MCP servers listed in `mcp.json` (a sibling of the task-store directory) and register
-/// their tools, so the agent can do more than drive the screen — read files, query APIs, whatever a
-/// server exposes. Shape:
+/// Give the agent tools beyond the screen. Servers come from Pocket Mac's own `mcp.json`, plus any
+/// already configured for **Claude Desktop** or **Claude Code** — inheriting those means the tools
+/// you have already set up just work here, rather than being configured twice. Pocket Mac's own
+/// entries win on a name clash.
 ///
-/// ```json
-/// { "servers": [ { "id": "fs", "command": "npx",
-///                  "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path"] } ] }
-/// ```
-///
-/// A server that fails to start is skipped with a log line rather than failing the task: a broken
-/// optional tool must not stop the user's work. Returns how many tools were registered.
+/// A server that fails to start is logged and skipped: a broken optional tool must not stop the
+/// user's work. Returns how many tools were registered.
 async fn register_configured_mcp_servers(registry: &mut ToolRegistry, store_dir: &str) -> usize {
-    let config_path = Path::new(store_dir)
-        .parent()
-        .unwrap_or(Path::new(store_dir))
-        .join("mcp.json");
-    let Ok(bytes) = std::fs::read(&config_path) else { return 0 };
-    let Ok(cfg) = serde_json::from_slice::<serde_json::Value>(&bytes) else {
-        eprintln!("pocketmac: {} is not valid JSON; ignoring", config_path.display());
-        return 0;
-    };
-    let Some(servers) = cfg.get("servers").and_then(|s| s.as_array()) else { return 0 };
+    let own = Path::new(store_dir).parent().map(|d| d.join("mcp.json"));
+    let specs = discover_servers(own);
 
     let mut total = 0;
-    for server in servers {
-        let (Some(id), Some(command)) = (
-            server.get("id").and_then(|v| v.as_str()),
-            server.get("command").and_then(|v| v.as_str()),
-        ) else {
-            continue;
-        };
-        let args: Vec<String> = server
-            .get("args")
-            .and_then(|a| a.as_array())
-            .map(|a| a.iter().filter_map(|v| v.as_str().map(str::to_string)).collect())
-            .unwrap_or_default();
-        let arg_refs: Vec<&str> = args.iter().map(String::as_str).collect();
-
-        match McpStdioClient::spawn(id, command, &arg_refs).await {
+    for spec in specs {
+        let args: Vec<&str> = spec.args.iter().map(String::as_str).collect();
+        match McpStdioClient::spawn(&spec.id, &spec.command, &args).await {
             Ok(client) => match register_mcp_server(registry, Arc::new(client) as Arc<dyn McpClient>).await {
                 Ok(n) => {
                     total += n;
-                    eprintln!("pocketmac: mcp '{id}' registered {n} tool(s)");
+                    eprintln!("pocketmac: mcp '{}' ({}) registered {n} tool(s)", spec.id, spec.origin);
                 }
-                Err(e) => eprintln!("pocketmac: mcp '{id}' listed no tools: {e}"),
+                Err(e) => eprintln!("pocketmac: mcp '{}' listed no tools: {e}", spec.id),
             },
-            Err(e) => eprintln!("pocketmac: mcp '{id}' failed to start: {e}"),
+            // Never fatal: a broken optional tool must not stop the user's work.
+            Err(e) => eprintln!("pocketmac: mcp '{}' failed to start: {e}", spec.id),
         }
     }
     total
@@ -135,8 +112,8 @@ async fn register_configured_mcp_servers(registry: &mut ToolRegistry, store_dir:
 /// the task store, so the choice survives restarts and needs no ABI change to add a provider.
 ///
 /// ```json
-/// { "provider": "claude-code" }                       // your subscription, no key
-/// { "provider": "grok", "key": "xai-…" }              // or set XAI_API_KEY
+/// { "provider": "claude-code" }                        // your subscription, no key
+/// { "provider": "grok", "key": "xai-…" }               // or set XAI_API_KEY
 /// { "provider": "ollama", "model": "llama3.2-vision" } // local, no key
 /// ```
 fn build_llm(store_dir: &str, api_key: &str) -> std::result::Result<Box<dyn LlmClient>, String> {
@@ -165,8 +142,7 @@ fn build_llm(store_dir: &str, api_key: &str) -> std::result::Result<Box<dyn LlmC
             Ok(Box::new(c))
         }
         other => {
-            let p = openai_provider(other)
-                .ok_or_else(|| format!("unknown provider '{other}'"))?;
+            let p = openai_provider(other).ok_or_else(|| format!("unknown provider '{other}'"))?;
             OpenAiCompatClient::from_provider(p, model, key)
                 .map(|c| Box::new(c) as Box<dyn LlmClient>)
                 .map_err(|e| e.to_string())
