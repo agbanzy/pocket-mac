@@ -32,7 +32,14 @@ struct AskView: View {
             guard let last = agent.events.last, last.kind == .done || last.kind == .error else { return }
             voice.speak(last.text)
         }
-        .onDisappear { voice.stopDictation() }
+        .onAppear {
+            // Ask once on arrival so the first mic tap isn't stalled behind two system dialogs.
+            voice.primePermissions()
+        }
+        .onDisappear {
+            voice.stopDictation()
+            voice.stopSpeaking()
+        }
     }
 
     private var promptCard: some View {
@@ -43,6 +50,7 @@ struct AskView: View {
                     Spacer()
                     Button {
                         voice.speaksResults.toggle()
+                        if !voice.speaksResults { voice.stopSpeaking() }
                     } label: {
                         Image(systemName: voice.speaksResults ? "speaker.wave.2.fill" : "speaker.slash")
                             .font(.system(size: 14, weight: .semibold))
