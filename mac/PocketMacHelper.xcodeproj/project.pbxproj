@@ -24,6 +24,8 @@
 		8E9B22BEB71499D4E10D32E8 /* RustAgentBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77D464A90B08D17F563600E /* RustAgentBridge.swift */; };
 		9AAE312D3ADC47552FA4BAD7 /* ScreenStreamer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE3393753244087DB6C40CC5 /* ScreenStreamer.swift */; };
 		AA7B5A02DE059511DFA69D6E /* SessionAccepter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4FA1707C55107E167DF665 /* SessionAccepter.swift */; };
+		C5067EE42B6E606F722BE4B5 /* BrainBroadcast.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBDF08AF2178B76261B7E5DC /* BrainBroadcast.swift */; };
+		D47D17D5886D85C086AAF9BB /* BrainWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4DC2C8FDE65916DDFF841D /* BrainWatcher.swift */; };
 		F3E2CEE066D1F1C762173199 /* ScheduleRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7F039F667105EF74D53301C /* ScheduleRunner.swift */; };
 		FEBB34A2DC9671205F4B9B36 /* AccessibilityAuthorizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A91A981FD1C08C4D3516405 /* AccessibilityAuthorizer.swift */; };
 		FED2BF3FF179B4E27401A8C9 /* ActionExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE319641B884B5B56C8CF1E /* ActionExecutor.swift */; };
@@ -43,12 +45,14 @@
 		6B4F3BDCC6E004820C64E980 /* CGEventTranslator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGEventTranslator.swift; sourceTree = "<group>"; };
 		6E232B57AD4BDC9B9A142329 /* LoginItemManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemManager.swift; sourceTree = "<group>"; };
 		77765320C1E80EA636A371BC /* PocketMacHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PocketMacHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7E4DC2C8FDE65916DDFF841D /* BrainWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrainWatcher.swift; sourceTree = "<group>"; };
 		A00402E8659A0D0B74F78467 /* ListenerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListenerService.swift; sourceTree = "<group>"; };
 		A5774EAD892247301FDD1E3C /* MacPeerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacPeerStore.swift; sourceTree = "<group>"; };
 		B9C2ECE3A1D3A7A11CF2F387 /* PocketMacKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PocketMacKit; path = ../shared/PocketMacKit; sourceTree = SOURCE_ROOT; };
 		BE3393753244087DB6C40CC5 /* ScreenStreamer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenStreamer.swift; sourceTree = "<group>"; };
 		C33BEC4A2D219EC4A5849F4D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		CB1CFCEC57EE54580DF6E643 /* AgentRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentRunner.swift; sourceTree = "<group>"; };
+		CBDF08AF2178B76261B7E5DC /* BrainBroadcast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrainBroadcast.swift; sourceTree = "<group>"; };
 		D42E07D09C4D19C7641024A7 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
 		D9B9B9FFBEF98E9329142170 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		E77D464A90B08D17F563600E /* RustAgentBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RustAgentBridge.swift; sourceTree = "<group>"; };
@@ -123,6 +127,8 @@
 		2E22029F488D15A49865C6A4 /* Server */ = {
 			isa = PBXGroup;
 			children = (
+				CBDF08AF2178B76261B7E5DC /* BrainBroadcast.swift */,
+				7E4DC2C8FDE65916DDFF841D /* BrainWatcher.swift */,
 				A00402E8659A0D0B74F78467 /* ListenerService.swift */,
 				62AC749EBD45E727D8E1DC57 /* RelayReachability.swift */,
 				2C4FA1707C55107E167DF665 /* SessionAccepter.swift */,
@@ -309,6 +315,8 @@
 				FED2BF3FF179B4E27401A8C9 /* ActionExecutor.swift in Sources */,
 				3DF13D85B22331CCA4DEA3CA /* AgentDataStore.swift in Sources */,
 				368E0376030EEF7F41AB75AE /* AgentRunner.swift in Sources */,
+				C5067EE42B6E606F722BE4B5 /* BrainBroadcast.swift in Sources */,
+				D47D17D5886D85C086AAF9BB /* BrainWatcher.swift in Sources */,
 				5D11909EF737EA7C17277011 /* CGEventTranslator.swift in Sources */,
 				46F42185B8AD0C3C0FEC638A /* HelperModel.swift in Sources */,
 				0ECEDF0D2A35B2B36C14AF7D /* ListenerService.swift in Sources */,

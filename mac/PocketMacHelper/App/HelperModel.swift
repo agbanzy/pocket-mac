@@ -69,6 +69,9 @@ final class HelperModel {
         startRelayRespondersForPairedPeers()
         // Proactive half: fire scheduled tasks while the helper runs.
         Task { await scheduleRunner.start() }
+        // Push memory, history and schedules to connected phones whenever they change on disk, so
+        // the brain sheet reflects what the Mac just did instead of the last thing it was asked for.
+        BrainWatcher.shared.start()
         // Dev/CI only: open a pairing window at launch so the probe harness can pair unattended.
         // Gated out of release builds — an unbounded auto-pair window would be a real exposure.
         #if DEBUG

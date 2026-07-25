@@ -5,7 +5,6 @@ import PocketMacKit
 /// live activity log stream back. Sensitive steps pause for a PIN. Uses the shared design system.
 struct AskView: View {
     @Environment(AppModel.self) private var app
-    @State private var prompt = ""
     @State private var pin = ""
     @State private var voice = VoiceController()
     /// Which field, if any, holds the keyboard.
@@ -23,7 +22,7 @@ struct AskView: View {
 
     private var agent: AgentSession { app.connection.agent }
     private var connected: Bool { app.connection.state.isSecured }
-    private var trimmed: String { prompt.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var trimmed: String { agent.draft.trimmingCharacters(in: .whitespacesAndNewlines) }
 
     private let suggestions = ["Open Safari and search the web",
                                "Summarize the document I have open",
@@ -141,7 +140,7 @@ struct AskView: View {
                 // the page stays put — you end up typing into a slot you can't see out of. This
                 // grows with the text up to eight lines, then the page scrolls, which is one
                 // scroll surface instead of two.
-                TextField("Tell your Mac what to do…", text: $prompt, axis: .vertical)
+                TextField("Tell your Mac what to do…", text: Bindable(agent).draft, axis: .vertical)
                     .font(.pmBody)
                     .foregroundStyle(PM.color.textPrimary)
                     .lineLimit(3...8)
@@ -154,7 +153,7 @@ struct AskView: View {
                         ForEach(suggestions, id: \.self) { s in
                             // Picking a suggestion is a complete thought, so put the keyboard away
                             // and let the Run button be the next thing under the thumb.
-                            Button { prompt = s; focus = nil } label: {
+                            Button { agent.draft = s; focus = nil } label: {
                                 Text(s).font(.pmCaption).foregroundStyle(PM.color.accent)
                                     .padding(.horizontal, PM.space.md).padding(.vertical, PM.space.sm)
                                     .background(PM.color.accentSoft, in: Capsule())
@@ -171,7 +170,7 @@ struct AskView: View {
     /// read what it heard before anything touches your Mac.
     private var micButton: some View {
         Button {
-            voice.toggleDictation { text in prompt = text }
+            voice.toggleDictation { text in agent.draft = text }
         } label: {
             Image(systemName: voice.isListening ? "mic.fill" : "mic")
                 .font(.system(size: 15, weight: .semibold))

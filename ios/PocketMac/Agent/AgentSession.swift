@@ -17,6 +17,14 @@ final class AgentSession {
     var isRunning = false
     var pendingPinReason: String?
 
+    /// What the user has typed but not yet run.
+    ///
+    /// It lives here rather than in `AskView` because the tab strip swaps view identity: SwiftUI
+    /// tears the old surface down, taking its `@State` with it. Typing a long task, tapping Screen
+    /// to glance at the Mac, and coming back used to lose every word of it. The session outlives the
+    /// tabs, so the draft does too.
+    var draft = ""
+
     func reset() {
         events = []
         isRunning = false

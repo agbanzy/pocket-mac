@@ -107,8 +107,15 @@ actor SessionAccepter {
             over: transport, localStatic: privateKey, prologue: prologue, authorize: authorize)
         let session = SecureSession(transport: transport, channel: AEADChannel(keys: keys))
         let runner = SessionRunner(session: session, translator: translator, actions: actions)
-        return Established(peerID: keys.peerID, transport: transport,
-                           run: { await session.run(onFrame: { frame in await runner.handle(frame) }) })
+        return Established(peerID: keys.peerID, transport: transport, run: {
+            // Subscribe this session to unsolicited state pushes for as long as it lives, so memory,
+            // history and schedules the Mac changes on its own reach the phone without it asking.
+            let token = BrainBroadcast.register { frame in
+                Task { try? await session.send(.control(frame)) }
+            }
+            defer { BrainBroadcast.deregister(token) }
+            await session.run(onFrame: { frame in await runner.handle(frame) })
+        })
     }
 }
 
