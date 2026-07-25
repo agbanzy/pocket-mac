@@ -82,18 +82,23 @@ final class ConnectionController: InputSink {
 
         state = .connecting
         do {
-            try await transport.start()
-
             let localStatic = try identity.privateKey()
             let remoteStatic = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: payload.macPublicKey)
 
-            // The app is the Noise initiator; it already knows the Mac's static key from pairing.
-            let keys = try await NoisePatternHandshake().performInitiator(
-                over: transport,
-                localStatic: localStatic,
-                remoteStatic: remoteStatic,
-                prologue: prologue
-            )
+            // Connect and handshake under one deadline. Both steps end in a socket read that the
+            // other side may never satisfy, and without a limit the UI simply sat on "Connecting"
+            // forever — which looks like a slow network but hides whatever actually failed. Failing
+            // out puts a real reason on screen instead.
+            let keys = try await withDeadline(Self.connectDeadline) {
+                try await transport.start()
+                // The app is the Noise initiator; it already knows the Mac's static key from pairing.
+                return try await NoisePatternHandshake().performInitiator(
+                    over: transport,
+                    localStatic: localStatic,
+                    remoteStatic: remoteStatic,
+                    prologue: prologue
+                )
+            }
 
             let session = SecureSession(transport: transport, channel: AEADChannel(keys: keys))
             self.session = session
@@ -108,9 +113,13 @@ final class ConnectionController: InputSink {
                                               appVersion: PocketMac.version))))
         } catch {
             session = nil
+            transport.close()   // don't leave a half-open socket behind on a failed attempt
             state = .offline(Self.describe(error))
         }
     }
+
+    /// Ceiling on connect + handshake. See the note at the call site.
+    private static let connectDeadline: Double = 10
 
     /// Tears the session down and returns to idle. Safe to call repeatedly.
     func disconnect() {

@@ -18,6 +18,14 @@ actor SessionAccepter {
     /// legitimate reconnect rate, far below a useful brute-force rate.
     private var handshakeLimiter = RateLimiter(capacity: 10, refillPerSecond: 2)
 
+    /// How long a peer gets to complete the Noise handshake before the connection is dropped.
+    ///
+    /// There was no limit at all. The responder's first act is to read message 1, so a peer that
+    /// connected and then said nothing left that read outstanding forever, holding the socket open —
+    /// one leaked connection per retry, and no error anywhere to say so. Ten seconds is far longer
+    /// than a handshake needs on any path, including the relay.
+    static let handshakeDeadline: Double = 10
+
     private struct ActiveSession {
         let peerID: PeerID
         let task: Task<Void, Never>
@@ -34,9 +42,11 @@ actor SessionAccepter {
         actions: ActionExecutor
     ) async -> PeerID? {
         guard handshakeLimiter.allow() else { transport.close(); return nil }
-        guard let established = try? await establish(
-            transport: transport, privateKeyData: privateKeyData, prologue: prologue,
-            authorize: authorize, translator: translator, actions: actions) else {
+        guard let established = try? await withDeadline(Self.handshakeDeadline, operation: {
+            try await self.establish(
+                transport: transport, privateKeyData: privateKeyData, prologue: prologue,
+                authorize: authorize, translator: translator, actions: actions)
+        }) else {
             transport.close()
             return nil
         }
@@ -60,9 +70,11 @@ actor SessionAccepter {
         actions: ActionExecutor
     ) async {
         guard handshakeLimiter.allow() else { transport.close(); return }
-        guard let established = try? await establish(
-            transport: transport, privateKeyData: privateKeyData, prologue: prologue,
-            authorize: authorize, translator: translator, actions: actions) else {
+        guard let established = try? await withDeadline(Self.handshakeDeadline, operation: {
+            try await self.establish(
+                transport: transport, privateKeyData: privateKeyData, prologue: prologue,
+                authorize: authorize, translator: translator, actions: actions)
+        }) else {
             transport.close()
             return
         }
