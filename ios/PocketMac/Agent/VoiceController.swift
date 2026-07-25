@@ -60,9 +60,45 @@ final class VoiceController {
 
     /// Ask for both permissions up front, so the first tap on the mic doesn't stall behind two
     /// system dialogs. Safe to call repeatedly.
-    func primePermissions() {
-        SFSpeechRecognizer.requestAuthorization { _ in
-            AVAudioApplication.requestRecordPermission { _ in }
+    ///
+    /// **`nonisolated` is load-bearing.** In a `@MainActor` type, a completion closure inherits main
+    /// actor isolation, and Swift 6 then asserts the executor when it runs. TCC delivers these
+    /// callbacks on a background queue, so that assertion traps and kills the process. Marking the
+    /// method `nonisolated` keeps the closure off the main actor; anything touching state hops back
+    /// explicitly.
+    nonisolated func primePermissions() {
+        Self.requestAuthorizations { _, _ in }
+    }
+
+    /// Request speech + microphone access, reporting `(granted, problem)` on an arbitrary queue.
+    /// Static and `@Sendable` so no isolated `self` is captured.
+    private nonisolated static func requestAuthorizations(
+        _ done: @escaping @Sendable (Bool, String?) -> Void
+    ) {
+        SFSpeechRecognizer.requestAuthorization { status in
+            guard status == .authorized else {
+                done(false, "Speech recognition is off. Settings ▸ Pocket Mac ▸ Speech Recognition.")
+                return
+            }
+            AVAudioApplication.requestRecordPermission { granted in
+                done(granted,
+                     granted ? nil : "Microphone access is off. Settings ▸ Pocket Mac ▸ Microphone.")
+            }
+        }
+    }
+
+    /// Build the recognition task off the main actor. `onUpdate` receives the transcript so far and
+    /// whether the task has ended (final result or error).
+    private nonisolated static func makeTask(
+        recognizer: SFSpeechRecognizer,
+        request: SFSpeechAudioBufferRecognitionRequest,
+        onUpdate: @escaping @Sendable (String?, Bool) -> Void
+    ) -> SFSpeechRecognitionTask {
+        recognizer.recognitionTask(with: request) { result, error in
+            if let result {
+                onUpdate(result.bestTranscription.formattedString, result.isFinal)
+            }
+            if error != nil { onUpdate(nil, true) }
         }
     }
 
@@ -88,25 +124,14 @@ final class VoiceController {
 
     private func requestThenStart() {
         problem = nil
-        SFSpeechRecognizer.requestAuthorization { [weak self] status in
-            Task { @MainActor in
+        // The callback arrives on a background queue (see `primePermissions`), so hop to the main
+        // actor before touching any state.
+        Self.requestAuthorizations { granted, problem in
+            Task { @MainActor [weak self] in
                 guard let self else { return }
-                guard status == .authorized else {
-                    self.micDenied = true
-                    self.problem = "Speech recognition is off. Settings ▸ Pocket Mac ▸ Speech Recognition."
-                    return
-                }
-                AVAudioApplication.requestRecordPermission { granted in
-                    Task { @MainActor in
-                        guard granted else {
-                            self.micDenied = true
-                            self.problem = "Microphone access is off. Settings ▸ Pocket Mac ▸ Microphone."
-                            return
-                        }
-                        self.micDenied = false
-                        self.startDictation()
-                    }
-                }
+                self.micDenied = !granted
+                self.problem = problem
+                if granted { self.startDictation() }
             }
         }
     }
@@ -151,15 +176,16 @@ final class VoiceController {
             transcript = ""
             phase = .listening
 
-            task = recognizer.recognitionTask(with: request) { [weak self] result, error in
-                Task { @MainActor in
+            // Same isolation rule as the permission callbacks: the result handler must not inherit
+            // main-actor isolation, or Swift 6 asserts the executor on whichever queue Speech uses.
+            task = Self.makeTask(recognizer: recognizer, request: request) { text, finished in
+                Task { @MainActor [weak self] in
                     guard let self else { return }
-                    if let result {
-                        self.transcript = result.bestTranscription.formattedString
-                        self.onTranscript?(self.transcript)
-                        if result.isFinal { self.stopDictation() }
+                    if let text {
+                        self.transcript = text
+                        self.onTranscript?(text)
                     }
-                    if error != nil { self.stopDictation() }
+                    if finished { self.stopDictation() }
                 }
             }
         } catch {
