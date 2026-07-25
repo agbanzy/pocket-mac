@@ -8,10 +8,18 @@ struct AskView: View {
     @State private var prompt = ""
     @State private var pin = ""
     @State private var voice = VoiceController()
-    @FocusState private var promptFocused: Bool
+    /// Which field, if any, holds the keyboard.
+    ///
+    /// One enum rather than two independent booleans, because the two fields must never both think
+    /// they have focus: setting this to `.pin` moves the keyboard off the composer in the same
+    /// update, with no window where both are focused and the keyboard flickers between them.
+    @FocusState private var focus: Field?
+
+    private enum Field: Hashable { case prompt, pin }
 
     /// Scroll anchor for the composer, so focusing the field brings it above the keyboard.
     private static let composerID = "composer"
+    private static let pinID = "pin"
 
     private var agent: AgentSession { app.connection.agent }
     private var connected: Bool { app.connection.state.isSecured }
@@ -36,7 +44,7 @@ struct AskView: View {
                     // it costs ~300pt that the keyboard has just taken away. Collapsing it while
                     // the field has focus is what actually keeps the composer and Run button on
                     // screen; scrolling alone races the keyboard animation and loses.
-                    if !promptFocused {
+                    if focus != .prompt {
                         PresenceView(
                             phase: .from(agent: agent, listening: voice.isListening,
                                          speaking: voice.phase == .speaking),
@@ -46,24 +54,39 @@ struct AskView: View {
                     promptCard
                         .id(Self.composerID)
                     runButton
-                    if let reason = agent.pendingPinReason { pinCard(reason) }
+                    if let reason = agent.pendingPinReason {
+                        pinCard(reason).id(Self.pinID)
+                    }
                     activityLog
                 }
                 .padding(PM.space.lg)
                 .frame(maxWidth: .infinity, alignment: .top)
-                .animation(.snappy, value: promptFocused)
+                .animation(.snappy, value: focus)
             }
             // Drag down anywhere to put the keyboard away — the gesture people already know from
             // Messages and Mail, and the only one that works when the Done button is off screen.
             .scrollDismissesKeyboard(.interactively)
-            .onChange(of: promptFocused) { _, focused in
-                guard focused else { return }
+            .onChange(of: focus) { _, now in
+                guard let now else { return }
                 // After the keyboard's safe-area inset lands, not before — otherwise this scrolls
                 // against the old, taller viewport and does nothing.
                 Task {
                     try? await Task.sleep(for: .milliseconds(350))
-                    withAnimation { proxy.scrollTo(Self.composerID, anchor: .top) }
+                    withAnimation {
+                        proxy.scrollTo(now == .pin ? Self.pinID : Self.composerID, anchor: .top)
+                    }
                 }
+            }
+            // A sensitive step is waiting on a PIN: bring the keyboard to it rather than making the
+            // user find a field that appeared below the fold. This is the one moment the app should
+            // take focus, because the agent is blocked until it is answered.
+            .onChange(of: agent.pendingPinReason) { _, reason in
+                focus = reason == nil ? nil : .pin
+            }
+            // Once the Mac is working, the composer keyboard is only in the way — the whole screen
+            // is now a transcript to watch.
+            .onChange(of: agent.isRunning) { _, running in
+                if running, focus == .prompt { focus = nil }
             }
             .onChange(of: agent.events.count) { _, _ in
                 if let last = agent.events.last {
@@ -78,7 +101,7 @@ struct AskView: View {
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Button("Done") { promptFocused = false }
+                Button("Done") { focus = nil }
                     .font(.pmHeadline)
             }
         }
@@ -122,15 +145,16 @@ struct AskView: View {
                     .font(.pmBody)
                     .foregroundStyle(PM.color.textPrimary)
                     .lineLimit(3...8)
-                    .focused($promptFocused)
-                    .submitLabel(.return)
+                    .focused($focus, equals: .prompt)
                     .padding(PM.space.sm)
                     .background(PM.color.surfaceHigh,
                                 in: RoundedRectangle(cornerRadius: PM.radius.sm))
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: PM.space.sm) {
                         ForEach(suggestions, id: \.self) { s in
-                            Button { prompt = s } label: {
+                            // Picking a suggestion is a complete thought, so put the keyboard away
+                            // and let the Run button be the next thing under the thumb.
+                            Button { prompt = s; focus = nil } label: {
                                 Text(s).font(.pmCaption).foregroundStyle(PM.color.accent)
                                     .padding(.horizontal, PM.space.md).padding(.vertical, PM.space.sm)
                                     .background(PM.color.accentSoft, in: Capsule())
@@ -167,7 +191,12 @@ struct AskView: View {
             }
             .buttonStyle(PMPrimaryButtonStyle(tint: PM.color.danger))
         } else {
-            Button { app.connection.runTask(trimmed, requirePin: false) } label: {
+            Button {
+                // Submitting is the end of typing. Dropping focus here rather than waiting for
+                // isRunning means the keyboard leaves with the tap, not a round trip later.
+                focus = nil
+                app.connection.runTask(trimmed, requirePin: false)
+            } label: {
                 Label("Run task", systemImage: "play.fill")
             }
             .buttonStyle(PMPrimaryButtonStyle())
@@ -185,9 +214,12 @@ struct AskView: View {
                 HStack(spacing: PM.space.sm) {
                     SecureField("PIN", text: $pin)
                         .textFieldStyle(.roundedBorder).frame(maxWidth: 120)
-                    Button("Allow") { app.connection.sendPin(pin); pin = "" }
+                        .focused($focus, equals: .pin)
+                        .keyboardType(.numberPad)
+                        .submitLabel(.go)
+                    Button("Allow") { focus = nil; app.connection.sendPin(pin); pin = "" }
                         .buttonStyle(PMSecondaryButtonStyle())
-                    Button("Deny") { app.connection.sendPin(""); pin = "" }
+                    Button("Deny") { focus = nil; app.connection.sendPin(""); pin = "" }
                         .buttonStyle(PMSecondaryButtonStyle(tint: PM.color.danger))
                 }
             }

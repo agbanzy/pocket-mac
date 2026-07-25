@@ -13,6 +13,19 @@ final class CGEventTranslator: @unchecked Sendable {
     private var leftButtonDown = false
     private let source = CGEventSource(stateID: .hidSystemState)
 
+    /// Where we last *told* the cursor to go.
+    ///
+    /// Clicks must be posted at this position, never at one read back from WindowServer. A tap
+    /// arrives as two frames — move, then click — and `CGEvent.post` only enqueues; it does not wait
+    /// for WindowServer to apply the move. Asking "where is the cursor?" immediately afterwards can
+    /// therefore still answer with the *previous* position, and the click lands on whatever the user
+    /// tapped last. That reads as random rather than merely offset, and it was the main reason taps
+    /// felt inaccurate. Tracking the commanded position removes the race entirely.
+    ///
+    /// Nil until we have moved the cursor at least once, in which case there is no commanded
+    /// position and reading the live one is correct.
+    private var commandedPosition: CGPoint?
+
     func handle(_ frame: InputFrame) {
         switch frame {
         case .mouseMove(let dx, let dy):
@@ -41,10 +54,10 @@ final class CGEventTranslator: @unchecked Sendable {
     /// Moves the cursor to a normalized (0…65535) absolute position on the main display — the
     /// screen-view "tap where you see it" path.
     private func moveAbsolute(x: UInt16, y: UInt16) {
-        let bounds = CGDisplayBounds(CGMainDisplayID())
+        let bounds = CGDisplayBounds(streamedDisplayID())
         let target = CGPoint(x: bounds.minX + CGFloat(x) / 65535.0 * bounds.width,
                              y: bounds.minY + CGFloat(y) / 65535.0 * bounds.height)
-        lock.lock(); let dragging = leftButtonDown; lock.unlock()
+        lock.lock(); let dragging = leftButtonDown; commandedPosition = target; lock.unlock()
         CGEvent(mouseEventSource: source, mouseType: dragging ? .leftMouseDragged : .mouseMoved,
                 mouseCursorPosition: target, mouseButton: .left)?
             .post(tap: .cghidEventTap)
@@ -56,16 +69,35 @@ final class CGEventTranslator: @unchecked Sendable {
         CGEvent(source: nil)?.location ?? .zero
     }
 
+    /// The position a click should be posted at: the one we commanded, falling back to the live
+    /// cursor only when we have never moved it. See ``commandedPosition``.
+    private func clickPosition() -> CGPoint {
+        lock.lock(); let commanded = commandedPosition; lock.unlock()
+        return commanded ?? currentLocation()
+    }
+
+    /// The display the phone is actually watching.
+    ///
+    /// The capture side picks `content.displays.first`; injecting into `CGMainDisplayID()` would be
+    /// a different display whenever those disagree, so taps would be scaled by one screen's bounds
+    /// and delivered to another. ``ScreenStreamer`` publishes the display it opened; until it does,
+    /// the main display is the right assumption.
+    private func streamedDisplayID() -> CGDirectDisplayID {
+        ScreenStreamer.streamingDisplayID ?? CGMainDisplayID()
+    }
+
     private func clampToDisplays(_ point: CGPoint) -> CGPoint {
-        let bounds = CGDisplayBounds(CGMainDisplayID())
+        let bounds = CGDisplayBounds(streamedDisplayID())
         return CGPoint(x: min(max(point.x, bounds.minX), bounds.maxX - 1),
                        y: min(max(point.y, bounds.minY), bounds.maxY - 1))
     }
 
     private func moveCursor(dx: Int, dy: Int) {
+        // Relative motion starts from the live cursor so the pointer still follows the physical
+        // mouse if someone is sitting at the Mac.
         let current = currentLocation()
         let target = clampToDisplays(CGPoint(x: current.x + CGFloat(dx), y: current.y + CGFloat(dy)))
-        lock.lock(); let dragging = leftButtonDown; lock.unlock()
+        lock.lock(); let dragging = leftButtonDown; commandedPosition = target; lock.unlock()
         let type: CGEventType = dragging ? .leftMouseDragged : .mouseMoved
         let button: CGMouseButton = dragging ? .left : .left
         CGEvent(mouseEventSource: source, mouseType: type, mouseCursorPosition: target, mouseButton: button)?
@@ -90,14 +122,14 @@ final class CGEventTranslator: @unchecked Sendable {
 
     private func setButton(_ button: MouseButton, down: Bool) {
         if button == .left { lock.lock(); leftButtonDown = down; lock.unlock() }
-        let position = currentLocation()
+        let position = clickPosition()
         let event = CGEvent(mouseEventSource: source, mouseType: down ? downType(button) : upType(button),
                             mouseCursorPosition: position, mouseButton: cgButton(button))
         event?.post(tap: .cghidEventTap)
     }
 
     private func click(_ button: MouseButton, count: Int) {
-        let position = currentLocation()
+        let position = clickPosition()
         for _ in 0 ..< count {
             let down = CGEvent(mouseEventSource: source, mouseType: downType(button),
                                mouseCursorPosition: position, mouseButton: cgButton(button))

@@ -12,7 +12,13 @@ import PocketMacKit
 final class ScreenControlView: UIView, UIGestureRecognizerDelegate {
     let host = ScreenHostView()
     var send: ((Frame) -> Void)?
-    var videoSize = CGSize(width: 16, height: 10)
+    /// The Mac's frame geometry, learned from the first decoded video frame.
+    ///
+    /// Deliberately optional. It used to default to 16:10, which is a guess — and a wrong one for
+    /// most external displays. Every tap before the first frame arrived was normalised against that
+    /// fiction and landed tens of points out, which felt like "the first couple of taps are always
+    /// wrong". Refusing to map a tap until the real aspect is known is better than mapping it wrongly.
+    var videoSize: CGSize?
 
     private var zoomScale: CGFloat = 1
     private var panOffset: CGPoint = .zero
@@ -137,7 +143,8 @@ final class ScreenControlView: UIView, UIGestureRecognizerDelegate {
     private func normalized(_ point: CGPoint) -> (UInt16, UInt16)? {
         // Into the (possibly zoomed/panned) host's coordinate space.
         let hostFrame = host.frame
-        guard hostFrame.width > 0, hostFrame.height > 0, videoSize.width > 0, videoSize.height > 0 else { return nil }
+        guard let videoSize, hostFrame.width > 0, hostFrame.height > 0,
+              videoSize.width > 0, videoSize.height > 0 else { return nil }
         let hp = CGPoint(x: point.x - hostFrame.minX, y: point.y - hostFrame.minY)
         // Aspect-fit content rect inside the host view.
         let hostAspect = hostFrame.width / hostFrame.height
@@ -147,7 +154,9 @@ final class ScreenControlView: UIView, UIGestureRecognizerDelegate {
         let ox = (hostFrame.width - cw) / 2, oy = (hostFrame.height - ch) / 2
         let fx = (hp.x - ox) / cw, fy = (hp.y - oy) / ch
         guard fx >= 0, fx <= 1, fy >= 0, fy <= 1 else { return nil }
-        return (UInt16(fx * 65535), UInt16(fy * 65535))
+        // Round rather than truncate: truncation biases every coordinate consistently towards the
+        // top-left, and the bias is free to remove.
+        return (UInt16((fx * 65535).rounded()), UInt16((fy * 65535).rounded()))
     }
 }
 

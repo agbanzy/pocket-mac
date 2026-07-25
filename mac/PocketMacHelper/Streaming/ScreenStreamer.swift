@@ -27,6 +27,19 @@ final class ScreenStreamer: NSObject, SCStreamOutput, SCStreamDelegate, @uncheck
     /// Cap the long edge so bandwidth stays sane on the relay path; scaled proportionally.
     private let maxLongEdge = 1600
 
+    /// The display currently being streamed, read by ``CGEventTranslator`` so that a tap is scaled by
+    /// the bounds of the screen the phone is actually looking at. Nil when nothing is streaming, in
+    /// which case the main display is the right default.
+    ///
+    /// Guarded by its own lock rather than an actor: the input path is synchronous and called from
+    /// the network queue, and making it await would reorder input frames.
+    static var streamingDisplayID: CGDirectDisplayID? {
+        get { idLock.lock(); defer { idLock.unlock() }; return _streamingDisplayID }
+        set { idLock.lock(); _streamingDisplayID = newValue; idLock.unlock() }
+    }
+    private static let idLock = NSLock()
+    nonisolated(unsafe) private static var _streamingDisplayID: CGDirectDisplayID?
+
     init(onEncodedFrame: @escaping @Sendable (Data, Bool, Int, Int) -> Void) {
         self.onEncodedFrame = onEncodedFrame
     }
@@ -35,9 +48,16 @@ final class ScreenStreamer: NSObject, SCStreamOutput, SCStreamDelegate, @uncheck
 
     func start(fps: Int = 30, bitrate: Int = 6_000_000) async throws {
         let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
-        guard let display = content.displays.first else {
+        // Prefer the main display. `content.displays` has no documented ordering, so taking `.first`
+        // could stream a secondary screen while input was injected into the main one — the phone
+        // would show monitor B and every tap would land on monitor A.
+        guard let display = content.displays.first(where: { $0.displayID == CGMainDisplayID() })
+                ?? content.displays.first else {
             throw NSError(domain: "PocketMac.Stream", code: 1, userInfo: [NSLocalizedDescriptionKey: "No display to capture"])
         }
+        // Tell the input side which screen the phone is watching, so absolute coordinates are scaled
+        // by the bounds of *that* display rather than whichever one happens to be main.
+        Self.streamingDisplayID = display.displayID
 
         // Scale the display's point size down to the long-edge cap.
         let scale = min(1.0, Double(maxLongEdge) / Double(max(display.width, display.height)))
@@ -66,6 +86,7 @@ final class ScreenStreamer: NSObject, SCStreamOutput, SCStreamDelegate, @uncheck
     func stop() {
         stream?.stopCapture { _ in }
         stream = nil
+        Self.streamingDisplayID = nil
         if let session {
             VTCompressionSessionInvalidate(session)
             self.session = nil
