@@ -58,12 +58,17 @@ final class HelperModel {
 
     // MARK: Lifecycle
 
+    /// Runs scheduled tasks (morning briefings and the like) without being asked.
+    private let scheduleRunner = ScheduleRunner()
+
     func start() {
         isAccessibilityTrusted = AccessibilityAuthorizer.isTrusted
         launchAtLogin = LoginItemManager.isEnabled
         parseRelayURL()
         startAdvertising()
         startRelayRespondersForPairedPeers()
+        // Proactive half: fire scheduled tasks while the helper runs.
+        Task { await scheduleRunner.start() }
         // Dev/CI only: open a pairing window at launch so the probe harness can pair unattended.
         // Gated out of release builds — an unbounded auto-pair window would be a real exposure.
         #if DEBUG

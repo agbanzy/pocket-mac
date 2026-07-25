@@ -19,6 +19,7 @@ pub mod agent;
 pub mod backend;
 pub mod llm;
 pub mod memory;
+pub mod schedule;
 pub mod mcp;
 pub mod task;
 pub mod tool;
@@ -26,6 +27,7 @@ pub mod types;
 
 pub use agent::{run, AgentConfig, Emitter};
 pub use backend::{computer_tool_schema, ComputerBackend};
+pub use schedule::{advance, due, new_task, Cadence, InMemoryScheduleStore, ScheduleStore, ScheduledTask};
 pub use memory::{describe_recall, Environment, InMemoryMemory, Memory, MemoryEntry, RememberTool, RECALL_LIMIT};
 pub use llm::{ContentBlock, ImageSource, LlmClient, LlmRequest, LlmResponse, Message, Usage};
 pub use mcp::{register_mcp_server, McpClient, McpTool, McpToolDef};

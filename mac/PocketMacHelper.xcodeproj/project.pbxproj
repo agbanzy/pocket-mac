@@ -24,6 +24,7 @@
 		8E9B22BEB71499D4E10D32E8 /* RustAgentBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77D464A90B08D17F563600E /* RustAgentBridge.swift */; };
 		9AAE312D3ADC47552FA4BAD7 /* ScreenStreamer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE3393753244087DB6C40CC5 /* ScreenStreamer.swift */; };
 		AA7B5A02DE059511DFA69D6E /* SessionAccepter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4FA1707C55107E167DF665 /* SessionAccepter.swift */; };
+		F3E2CEE066D1F1C762173199 /* ScheduleRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7F039F667105EF74D53301C /* ScheduleRunner.swift */; };
 		FEBB34A2DC9671205F4B9B36 /* AccessibilityAuthorizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A91A981FD1C08C4D3516405 /* AccessibilityAuthorizer.swift */; };
 		FED2BF3FF179B4E27401A8C9 /* ActionExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CE319641B884B5B56C8CF1E /* ActionExecutor.swift */; };
 /* End PBXBuildFile section */
@@ -51,6 +52,7 @@
 		D42E07D09C4D19C7641024A7 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
 		D9B9B9FFBEF98E9329142170 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		E77D464A90B08D17F563600E /* RustAgentBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RustAgentBridge.swift; sourceTree = "<group>"; };
+		E7F039F667105EF74D53301C /* ScheduleRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleRunner.swift; sourceTree = "<group>"; };
 		F3FE103EE0BC024E9688A8F0 /* PocketMacHelper-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PocketMacHelper-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -186,6 +188,7 @@
 				F3FE103EE0BC024E9688A8F0 /* PocketMacHelper-Bridging-Header.h */,
 				5D711F91C5DFDB72255D147C /* ProviderStore.swift */,
 				E77D464A90B08D17F563600E /* RustAgentBridge.swift */,
+				E7F039F667105EF74D53301C /* ScheduleRunner.swift */,
 			);
 			path = Agent;
 			sourceTree = "<group>";
@@ -318,6 +321,7 @@
 				3BFA822DE0139DA4CA70B44E /* QRCodeView.swift in Sources */,
 				32ABCE42C60C3C71982F0C26 /* RelayReachability.swift in Sources */,
 				8E9B22BEB71499D4E10D32E8 /* RustAgentBridge.swift in Sources */,
+				F3E2CEE066D1F1C762173199 /* ScheduleRunner.swift in Sources */,
 				9AAE312D3ADC47552FA4BAD7 /* ScreenStreamer.swift in Sources */,
 				AA7B5A02DE059511DFA69D6E /* SessionAccepter.swift in Sources */,
 			);
