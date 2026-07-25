@@ -321,7 +321,7 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					21C830CA9D9BD9674188D5BF = {
-						DevelopmentTeam = 7T7BJT2AU7;
+						DevelopmentTeam = JB94NKM5A6;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -418,7 +418,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 13;
-				DEVELOPMENT_TEAM = 7T7BJT2AU7;
+				DEVELOPMENT_TEAM = JB94NKM5A6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PocketMac/Resources/Info.plist;
@@ -445,7 +445,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 13;
-				DEVELOPMENT_TEAM = 7T7BJT2AU7;
+				DEVELOPMENT_TEAM = JB94NKM5A6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PocketMac/Resources/Info.plist;
