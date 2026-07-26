@@ -56,7 +56,21 @@ struct RemoteView: View {
         .onChange(of: isSecured) { _, secured in
             UIApplication.shared.isIdleTimerDisabled = (surface == .screen && secured)
         }
-        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
+        .onDisappear {
+            UIApplication.shared.isIdleTimerDisabled = false
+            app.voice.stopWakeListening()
+        }
+        // Wake belongs here rather than on Ask: the whole point is to start a task without touching
+        // the phone, which includes when you are looking at the Mac's screen or the deck. Hearing
+        // the phrase brings you to Ask and opens the microphone for the task itself.
+        .onAppear {
+            app.voice.onWake = { [weak app] in
+                guard let app else { return }
+                surface = .ask
+                app.voice.toggleDictation { text in app.connection.agent.draft = text }
+            }
+            app.voice.startWakeListening()
+        }
     }
 
     // MARK: Hub

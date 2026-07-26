@@ -58,6 +58,28 @@ final class VoiceController {
     }
     private static let speakKey = "com.innoedge.pocketmac.speakResults"
 
+    /// Listen continuously for a wake phrase, so a task can be started without touching the phone.
+    ///
+    /// **Off by default, and deliberately so.** It holds the microphone open for as long as the app
+    /// is in front, which costs battery and means the app is always hearing the room — neither is
+    /// something to switch on for somebody. Recognition is pinned on-device (see
+    /// ``startWakeListening()``) so nothing is streamed to Apple while it waits.
+    var wakePhraseEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: Self.wakeKey) }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Self.wakeKey)
+            if newValue { startWakeListening() } else { stopWakeListening() }
+        }
+    }
+    private static let wakeKey = "com.innoedge.pocketmac.wakePhrase"
+
+    /// What has to be heard. Two words, both common enough to be recognised reliably but unlikely
+    /// together in ordinary speech — a single common word would fire constantly.
+    static let wakePhrase = "hey mac"
+
+    /// True while the wake listener holds the microphone.
+    private(set) var isAwaitingWake = false
+
     private let recognizer = SFSpeechRecognizer(locale: Locale.current)
     private let synthesizer = AVSpeechSynthesizer()
 
@@ -68,6 +90,9 @@ final class VoiceController {
     private var onTranscript: ((String) -> Void)?
     /// An outcome that arrived while dictating; spoken once the mic is free.
     private var pendingSpeech: String?
+
+    /// Called when the wake phrase is heard, so the surface can start dictating a task.
+    var onWake: (() -> Void)?
 
     // MARK: Permissions
 
@@ -162,6 +187,7 @@ final class VoiceController {
 
     private func requestThenStart() {
         problem = nil
+        stopWakeListening()   // the microphone cannot be shared; dictation takes precedence
         // The callback arrives on a background queue (see `primePermissions`), so hop to the main
         // actor before touching any state.
         Self.requestAuthorizations { granted, problem in
@@ -251,9 +277,79 @@ final class VoiceController {
         }
     }
 
+    // MARK: Wake phrase
+
+    /// Begin listening for the wake phrase.
+    ///
+    /// Shares the same engine plumbing as dictation, with two differences that matter:
+    /// `requiresOnDeviceRecognition` keeps the audio on the phone — a listener that ships every
+    /// sound in the room to a server is not something to run continuously — and the recogniser is
+    /// restarted after each hit, because a recognition task ends once it reports a final result.
+    ///
+    /// Only ever runs while nothing else owns the microphone. The mic cannot be shared, so wake
+    /// listening yields to dictation and to speech, and is resumed by whichever finishes last.
+    func startWakeListening() {
+        guard wakePhraseEnabled, phase == .idle, !isAwaitingWake else { return }
+        guard let recognizer, recognizer.isAvailable, speechAuthorized, micAuthorized else { return }
+        #if targetEnvironment(simulator)
+        return   // no capture path here; see the note in startDictation()
+        #else
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.record, mode: .measurement, options: [.duckOthers])
+            try session.setActive(true, options: .notifyOthersOnDeactivation)
+            guard session.isInputAvailable, !session.currentRoute.inputs.isEmpty else { return }
+
+            let engine = AVAudioEngine()
+            let input = engine.inputNode
+            let format = input.inputFormat(forBus: 0)
+            guard format.sampleRate > 0, format.channelCount > 0 else { return }
+
+            let request = SFSpeechAudioBufferRecognitionRequest()
+            request.shouldReportPartialResults = true
+            request.requiresOnDeviceRecognition = true
+
+            Self.installTap(on: input, format: format, feeding: request)
+            engine.prepare()
+            try engine.start()
+
+            self.engine = engine
+            self.request = request
+            isAwaitingWake = true
+
+            let phrase = Self.wakePhrase
+            task = Self.makeTask(recognizer: recognizer, request: request) { text, finished in
+                let heard = text?.lowercased().contains(phrase) ?? false
+                Task { @MainActor [weak self] in
+                    guard let self, self.isAwaitingWake else { return }
+                    if heard {
+                        self.stopWakeListening()
+                        self.onWake?()
+                    } else if finished {
+                        // The task ended without a hit; a fresh one is needed to keep listening.
+                        self.stopWakeListening()
+                        self.startWakeListening()
+                    }
+                }
+            }
+        } catch {
+            isAwaitingWake = false
+            teardown()
+        }
+        #endif
+    }
+
+    func stopWakeListening() {
+        guard isAwaitingWake else { return }
+        isAwaitingWake = false
+        teardown()
+    }
+
     func stopDictation() {
         teardown()
         phase = .idle
+        // Hand the microphone back to the wake listener, if that is what the user asked for.
+        defer { startWakeListening() }
         // An outcome that landed mid-dictation gets its turn now that the route is free.
         if let pending = pendingSpeech {
             pendingSpeech = nil
@@ -286,6 +382,9 @@ final class VoiceController {
             return
         }
         if synthesizer.isSpeaking { synthesizer.stopSpeaking(at: .immediate) }
+        // Playback and recording cannot hold the session at once, so the wake listener stands down
+        // for the length of the sentence and is resumed below.
+        stopWakeListening()
         do {
             let session = AVAudioSession.sharedInstance()
             try session.setCategory(.playback, mode: .spokenAudio, options: .duckOthers)
@@ -304,6 +403,7 @@ final class VoiceController {
             while synthesizer.isSpeaking { try? await Task.sleep(nanoseconds: 200_000_000) }
             if phase == .speaking { phase = .idle }
             try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+            startWakeListening()
         }
     }
 

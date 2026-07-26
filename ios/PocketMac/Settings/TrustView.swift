@@ -41,7 +41,23 @@ struct TrustView: View {
             row(icon: "clock.arrow.circlepath", title: "Run on a schedule",
                 detail: "Only the tasks you add under Schedule, only while your Mac is awake.",
                 state: app.connection.schedules.contains(where: { $0.enabled }) ? .granted : .off,
-                action: nil, last: true)
+                action: nil)
+
+            // The one capability here that is opt-in rather than reported, because turning it on
+            // holds the microphone open. It is stated plainly rather than buried in a settings list.
+            PMRow(icon: "waveform.badge.mic",
+                  iconTint: app.voice.wakePhraseEnabled ? PM.color.accent : PM.color.textTertiary,
+                  title: "Listen for “Hey Mac”",
+                  subtitle: "Keeps the microphone open while the app is open so you can start a "
+                          + "task without touching the phone. Recognition stays on this device. "
+                          + "Off by default — it costs battery.",
+                  showsDivider: false) {
+                Toggle("", isOn: Binding(
+                    get: { app.voice.wakePhraseEnabled },
+                    set: { app.voice.wakePhraseEnabled = $0 }))
+                    .labelsHidden().tint(PM.color.accent)
+                    .disabled(!(micGranted && speechGranted))
+            }
         }
         .task { refresh() }
     }
