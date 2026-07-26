@@ -89,7 +89,8 @@ final class ConnectionController: InputSink {
             // other side may never satisfy, and without a limit the UI simply sat on "Connecting"
             // forever — which looks like a slow network but hides whatever actually failed. Failing
             // out puts a real reason on screen instead.
-            let keys = try await withDeadline(Self.connectDeadline) {
+            let keys = try await withDeadline(Self.connectDeadline,
+                                              onExpiry: { transport.close() }) {
                 try await transport.start()
                 // The app is the Noise initiator; it already knows the Mac's static key from pairing.
                 return try await NoisePatternHandshake().performInitiator(

@@ -42,7 +42,8 @@ actor SessionAccepter {
         actions: ActionExecutor
     ) async -> PeerID? {
         guard handshakeLimiter.allow() else { transport.close(); return nil }
-        guard let established = try? await withDeadline(Self.handshakeDeadline, operation: {
+        guard let established = try? await withDeadline(
+            Self.handshakeDeadline, onExpiry: { transport.close() }, operation: {
             try await self.establish(
                 transport: transport, privateKeyData: privateKeyData, prologue: prologue,
                 authorize: authorize, translator: translator, actions: actions)
@@ -70,7 +71,8 @@ actor SessionAccepter {
         actions: ActionExecutor
     ) async {
         guard handshakeLimiter.allow() else { transport.close(); return }
-        guard let established = try? await withDeadline(Self.handshakeDeadline, operation: {
+        guard let established = try? await withDeadline(
+            Self.handshakeDeadline, onExpiry: { transport.close() }, operation: {
             try await self.establish(
                 transport: transport, privateKeyData: privateKeyData, prologue: prologue,
                 authorize: authorize, translator: translator, actions: actions)
