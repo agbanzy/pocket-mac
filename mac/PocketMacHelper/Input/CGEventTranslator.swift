@@ -24,7 +24,18 @@ final class CGEventTranslator: @unchecked Sendable {
     ///
     /// Nil until we have moved the cursor at least once, in which case there is no commanded
     /// position and reading the live one is correct.
+    ///
+    /// It also *expires*. The race it exists to win lasts milliseconds — the gap between posting a
+    /// move and WindowServer applying it. Beyond that the live cursor is the truth: someone at the
+    /// Mac may have moved the physical mouse, and the trackpad surface sends a bare click with no
+    /// preceding move, which would otherwise be posted wherever the phone last pointed rather than
+    /// where the cursor actually is.
     private var commandedPosition: CGPoint?
+    private var commandedAt: Date?
+
+    /// How long a commanded position stays authoritative. Long enough to cover the post-then-read
+    /// race by orders of magnitude, far short of any human pause between moving and clicking.
+    private static let commandedPositionTTL: TimeInterval = 0.5
 
     func handle(_ frame: InputFrame) {
         switch frame {
@@ -57,7 +68,8 @@ final class CGEventTranslator: @unchecked Sendable {
         let bounds = CGDisplayBounds(streamedDisplayID())
         let target = CGPoint(x: bounds.minX + CGFloat(x) / 65535.0 * bounds.width,
                              y: bounds.minY + CGFloat(y) / 65535.0 * bounds.height)
-        lock.lock(); let dragging = leftButtonDown; commandedPosition = target; lock.unlock()
+        lock.lock(); let dragging = leftButtonDown
+        commandedPosition = target; commandedAt = Date(); lock.unlock()
         CGEvent(mouseEventSource: source, mouseType: dragging ? .leftMouseDragged : .mouseMoved,
                 mouseCursorPosition: target, mouseButton: .left)?
             .post(tap: .cghidEventTap)
@@ -72,8 +84,14 @@ final class CGEventTranslator: @unchecked Sendable {
     /// The position a click should be posted at: the one we commanded, falling back to the live
     /// cursor only when we have never moved it. See ``commandedPosition``.
     private func clickPosition() -> CGPoint {
-        lock.lock(); let commanded = commandedPosition; lock.unlock()
-        return commanded ?? currentLocation()
+        lock.lock()
+        let commanded = commandedPosition
+        let at = commandedAt
+        lock.unlock()
+        guard let commanded, let at, Date().timeIntervalSince(at) < Self.commandedPositionTTL else {
+            return currentLocation()
+        }
+        return commanded
     }
 
     /// The display the phone is actually watching.
@@ -97,7 +115,8 @@ final class CGEventTranslator: @unchecked Sendable {
         // mouse if someone is sitting at the Mac.
         let current = currentLocation()
         let target = clampToDisplays(CGPoint(x: current.x + CGFloat(dx), y: current.y + CGFloat(dy)))
-        lock.lock(); let dragging = leftButtonDown; commandedPosition = target; lock.unlock()
+        lock.lock(); let dragging = leftButtonDown
+        commandedPosition = target; commandedAt = Date(); lock.unlock()
         let type: CGEventType = dragging ? .leftMouseDragged : .mouseMoved
         let button: CGMouseButton = dragging ? .left : .left
         CGEvent(mouseEventSource: source, mouseType: type, mouseCursorPosition: target, mouseButton: button)?

@@ -80,6 +80,10 @@ final class VoiceController {
     /// True while the wake listener holds the microphone.
     private(set) var isAwaitingWake = false
 
+    /// Consecutive failed restarts, so a recogniser that always errors cannot spin forever.
+    private var wakeRestarts = 0
+    private static let maxWakeRestarts = 5
+
     private let recognizer = SFSpeechRecognizer(locale: Locale.current)
     private let synthesizer = AVSpeechSynthesizer()
 
@@ -201,6 +205,10 @@ final class VoiceController {
     }
 
     private func startDictation() {
+        // requestThenStart() stopped the listener, but an async permission round-trip happened since
+        // and speak()'s completion can legitimately re-arm it in that gap. Two engines with taps on
+        // one session is the state that used to take the app down, so stand it down again here.
+        stopWakeListening()
         guard let recognizer, recognizer.isAvailable else {
             problem = "Speech recognition isn’t available right now."
             return
@@ -290,7 +298,20 @@ final class VoiceController {
     /// listening yields to dictation and to speech, and is resumed by whichever finishes last.
     func startWakeListening() {
         guard wakePhraseEnabled, phase == .idle, !isAwaitingWake else { return }
-        guard let recognizer, recognizer.isAvailable, speechAuthorized, micAuthorized else { return }
+        // `requiresOnDeviceRecognition` below is a hard requirement, not a preference: a listener
+        // that ships every sound in the room to a server is not something to run continuously. If
+        // the model for this locale has not been downloaded, recognition fails immediately — and
+        // since a failed task reports "finished", restarting on finish would spin a hot loop
+        // building an audio engine thousands of times a second. Check support up front.
+        guard let recognizer, recognizer.isAvailable,
+              recognizer.supportsOnDeviceRecognition,
+              speechAuthorized, micAuthorized else {
+            problem = wakePhraseEnabled
+                ? "Hands-free needs on-device dictation for \(Locale.current.identifier), which "
+                + "isn't downloaded. Settings ▸ General ▸ Keyboard ▸ Dictation."
+                : nil
+            return
+        }
         #if targetEnvironment(simulator)
         return   // no capture path here; see the note in startDictation()
         #else
@@ -323,12 +344,25 @@ final class VoiceController {
                 Task { @MainActor [weak self] in
                     guard let self, self.isAwaitingWake else { return }
                     if heard {
+                        self.wakeRestarts = 0
                         self.stopWakeListening()
                         self.onWake?()
                     } else if finished {
-                        // The task ended without a hit; a fresh one is needed to keep listening.
+                        // A recognition task also reports "finished" when it ERRORS, so restarting
+                        // unconditionally is how a hot loop starts. Back off, and give up after a
+                        // few consecutive failures rather than burning the battery in silence.
                         self.stopWakeListening()
-                        self.startWakeListening()
+                        self.wakeRestarts += 1
+                        guard self.wakeRestarts <= Self.maxWakeRestarts else {
+                            self.problem = "Hands-free listening kept failing, so it stopped. "
+                                         + "Turn it off and on again to retry."
+                            return
+                        }
+                        let delay = UInt64(self.wakeRestarts) * 500_000_000
+                        Task { @MainActor [weak self] in
+                            try? await Task.sleep(nanoseconds: delay)
+                            self?.startWakeListening()
+                        }
                     }
                 }
             }
@@ -390,7 +424,10 @@ final class VoiceController {
             try session.setCategory(.playback, mode: .spokenAudio, options: .duckOthers)
             try session.setActive(true)
         } catch {
-            return // speaking is a nicety; never let it take the app down
+            // Speaking is a nicety; never let it take the app down — but the wake listener was torn
+            // down a few lines above and only the success path restores it, so put it back here too.
+            startWakeListening()
+            return
         }
         let utterance = AVSpeechUtterance(string: text)
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate

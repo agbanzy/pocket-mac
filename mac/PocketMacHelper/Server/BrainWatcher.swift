@@ -63,7 +63,7 @@ final class BrainWatcher: @unchecked Sendable {
     private func scheduleFlush() {
         coalesce?.cancel()
         let work = DispatchWorkItem { [weak self] in
-            guard let self else { return }
+            guard let self, BrainBroadcast.hasListeners else { return }
             BrainBroadcast.memoryChanged()
             BrainBroadcast.historyChanged()
             BrainBroadcast.schedulesChanged()

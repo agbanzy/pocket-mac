@@ -50,9 +50,12 @@ die() { printf 'error: %s\n' "$1" >&2; exit 1; }
 # revoked one is still returned by find-identity. Selecting by name would be a coin flip, so pin the
 # SHA-1 of a valid one: `-v` lists only identities that currently validate for code signing.
 say "Finding a valid Apple Distribution identity for ${TEAM}…"
+# `|| true` matters: under `set -euo pipefail` a non-matching grep exits 1, which would kill the
+# script here with no output at all — the die below would never run and the user would see a silent
+# failure instead of being told what is missing.
 IDENTITY=$(security find-identity -v -p codesigning \
   | grep "Apple Distribution" | grep "$TEAM" | grep -v CSSMERR \
-  | head -1 | awk '{print $2}')
+  | head -1 | awk '{print $2}' || true)
 [ -n "$IDENTITY" ] || die "no valid Apple Distribution identity for team $TEAM in the keychain"
 say "Using identity $IDENTITY"
 

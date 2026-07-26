@@ -83,6 +83,13 @@ final class ScreenStreamer: NSObject, SCStreamOutput, SCStreamDelegate, @uncheck
         log.info("screen capture started \(w)x\(h) @\(fps)fps")
     }
 
+    deinit {
+        // stop() only runs on an explicit .stopVideo frame. When the transport dies instead, the
+        // SessionRunner and its streamer are simply released — and the static kept the old display
+        // id forever, so a later tap was scaled by a display nobody is watching.
+        Self.streamingDisplayID = nil
+    }
+
     func stop() {
         stream?.stopCapture { _ in }
         stream = nil

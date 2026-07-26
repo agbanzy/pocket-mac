@@ -30,7 +30,10 @@ abi_target() {
     arm64-v8a)   echo "aarch64-linux-android aarch64-linux-android" ;;
     x86_64)      echo "x86_64-linux-android x86_64-linux-android" ;;
     armeabi-v7a) echo "armv7-linux-androideabi armv7a-linux-androideabi" ;;
-    *) die "unknown ABI '$1' (use arm64-v8a, x86_64, or armeabi-v7a)" ;;
+    # Cannot die() here: this runs inside $( ), so exit only leaves the subshell and the caller
+    # would continue with empty values and fail later with a confusing message about a missing
+    # clang. Emit a sentinel the caller checks instead.
+    *) echo "UNKNOWN UNKNOWN" ;;
   esac
 }
 
@@ -39,6 +42,7 @@ ABIS=("$@")
 
 for abi in "${ABIS[@]}"; do
   read -r TRIPLE CLANG_PREFIX <<<"$(abi_target "$abi")"
+  [ "$TRIPLE" = "UNKNOWN" ] && die "unknown ABI '$abi' (use arm64-v8a, x86_64, or armeabi-v7a)"
   rustup target add "$TRIPLE" >/dev/null 2>&1 || true
 
   CLANG="$TOOLCHAIN/${CLANG_PREFIX}${API}-clang"

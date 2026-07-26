@@ -43,10 +43,20 @@ enum BrainBroadcast {
 
     /// Fan a frame out to every connected phone. Fire-and-forget: a push is a courtesy, and a phone
     /// that misses one still gets the truth the next time it asks.
-    static func push(_ frame: ControlFrame) {
+    static func push(_ frame: @autoclosure () -> ControlFrame) {
         lock.lock(); let targets = Array(sinks.values); lock.unlock()
+        // Autoclosure so the snapshot is never built when nobody is connected. The watcher runs
+        // from helper launch regardless of whether a phone has ever paired, and building a history
+        // snapshot walks and parses the whole tasks directory — real work for no reader.
         guard !targets.isEmpty else { return }
+        let frame = frame()
         for send in targets { send(frame) }
+    }
+
+    /// True when at least one phone is connected. Callers doing expensive work can check first.
+    static var hasListeners: Bool {
+        lock.lock(); defer { lock.unlock() }
+        return !sinks.isEmpty
     }
 
     // MARK: What changed

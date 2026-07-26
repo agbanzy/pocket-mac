@@ -114,13 +114,20 @@ final class ScreenControlView: UIView, UIGestureRecognizerDelegate {
 
     /// Hold still and release → right-click. Hold then drag → click-drag (move windows, drag files).
     @objc private func onHoldDrag(_ g: UILongPressGestureRecognizer) {
-        guard let n = normalized(g.location(in: self)) else { return }
+        // The end of a gesture must be handled even when the finger is somewhere unmappable — the
+        // letterbox bars, or off the content entirely. Guarding the whole method on a coordinate
+        // meant lifting your finger over a bar skipped `.ended`, so the Mac's left button stayed
+        // down: every later move dragged, and the next tap finished a selection you never began.
+        // A button that is down must always be released; only the *position* needs a valid mapping.
+        let n = normalized(g.location(in: self))
         switch g.state {
         case .began:
+            guard let n else { return }
             holdDidMove = false
             holdDownSent = false
             send?(.input(.mouseMoveAbsolute(x: n.0, y: n.1)))
         case .changed:
+            guard let n else { return }   // ignore movement outside the image, keep the drag alive
             if !holdDidMove { // first movement → this is a drag: press the button now
                 holdDidMove = true
                 holdDownSent = true
@@ -130,7 +137,8 @@ final class ScreenControlView: UIView, UIGestureRecognizerDelegate {
         case .ended, .cancelled, .failed:
             if holdDownSent {
                 send?(.input(.mouseUp(.left)))                       // finished a drag
-            } else {
+                holdDownSent = false
+            } else if n != nil {
                 send?(.input(.mouseClick(button: .right, count: 1))) // stationary hold → right-click
             }
         default:
