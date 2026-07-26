@@ -164,6 +164,11 @@ struct RemoteView: View {
                     .frame(width: 1, height: 1).opacity(0.01)
             )
             .statusBarHidden()
+            // This surface is full-bleed, so the navigation bar sat on top of the Mac's menu bar:
+            // you could see it but not reach it, and taps in that strip opened Devices or Settings
+            // instead of going to the Mac. Everything in the bar is reachable from the floating
+            // control while you are here, so the bar itself is what should give way.
+            .toolbar(.hidden, for: .navigationBar)
     }
 
     private var floatPanel: some View {
