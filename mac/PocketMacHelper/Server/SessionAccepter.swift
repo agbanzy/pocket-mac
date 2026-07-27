@@ -286,7 +286,15 @@ private actor SessionRunner {
             // only path with MCP tools and durable task history. If it can't start (missing
             // capture permission, unwritable store), fall back to the in-process Swift loop so a
             // task never dies on plumbing.
-            if let key = AgentRunner.loadAPIKey() {
+            // Run the Rust core whenever the chosen provider can actually start, which is NOT the
+            // same as "an Anthropic key exists". Only the claude/anthropic arm of `build_llm` reads
+            // the key (agent-ffi/src/lib.rs:133); claude-code and the OpenAI-compatible providers
+            // ignore it. Gating the whole core behind a key file therefore made the two providers
+            // advertised as keyless — "Claude subscription" and "Local model", both needsKey: false
+            // in ProviderStore — unreachable on exactly the machines they were meant for: with no
+            // key the core never ran, and the Swift fallback is Anthropic-only, so selecting either
+            // failed with "No Anthropic API key". See F-20.
+            if let key = AgentRunner.resolvedKeyForActiveProvider() {
                 let rc = await RustAgentBridge.run(prompt: prompt, apiKey: key,
                                                    persona: RustAgentBridge.persona, emit: emit)
                 if !RustAgentBridge.isStartupFailure(rc) {

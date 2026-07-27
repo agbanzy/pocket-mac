@@ -416,6 +416,21 @@ actor AgentRunner {
 
     // MARK: API key
 
+    /// The key to hand the Rust core, or nil when the core genuinely cannot start.
+    ///
+    /// Only the claude/anthropic provider needs an Anthropic key — `build_llm` in agent-ffi reads it
+    /// in that arm alone. "Claude subscription" shells out to the Claude Code CLI and the
+    /// OpenAI-compatible providers (Grok, Ollama, LM Studio) carry their own credentials in
+    /// `provider.json`, so for those an absent Anthropic key is irrelevant and the empty string is
+    /// the honest thing to pass. Returning nil is reserved for the one case that really is blocked:
+    /// the Anthropic provider with no key, where the Swift fallback gives the better error message.
+    static func resolvedKeyForActiveProvider() -> String? {
+        switch ProviderStore.activeId() {
+        case "claude", "anthropic": return loadAPIKey()
+        default: return loadAPIKey() ?? ""
+        }
+    }
+
     static func loadAPIKey() -> String? {
         if let env = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"], env.hasPrefix("sk-ant-") { return env }
         let path = (NSHomeDirectory() as NSString).appendingPathComponent("Downloads/medskey.rtf")
