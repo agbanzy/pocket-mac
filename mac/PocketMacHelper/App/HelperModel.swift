@@ -215,16 +215,36 @@ final class HelperModel {
         relayReachability.stop(id: "pairing") // safe: no admission happened, so no live session to kill
     }
 
+    /// Writes the pairing URL where an unattended test harness can find it.
+    ///
+    /// **Debug builds only, and 0600.** The contents are sensitive enough that this file should
+    /// never have existed outside development: it is written only so the test harness can pair
+    /// without a human, and the `--auto-pair` flag that consumes it is already `#if DEBUG`. This
+    /// write simply was not, which is how a development affordance ended up in shipping builds.
+    ///
+    /// Created in one step with its permissions set, rather than written and then tightened — the
+    /// gap between those two calls is a window where the contents are more readable than intended.
+    /// Removal stays unconditional so a file left behind by an earlier build is cleaned up.
+    ///
+    /// Rationale in full is recorded in the internal audit rather than here.
     private func writePairingHandoff(_ urlString: String?) {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appendingPathComponent("PocketMac", isDirectory: true)
         try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
         let file = base.appendingPathComponent("pairing.url")
-        if let urlString {
-            try? urlString.write(to: file, atomically: true, encoding: .utf8)
-        } else {
+        guard let urlString else {
             try? FileManager.default.removeItem(at: file)
+            return
         }
+        #if DEBUG
+        // Create with 0600 up front rather than writing then chmod-ing: between those two calls the
+        // secret is world-readable, which is the whole bug in miniature.
+        try? FileManager.default.removeItem(at: file)
+        FileManager.default.createFile(
+            atPath: file.path,
+            contents: Data(urlString.utf8),
+            attributes: [.posixPermissions: 0o600])
+        #endif
     }
 
     // MARK: Peers
